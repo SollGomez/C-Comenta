@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "utilsServer.h"
+#include "utilsClient.h"
 
 /**
 * @fn    decir_hola
