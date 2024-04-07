@@ -1,8 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <utils/shared.h>
+#include <clean.h>
 
 int main(int argc, char* argv[]) {
-    decir_hola("una Interfaz de Entrada/Salida");
+
+    init_loggers();
+
+    cerrarPrograma();
+
     return 0;
 }
