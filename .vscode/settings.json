@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "utilsclient.h": "c",
+        "main.h": "c",
+        "comunicacion.h": "c",
+        "stddef.h": "c",
+        "stdbool.h": "c",
+        "estructurascompartidas.h": "c",
+        "memoriainstrucciones.h": "c",
+        "leerconfigmemory.h": "c",
+        "shared.h": "c",
+        "stdlib.h": "c"
+    }
+}
