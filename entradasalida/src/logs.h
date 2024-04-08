@@ -8,7 +8,7 @@
 
 int init_loggers();
 
-void operacion(uint32_t pid, char* operacionARealizar);
+void logOperacion(uint32_t pid, char* operacionARealizar);
 
 
 #endif /* LOGS_H_ */
