@@ -5,6 +5,7 @@
 			"*.h": "c",
 		},
 		"C_Cpp.errorSquiggles": "disabled",
+		"editor.fontFamily": "'Nimbus Mono L', 'monospace', monospace",
 	},
 	"folders": [
 		{

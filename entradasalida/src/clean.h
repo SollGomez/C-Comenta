@@ -1,6 +1,7 @@
 #ifndef CLEAN_H_
 #define CLEAN_H_
 
+
 #include <logs.h>
 
 extern t_log* trace_logger;

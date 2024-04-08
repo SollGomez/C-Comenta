@@ -1,13 +1,15 @@
-#include "logs.h"
+#include <logs.h>
 
 
 t_log* info_logger;
 t_log* trace_logger;
 t_log* error_logger;
+t_config* configuracionES;
 bool logsCreados = false;
+bool configCreada = false;
+t_config_entradaSalida* cfg_entradaSalida;
 
-
-int init_loggers(){
+int init_loggers_config(char* path){
 
     trace_logger = log_create("trace_logger.log", "entradaSalida", true, LOG_LEVEL_TRACE);
     info_logger = log_create("info_logger.log", "entradaSalida", true, LOG_LEVEL_INFO);
@@ -19,10 +21,59 @@ int init_loggers(){
         return false;
     }
 
+    cfg_entradaSalida = cfg_entradaSalida_start();
+
+    if(cfg_entradaSalida == NULL){
+        return false;
+    }
+    configCreada = true;
     logsCreados = true;
+
+    configuracionES = config_create(path);
+    if(configuracionES == NULL){
+        printf("no pude leer la config");
+    }
 
     return true;                //TODO: CUANDO ESTÉN LAS CONFIGS, CAMBIAR. 
 }
+
+t_config_entradaSalida *cfg_entradaSalida_start()
+{
+    t_config_entradaSalida *cfg = malloc(sizeof(t_config_entradaSalida));
+    return cfg;
+}
+
+int cargar_configuracion(){
+    cfg_entradaSalida->IP_KERNEL = config_get_string_value(configuracionES, "IP_KERNEL");
+    log_trace(trace_logger, "IP_KERNEL Cargada Correctamente: %s", cfg_entradaSalida->IP_KERNEL);
+
+    cfg_entradaSalida->IP_MEMORIA = config_get_string_value(configuracionES, "IP_MEMORIA");
+    log_trace(trace_logger, "IP_MEMORIA Cargada Correctamente: %s", cfg_entradaSalida->IP_MEMORIA);
+
+    cfg_entradaSalida->PUERTO_KERNEL = config_get_string_value(configuracionES, "PUERTO_KERNEL");
+    log_trace(trace_logger, "PUERTO_KERNEL Cargado Correctamente: %s", cfg_entradaSalida->PUERTO_KERNEL);
+
+    cfg_entradaSalida->PUERTO_MEMORIA = config_get_string_value(configuracionES, "PUERTO_MEMORIA");
+    log_trace(trace_logger, "PUERTO_MEMORIA Cargado Correctamente: %s", cfg_entradaSalida->PUERTO_MEMORIA);
+
+    cfg_entradaSalida->BLOCK_COUNT = config_get_int_value(configuracionES, "BLOCK_COUNT");
+    log_trace(trace_logger, "BLOCK_COUNT Cargado Correctamente: %d", cfg_entradaSalida->BLOCK_COUNT);
+
+    cfg_entradaSalida->BLOCK_SIZE = config_get_int_value(configuracionES, "BLOCK_SIZE");
+    log_trace(trace_logger, "BLOCK_SIZE Cargado Correctamente: %d", cfg_entradaSalida->BLOCK_SIZE);
+
+    cfg_entradaSalida->PATH_BASE_DIALFS = config_get_string_value(configuracionES, "PATH_BASE_DIALFS");
+    log_trace(trace_logger, "PATH_BASE_DIALFS Cargado Correctamente: %s", cfg_entradaSalida->PATH_BASE_DIALFS);
+
+    cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO = config_get_int_value(configuracionES, "TIEMPO_UNIDAD_TRABAJO");
+    log_trace(trace_logger, "TIEMPO_UNIDAD_TRABAJO Cargado Correctamente: %d", cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO);
+
+    cfg_entradaSalida->TIPO_INTERFAZ = config_get_string_value(configuracionES, "TIPO_INTERFAZ");
+    log_trace(trace_logger, "TIPO_INTERFAZ Cargada Correctamente: %s", cfg_entradaSalida->TIPO_INTERFAZ);
+
+    return true;
+}
+
 
 void logOperacion(uint32_t pid, char* operacionARealizar){ 
     log_info(info_logger, "PID: <%d> - Operacion: <%s>", pid, operacionARealizar);
@@ -47,3 +98,27 @@ void logLeerArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir
 void logEscribirArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir, uint32_t punteroArchivo){
     log_info(info_logger, "PID: <%d> - Escribir Archivo: <%s> - Tamaño a escribir: <%d> - Puntero Archivo: <%d>", pid, nombreArchivo, tamanioAEscribir, punteroArchivo);
 }
+
+
+
+
+# Obtener la ubicación del script
+script_dir=$(dirname "$0")
+
+# Directorio relativo al script
+directorio=$(realpath "$0")
+directorioEjecutable=$(dirname "$directorio")
+directorioModulo=$(dirname "$directorioEjecutable")
+directorioTp=$(dirname "$directorioModulo")
+
+test="$1"
+
+directorioConfig="$directorioTp/pruebas/configs/$test"
+
+directorioBin="$directorioModulo/bin/"
+
+
+# Cambiar al directorio
+cd "$directorioBin"
+# Ejecutar el programa con parámetros determinados
+./entradasalida "$directorioConfig/entradasalida.config" 
