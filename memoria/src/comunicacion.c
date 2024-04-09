@@ -14,7 +14,7 @@ int recibirConexion(char *puerto) {
 	log_info(logger, "Servidor listo para recibir a los clientes");
 
 	cpu_fd = esperar_cliente(memoria_fd);
-	pthread_create(&tid[0], NULL, (void*)recibirCPU, NULL);
+	pthread_create(&tid[0], NULL, recibirCPU, NULL);
 	// kernel_fd = esperar_cliente(memoria_fd);
 	// pthread_create(&tid[1], NULL, recibirFS, NULL);
 	// interfazIO_fd = esperar_cliente(memoria_fd);

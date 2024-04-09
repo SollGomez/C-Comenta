@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     
     info_logger = log_create("info_logger.log","Memory", true, LOG_LEVEL_INFO);
     pthread_t tid;
-    log_info(info_logger, "%s",argv[1]);
+    
     config = crearConfig(argv[1]);
 	PUERTO = config_get_string_value(config, "PUERTO_ESCUCHA");
 
