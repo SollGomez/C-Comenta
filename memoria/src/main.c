@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
 }
 
 void *recibir(){
-	recibirConexion("8002");
+	recibirConexion(PUERTO);
 	return NULL;
 }
 
