@@ -4,7 +4,7 @@
 t_log* info_logger;
 t_log* trace_logger;
 t_log* error_logger;
-t_config* configuracionES;
+t_config* configuracionEntradasalida;
 bool logsCreados = false;
 bool configCreada = false;
 t_config_entradaSalida* cfg_entradaSalida;
@@ -29,8 +29,8 @@ int init_loggers_config(char* path){
     configCreada = true;
     logsCreados = true;
 
-    configuracionES = config_create(path);
-    if(configuracionES == NULL){
+    configuracionEntradasalida = config_create(path);
+    if(configuracionEntradasalida == NULL){
         printf("no pude leer la config");
     }
 
@@ -44,31 +44,31 @@ t_config_entradaSalida *cfg_entradaSalida_start()
 }
 
 int cargar_configuracion(){
-    cfg_entradaSalida->IP_KERNEL = config_get_string_value(configuracionES, "IP_KERNEL");
+    cfg_entradaSalida->IP_KERNEL = config_get_string_value(configuracionEntradasalida, "IP_KERNEL");
     log_trace(trace_logger, "IP_KERNEL Cargada Correctamente: %s", cfg_entradaSalida->IP_KERNEL);
 
-    cfg_entradaSalida->IP_MEMORIA = config_get_string_value(configuracionES, "IP_MEMORIA");
+    cfg_entradaSalida->IP_MEMORIA = config_get_string_value(configuracionEntradasalida, "IP_MEMORIA");
     log_trace(trace_logger, "IP_MEMORIA Cargada Correctamente: %s", cfg_entradaSalida->IP_MEMORIA);
 
-    cfg_entradaSalida->PUERTO_KERNEL = config_get_string_value(configuracionES, "PUERTO_KERNEL");
+    cfg_entradaSalida->PUERTO_KERNEL = config_get_string_value(configuracionEntradasalida, "PUERTO_KERNEL");
     log_trace(trace_logger, "PUERTO_KERNEL Cargado Correctamente: %s", cfg_entradaSalida->PUERTO_KERNEL);
 
-    cfg_entradaSalida->PUERTO_MEMORIA = config_get_string_value(configuracionES, "PUERTO_MEMORIA");
+    cfg_entradaSalida->PUERTO_MEMORIA = config_get_string_value(configuracionEntradasalida, "PUERTO_MEMORIA");
     log_trace(trace_logger, "PUERTO_MEMORIA Cargado Correctamente: %s", cfg_entradaSalida->PUERTO_MEMORIA);
 
-    cfg_entradaSalida->BLOCK_COUNT = config_get_int_value(configuracionES, "BLOCK_COUNT");
+    cfg_entradaSalida->BLOCK_COUNT = config_get_int_value(configuracionEntradasalida, "BLOCK_COUNT");
     log_trace(trace_logger, "BLOCK_COUNT Cargado Correctamente: %d", cfg_entradaSalida->BLOCK_COUNT);
 
-    cfg_entradaSalida->BLOCK_SIZE = config_get_int_value(configuracionES, "BLOCK_SIZE");
+    cfg_entradaSalida->BLOCK_SIZE = config_get_int_value(configuracionEntradasalida, "BLOCK_SIZE");
     log_trace(trace_logger, "BLOCK_SIZE Cargado Correctamente: %d", cfg_entradaSalida->BLOCK_SIZE);
 
-    cfg_entradaSalida->PATH_BASE_DIALFS = config_get_string_value(configuracionES, "PATH_BASE_DIALFS");
+    cfg_entradaSalida->PATH_BASE_DIALFS = config_get_string_value(configuracionEntradasalida, "PATH_BASE_DIALFS");
     log_trace(trace_logger, "PATH_BASE_DIALFS Cargado Correctamente: %s", cfg_entradaSalida->PATH_BASE_DIALFS);
 
-    cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO = config_get_int_value(configuracionES, "TIEMPO_UNIDAD_TRABAJO");
+    cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO = config_get_int_value(configuracionEntradasalida, "TIEMPO_UNIDAD_TRABAJO");
     log_trace(trace_logger, "TIEMPO_UNIDAD_TRABAJO Cargado Correctamente: %d", cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO);
 
-    cfg_entradaSalida->TIPO_INTERFAZ = config_get_string_value(configuracionES, "TIPO_INTERFAZ");
+    cfg_entradaSalida->TIPO_INTERFAZ = config_get_string_value(configuracionEntradasalida, "TIPO_INTERFAZ");
     log_trace(trace_logger, "TIPO_INTERFAZ Cargada Correctamente: %s", cfg_entradaSalida->TIPO_INTERFAZ);
 
     return true;

@@ -1,0 +1,9 @@
+[TRACE] 00:46:29:092 entradaSalida/(3105:3105): IP_KERNEL Cargada Correctamente: 127.0.0.1
+[TRACE] 00:46:29:093 entradaSalida/(3105:3105): IP_MEMORIA Cargada Correctamente: 127.0.0.1
+[TRACE] 00:46:29:093 entradaSalida/(3105:3105): PUERTO_KERNEL Cargado Correctamente: 8003
+[TRACE] 00:46:29:093 entradaSalida/(3105:3105): PUERTO_MEMORIA Cargado Correctamente: 8002
+[TRACE] 00:46:29:093 entradaSalida/(3105:3105): BLOCK_COUNT Cargado Correctamente: 1024
+[TRACE] 00:46:29:093 entradaSalida/(3105:3105): BLOCK_SIZE Cargado Correctamente: 64
+[TRACE] 00:46:29:093 entradaSalida/(3105:3105): PATH_BASE_DIALFS Cargado Correctamente: /home/utnso/dialfs
+[TRACE] 00:46:29:093 entradaSalida/(3105:3105): TIEMPO_UNIDAD_TRABAJO Cargado Correctamente: 250
+[TRACE] 00:46:29:093 entradaSalida/(3105:3105): TIPO_INTERFAZ Cargada Correctamente: STDOUT
