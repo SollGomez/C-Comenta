@@ -77,8 +77,8 @@ void iniciarNecesidades(){
 	pthread_t tid[7];
 	pthread_create(&tid[0], NULL, conectarMemoria, "MEMORIA");
 	pthread_join(tid[0], NULL);
-	pthread_create(&tid[1], NULL, conectarFilesystem, "FILESYSTEM");
-	pthread_join(tid[1], NULL);
+	// pthread_create(&tid[1], NULL, conectarFilesystem, "FILESYSTEM");
+	// pthread_join(tid[1], NULL);
 	pthread_create(&tid[2], NULL, conectarCPU, "CPU");
 	pthread_join(tid[2], NULL);
 	pthread_create(&tid[3], NULL, conectarCPUInterrupt, "CPU");
@@ -107,9 +107,9 @@ void iniciarNecesidades(){
 
     //cargarRecursos();
 
-	pthread_join(tid[4], NULL);
-	pthread_join(tid[5], NULL);
-	pthread_join(tid[6], NULL);
+	// pthread_join(tid[4], NULL);
+	// pthread_join(tid[5], NULL);
+	// pthread_join(tid[6], NULL);
 	// pthread_join(hilo_planificador_LP, NULL);
 	// pthread_join(hilo_planificador_corto,NULL);
 	// pthread_join(hilo_liberador_procesos,NULL);

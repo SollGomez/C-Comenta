@@ -11,6 +11,9 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
 
     iniciarNecesidades();
+	
+	char nombre[50];
+	scanf("%s", nombre);
 
     return 0;
 }

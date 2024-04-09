@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
     pthread_create(&tid, NULL, recibir, NULL);
 	pthread_join(tid, NULL);
 
+
     return 0;
 }
 

@@ -23,11 +23,12 @@ int main(int argc, char* argv[]) {
 
     pthread_join(tid[1], NULL);
 
-    // pthread_create(&tid[0], NULL, recibir, NULL);
-	// pthread_create(&tid[2], NULL, recibirInterrupt, NULL);
+    pthread_create(&tid[0], NULL, recibir, NULL);
+	pthread_create(&tid[2], NULL, recibirInterrupt, NULL);
 
-	// pthread_join(tid[0], NULL);
-	// pthread_join(tid[2], NULL);
+	pthread_join(tid[0], NULL);
+	pthread_join(tid[2], NULL);
+
 
     return 0;
 }

@@ -15,5 +15,7 @@ extern t_log* info_logger;
 
 int recibirConexion(char *);
 void *recibirCPU(void);
+void *recibirIO(void*);
+void *recibirKernel();
 
 #endif

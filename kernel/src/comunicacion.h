@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <utils/shared.h>
 #include "pthread.h"
+#include "main.h"
 
 
 extern t_config *config;
