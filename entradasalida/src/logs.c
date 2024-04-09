@@ -15,7 +15,7 @@ int init_loggers_config(char* path){
     info_logger = log_create("info_logger.log", "entradaSalida", true, LOG_LEVEL_INFO);
     error_logger = log_create("error_logger.log","entradaSalida", true, LOG_LEVEL_ERROR);
 
-     if(trace_logger== NULL || info_logger== NULL || error_logger== NULL){
+    if(trace_logger== NULL || info_logger== NULL || error_logger== NULL){
 
         printf("No pude crear los loggers");
         return false;

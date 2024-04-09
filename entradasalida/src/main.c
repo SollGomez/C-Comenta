@@ -5,11 +5,7 @@
 
 int main(int argc, char* argv[]) {
 
-    char* pathConfig = argv[1];
-    
-    
-
-    init_loggers_config(pathConfig);
+    init_loggers_config(argv[1]);
     cargar_configuracion();
     cerrarPrograma();
 
