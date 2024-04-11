@@ -26,6 +26,21 @@ typedef struct{
 	 uint32_t marco;
 } Pagina;
 
+typedef enum {
+    NUEVO,
+    LISTO,
+    EJECUCION,
+    BLOQUEADO,
+    TERMINADO
+} EstadoProceso;
+
+typedef struct {
+    char registro_AX[5];
+    char registro_BX[5];
+    char registro_CX[5];
+    char registro_DX[5];
+} RegistrosCPU;
+
 typedef struct {
     uint32_t id;
     uint32_t prioridad;

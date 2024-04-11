@@ -4,13 +4,8 @@
 #include <stdbool.h>
 #include <utils/shared.h>
 #include "comunicacion.h"
-#include "utilsClient.h"
-#include "utilsServer.h"
-#include "utilidades.h"
-#include "estructurasCompartidas.h"
 #include "pthread.h"
 #include "leerConfigMemory.h"
-#include "estructurasCompartidas.h"
 #include "esquema.h"
 #include <commons/collections/queue.h>
 

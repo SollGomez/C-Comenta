@@ -9,6 +9,7 @@
         "memoriainstrucciones.h": "c",
         "leerconfigmemory.h": "c",
         "shared.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "queue.h": "c"
     }
 }
