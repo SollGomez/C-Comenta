@@ -12,6 +12,8 @@ int idProcesoGlobal=0;
 
 bool planificacionFlag=true;
 
+t_log* loggerInfo;
+
 t_queue* colaNew;
 t_list* colaExec;
 t_queue* colaExit;
@@ -50,6 +52,7 @@ pthread_t hilo_planificador_corto;
 pthread_t hilo_liberador_procesos;
 
 void iniciarNecesidades(){
+    loggerInfo=iniciar_logger("kernel.log");
 	tablaGlobal_ArchivosAbiertos = list_create();
 	listaPeticionesArchivos = list_create();
     colaNew = queue_create();
@@ -74,15 +77,16 @@ void iniciarNecesidades(){
     sem_init(&sem_procesosExit,0,0);
     sem_init(&sem_cpuLibre,0,1);
 
+    //log_info(logger, "%s\n", config_get_string_value(config,"PUERTO_ESCUCHA"));
 	pthread_t tid[7];
 	pthread_create(&tid[0], NULL, conectarMemoria, "MEMORIA");
 	pthread_join(tid[0], NULL);
-	// pthread_create(&tid[1], NULL, conectarFilesystem, "FILESYSTEM");
-	// pthread_join(tid[1], NULL);
 	pthread_create(&tid[2], NULL, conectarCPU, "CPU");
 	pthread_join(tid[2], NULL);
 	pthread_create(&tid[3], NULL, conectarCPUInterrupt, "CPU");
 	pthread_join(tid[3], NULL);
+    pthread_create(&tid[1], NULL, escucharConexionesIO, config_get_string_value(config,"PUERTO_ESCUCHA"));
+	
 
     // pthread_create(&hilo_planificador_LP, NULL, (void*)planificadorLargoPlazo, NULL);
     // pthread_create(&hilo_planificador_corto, NULL, (void*)planificadorCortoPlazo, NULL);
@@ -113,6 +117,7 @@ void iniciarNecesidades(){
 	// pthread_join(hilo_planificador_LP, NULL);
 	// pthread_join(hilo_planificador_corto,NULL);
 	// pthread_join(hilo_liberador_procesos,NULL);
+    pthread_join(tid[1], NULL);
 }
 
 int tamanioArray(char** array){

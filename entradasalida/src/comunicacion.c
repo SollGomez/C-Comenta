@@ -1,8 +1,8 @@
 #include "comunicacion.h"
 
 int contadorDispositivosIO=0;
-int memoria_fd[50];
-int kernel_fd[50];
+int memoria_fd[4];
+int kernel_fd[4];
 
 int conectarMemoria(char *modulo){
 	printf("ENTRE A CONECTAR ");
@@ -73,3 +73,44 @@ int conectarKernel(char *modulo){
 
 	return kernel_fd[contadorDispositivosIO];
 }
+
+
+t_log* iniciar_logger(char *nombre)
+{
+	t_log* nuevo_logger;
+	nuevo_logger = log_create(nombre, "tp", 1, LOG_LEVEL_INFO);
+	if(nuevo_logger == NULL)
+	{
+		printf("No se genero de forma correcta el logger");
+		exit(1);
+	}
+
+	return nuevo_logger;
+}
+
+
+void paquete(int conexion, t_log* logger)
+{	char *leido;
+	t_paquete* paquete = crear_paquete(PAQUETECLIENTE,logger);
+
+	leido = readline("> ");
+	while(*leido != '\0'){
+		agregar_a_paquete(paquete, leido, strlen(leido)+1);
+		free(leido);
+		leido = readline("> ");
+	}
+
+	enviar_paquete(paquete, conexion);
+	free(paquete);
+	free(leido);
+}
+
+void iterator(char* value) {
+	log_info(logger,"%s", value);
+}
+
+void terminar_programa(int conexion, t_log* logger){
+	log_destroy(logger);
+	liberar_conexion(conexion);
+}
+

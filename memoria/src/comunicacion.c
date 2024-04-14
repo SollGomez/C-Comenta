@@ -2,14 +2,14 @@
 
 int memoria_fd;
 int cpu_fd;
-int interfazIO_fd[50];
+int interfazIO_fd[4];
 int kernel_fd;
 
 
 int recibirConexion(char *puerto) {
 	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_DEBUG);
 	pthread_t tid[2];
-	pthread_t hilosIO[50];
+	pthread_t hilosIO[4];
 	int contadorIO=0;
 
 	memoria_fd = iniciar_servidor(puerto);
@@ -23,7 +23,7 @@ int recibirConexion(char *puerto) {
 	while(1)
 	{
 		interfazIO_fd[contadorIO] = esperar_cliente(memoria_fd);
-		pthread_create(&tid[contadorIO], NULL, recibirIO((void*)contadorIO), NULL);
+		pthread_create(&hilosIO[contadorIO], NULL, recibirIO, contadorIO);
 		contadorIO++;
 	}
 	// 
@@ -88,9 +88,11 @@ void *recibirCPU(void){
 		}
 }
 
-void *recibirIO(void* contador){
+void *recibirIO(int contador){
+
+	int contadorIO_local= (int) contador;
 	while(1) {
-		int contadorIO_local= (int) contador;
+		
 		int cod_op = recibir_operacion(interfazIO_fd[contadorIO_local]); //seguro se necesita un mutex
 		// pthread_mutex_lock(&mutexFS);
 

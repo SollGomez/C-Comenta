@@ -9,11 +9,8 @@ int main(int argc, char* argv[]) {
     decir_hola("Kernel");
 
     config = crearConfig(argv[1]);
-
     iniciarNecesidades();
 	
-	char nombre[50];
-	scanf("%s", nombre);
 
     return 0;
 }
@@ -23,8 +20,8 @@ void *conectarMemoria(void *parametro){
 	return NULL;
 }
 
-void *conectarFilesystem(void *parametro){
-	conectarModuloFilesystem(parametro);
+void *escucharConexionesIO(void *parametro){
+	recibirConexion(parametro);
 	return NULL;
 }
 

@@ -13,7 +13,7 @@ extern t_config* config;
 void * conectarCPU(void *);
 void *conectarCPUInterrupt(void *);
 void * conectarMemoria(void *);
-void *conectarFilesystem(void *);
+void *escucharConexionesIO(void *);
 t_config *crearConfig(char* configPath);
 
 #endif /* MAIN_H_ */

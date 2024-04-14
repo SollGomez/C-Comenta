@@ -9,6 +9,16 @@ int main(int argc, char* argv[]) {
     decir_hola("una Interfaz de Entrada/Salida");
 
     config = crearConfig(argv[1]);
+    
+	for(int i=0; i<4; i++)
+	{
+		conectarKernel("KERNEL");
+		conectarMemoria("MEMORIA");
+		contadorDispositivosIO++;
+	}
+
+	char nombre[50];
+	scanf("%s", nombre);
 
     return 0;
 }
