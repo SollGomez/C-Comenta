@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
     cargar_configuracion();
-    cerrarPrograma();
+    
     
 	for(int i=0; i<4; i++)
 	{
@@ -20,11 +20,11 @@ int main(int argc, char* argv[]) {
 		conectarMemoria("MEMORIA");
 		contadorDispositivosIO++;
 	}
-
+	
 	char nombre[50];
 	scanf("%s", nombre);
 
-
+	cerrarPrograma();
     return 0;
 }
 
