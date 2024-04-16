@@ -30,30 +30,17 @@ int main(int argc, char* argv[]) {
 	PATH_INSTRUCCIONES = config_get_string_value(config, "PATH_INSTRUCCIONES");
 	RETARDO_RESPUESTA = config_get_int_value(config, "RETARDO_RESPUESTA");
 	tablaGeneral = list_create();
-	int marco, marco2;
 	instruccionesEnMemoria = list_create();
 
-//	strcpy(parametro, "TAM_PAGINA");
-//	crearEspacioContiguoDeMemoria();
-	//inicializarBitmap();//Inicializamos memoria
-	crearEstructurasAdministrativas();//
-	if(strcmp(algoritmo, "FIFO") == 0)
-		inicializarColaFIFO();
-	else if (strcmp(algoritmo, "LRU") == 0)
-		inicializarListaPaginas();
+	iniciarMemoria();
+
 	printf("La cantidad de marcos es: %u\n", CANT_MARCOS);
 
 	pthread_create(&tid[0], NULL, recibir, NULL);
 	pthread_join(tid[0], NULL);
 
-	//crearTablaDePaginas(1, 64);
 
 	config_destroy(config);
-	if(strcmp(algoritmo, "FIFO") == 0)
-		queue_destroy(colaFIFO);
-	else if (strcmp(algoritmo, "LRU") == 0)
-		list_destroy(paginasConTimestamp);
-
 	list_destroy(tablaGeneral);
 	log_destroy(info_logger);
 	free(espacio_contiguo);

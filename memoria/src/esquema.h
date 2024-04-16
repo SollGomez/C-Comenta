@@ -14,36 +14,18 @@ typedef struct{
 	int memoriaIniciada;
 }espacioContiguoMemoria;
 
+uint32_t buscarMarcoLibre(); //Devuelve el primer marco libre que encuentra
+void marcarMarcoOcupado(int); //Marca como ocupado el marco que le pasemos
+void marcarMarcoLibre(int); //Marca como libre el marco que le pasemos
+void crearTablaPaginasProceso(uint32_t, uint32_t); //Crea la tabla de paginas de un proceso y la agrega a la TablaGeneral
+void finalizacionDeProceso(uint32_t); //Marca como libres los marcos del proceso
+TablaDePaginas* obtenerTablaPorPID(uint32_t); //Devuelve la tabla cuyo PID sea el pedido
+void liberarTablaDePaginas(uint32_t); //Elimina la tabla del proceso de la TablaGeneral
+uint32_t obtenerMarcoDePagina(uint32_t, uint32_t); //Devuelve el numero de marco de la pagina solicitada
+
 extern espacioContiguoMemoria espacioUsuario;
 extern TablaDePaginas tablaDePaginas;
 extern int tam_pagina;
 extern bool flagComunicacion;
-
-void asignarEspacioContiguoDeMemoria();
-void liberarModuloSwap(t_list *);
-void creacionDeProceso(uint32_t, uint32_t);
-void finalizacionDeProceso(uint32_t);
-void* recibePedidoDeLectura(uint32_t, uint32_t, uint32_t);
-void recibePedidoDeEscritura(int, void*, uint32_t, uint32_t);
-uint32_t accesoTablaPaginas(const TablaDePaginas*, uint32_t, uint32_t);
-void* lecturaEspacioUsuario(void**,void*);
-char* escrituraEspacioUsuario(void**,void*,void*);
-void asignarMarcoAPagina(uint32_t, int, TablaDePaginas*);
-void cargarPaginaEnMemoria(TablaDePaginas*, int);
-int obtenerDatoDesdePagina(TablaDePaginas*, int, int);
-void PageFault();
-void pedirPaginaAlFS();
-Pagina *elegirPaginaVictima();
-void* leerMarco(uint32_t);
-//void escribirPagina(uint32_t, Pagina*);
-void pedirDatosAFS(Pagina*);
-t_list* obtenerListaSwap();
-void* recibirDatosDesdeFS();
-void obtenerModuloSwap();
-void recibirDatosDeFs(void *, uint32_t );
-
-TablaDePaginas* obtenerTablaPorPosSwap(uint32_t );
-int obtenerNroPaginaPorPosSwap(uint32_t );
-
 
 #endif /* ESQUEMA_H_ */

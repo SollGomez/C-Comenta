@@ -10,6 +10,7 @@
         "leerconfigmemory.h": "c",
         "shared.h": "c",
         "stdlib.h": "c",
-        "queue.h": "c"
+        "queue.h": "c",
+        "esquema.h": "c"
     }
 }
