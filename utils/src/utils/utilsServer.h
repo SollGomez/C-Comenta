@@ -16,13 +16,11 @@ typedef enum{
 	PAQUETESERVIDOR
 }op_code_server;
 
-extern t_log* logger;
-
 void* recibir_buffer(int*, int);
 void* recibir_buffer2(int* size, int socket_cliente);
 
 
-int iniciar_servidor(char*);
+int iniciar_servidor(t_log* logger, const char* name, char* puerto);
 int esperar_cliente(int);
 t_list* recibir_paquete(int);
 void recibir_mensaje(int);

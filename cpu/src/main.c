@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <utils/shared.h>
 #include "main.h"
+#include <signal.h>
 
 char *PUERTO_DISPATCH;
 char *PUERTO_INTERRUPT;
@@ -12,6 +13,11 @@ t_log* error_logger;
 int main(int argc, char* argv[]) {
     decir_hola("CPU");
     
+	if (signal(SIGINT, sigint_handler) == SIG_ERR) {
+        perror("Error al configurar el manejador de señal");
+        return EXIT_FAILURE;
+    }
+
     config = crearConfig(argv[1]);
     info_logger = log_create("info_logger.log","Cpu", true, LOG_LEVEL_INFO);
 	error_logger = log_create("error_logger.log","Cpu", true, LOG_LEVEL_ERROR);
@@ -20,7 +26,6 @@ int main(int argc, char* argv[]) {
 
     pthread_t tid[3];
 	pthread_create(&tid[1], NULL, conectarMemoria, NULL);
-
     pthread_join(tid[1], NULL);
 
     pthread_create(&tid[0], NULL, recibir, NULL);
@@ -60,4 +65,13 @@ t_config *crearConfig(char* configPath){
 	exit(2);
 
 	return config;
+}
+
+void sigint_handler(int sig) {
+    printf("\nSe ha recibido la señal SIGINT (Ctrl+C). Cerrando sockets...\n");
+    // Aquí puedes cerrar tus sockets u realizar otras tareas necesarias
+	close(memoria_fd);
+	close(kernel_fd);
+	close(kernel_interrupt_fd);
+    exit(EXIT_SUCCESS); // Puedes modificar esto según sea necesario
 }

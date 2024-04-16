@@ -8,7 +8,6 @@ int kernel_interrupt_fd;
 int memoria_fd;
 
 int conectarModulo(char *modulo){
-	printf("ENTRE A CONECTAR ");
 
 	char *ip;
 	char *puerto;
@@ -25,7 +24,7 @@ int conectarModulo(char *modulo){
 	ip=config_get_string_value(config,parametro);
 
 	if(!strcmp(charAux,"CPU"))
-		strcpy(charAux,"CPU_DISPATCH");
+	 	strcpy(charAux,"CPU_DISPATCH");
 
 	strcpy(parametro, "PUERTO_");
     strcat(parametro, charAux);
@@ -35,7 +34,7 @@ int conectarModulo(char *modulo){
 	log_info(loggerCpuMem, "PUERTO=%s\n", puerto);
 
 
-	memoria_fd= crear_conexion(ip, puerto);
+	memoria_fd= crear_conexion(loggerCpuMem, "Conecto a Cpu a memoria",ip, puerto);
 
 	// t_list* lista;
 
@@ -65,9 +64,10 @@ int conectarModulo(char *modulo){
 }
 
 void recibirConexion(char *puerto) {
-	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_DEBUG);
+	t_log* logger;
+	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
 
-	int cpu_dispatch_fd = iniciar_servidor(puerto);
+	int cpu_dispatch_fd = iniciar_servidor(logger, "Servidor CPU Dispatch", puerto);
 	log_info(logger, "CPU DISPATCH: Servidor listo para recibir a los clientes");
 
 
@@ -115,10 +115,11 @@ void recibirConexion(char *puerto) {
 }
 
 void recibirConexionInterrupt(char *puerto) {    //habría q hacer un while que espere cosas de memoria
-	logger = log_create("moduloInterrupt.log", "-", 1, LOG_LEVEL_DEBUG);
+	t_log* loggerI;
+	loggerI = log_create("moduloInterrupt.log", "-", 1, LOG_LEVEL_INFO);
 
-	int cpu_interrupt_fd = iniciar_servidor(puerto);
-	log_info(logger, "CPU INTERRUPT: Servidor listo para recibir a los clientes");
+	int cpu_interrupt_fd = iniciar_servidor(loggerI, "Servidor cpu Interrupt",puerto);
+	log_info(loggerI, "CPU INTERRUPT: Servidor listo para recibir a los clientes");
 
 
 	kernel_interrupt_fd = esperar_cliente(cpu_interrupt_fd);
@@ -144,13 +145,13 @@ void recibirConexionInterrupt(char *puerto) {    //habría q hacer un while que 
 				// 	}
 				// 	break;
 				case -1:
-					log_error(logger, "el cliente se desconecto.");
+					log_error(loggerI, "el cliente se desconecto.");
 
-						log_error(logger, "Terminando servidor.");
+						log_error(loggerI, "Terminando servidor.");
 						return;
 					break;
 				default:
-					log_warning(logger,"Operacion desconocida. No quieras meter la pata");
+					log_warning(loggerI,"Operacion desconocida. No quieras meter la pata");
 					break;
 			}
 	}
@@ -185,10 +186,6 @@ void paquete(int conexion, t_log* logger)
 	enviar_paquete(paquete, conexion);
 	free(paquete);
 	free(leido);
-}
-
-void iterator(char* value) {
-	log_info(logger,"%s", value);
 }
 
 void terminar_programa(int conexion, t_log* logger){

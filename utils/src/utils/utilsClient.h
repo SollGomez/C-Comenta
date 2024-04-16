@@ -72,7 +72,7 @@ typedef struct
 	t_buffer* buffer;
 } t_paquete;
 
-int crear_conexion(char*, char*);
+int crear_conexion(t_log* logger, const char* server_name, char* ip, char* puerto);
 void enviar_mensaje(char*, int);
 t_paquete* crear_paquete(op_code_cliente, t_log*);
 void agregar_a_paquete(t_paquete*, void*, int);

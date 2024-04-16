@@ -1,4 +1,5 @@
 #include "utilsClient.h"
+#include <errno.h>
 
 
 void* serializar_paquete(t_paquete* paquete, int bytes)
@@ -16,27 +17,43 @@ void* serializar_paquete(t_paquete* paquete, int bytes)
 	return magic;
 }
 
-int crear_conexion(char *ip, char* puerto)
-{
-	struct addrinfo hints;
-	struct addrinfo *server_info;
+int crear_conexion(t_log* logger, const char* server_name, char* ip, char* puerto) {
+    struct addrinfo hints, *servinfo;
 
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
+    // Init de hints
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
 
-	getaddrinfo(ip, puerto, &hints, &server_info);
+    // Recibe addrinfo
+    getaddrinfo(ip, puerto, &hints, &servinfo);
 
-	int socket_cliente = socket(server_info->ai_family,
-								server_info->ai_socktype,
-								server_info->ai_protocol);
-	
-	connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
-	
-	freeaddrinfo(server_info);
+    errno = 0;
+    // Crea un socket con la informacion recibida (del primero, suficiente)
+    int socket_cliente = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+    int yes=1;
+    setsockopt(socket_cliente, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
+    // Fallo en crear el socket
+    if(socket_cliente == -1) {
+        printf("socket() devolvio: %s \n",strerror(errno));
+        log_error(logger, "Error creando el socket para %s", ip, puerto);
+        log_error(logger, "y puerto %s", puerto);
+        //freeaddrinfo(servinfo);
+        return 0;
+    }
 
-	return socket_cliente;
+    // Error conectando
+    if(connect(socket_cliente, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+        log_error(logger, "Error al conectar (a %s)\n", server_name);
+        freeaddrinfo(servinfo);
+        return 0;
+    } else
+        log_info(logger, "Cliente conectado en %s:%s (%s)\n", ip, puerto, server_name);
+
+    freeaddrinfo(servinfo);
+
+    return socket_cliente;
 }
 
 void enviar_mensaje(char* mensaje, int socket_cliente)

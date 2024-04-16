@@ -15,5 +15,6 @@ void *recibir();
 void *conectarMemoria();
 void *recibirInterrupt();
 t_config *crearConfig(char* configPath);
+void sigint_handler(int sig);
 
 #endif /* MAIN_H_ */
