@@ -5,8 +5,6 @@ int memoria_fd[4];
 int kernel_fd[4];
 
 int conectarMemoria(char *modulo){
-	printf("ENTRE A CONECTAR ");
-
 	char *ip;
 	char *puerto;
 	char charAux[50];
@@ -32,15 +30,13 @@ int conectarMemoria(char *modulo){
 	log_info(loggerIOMem, "IP=%s\n", ip);
 	log_info(loggerIOMem, "PUERTO=%s\n", puerto);
 
-    log_destroy(loggerIOMem);
-
-	memoria_fd[contadorDispositivosIO]= crear_conexion(ip, puerto);
+	memoria_fd[contadorDispositivosIO]= crear_conexion(loggerIOMem, "Conecto dispositivo IO a Memoria",ip, puerto);
+	log_destroy(loggerIOMem);
 
 	return memoria_fd[contadorDispositivosIO];
 }
 
 int conectarKernel(char *modulo){
-	printf("ENTRE A CONECTAR ");
 
 	char *ip;
 	char *puerto;
@@ -67,9 +63,8 @@ int conectarKernel(char *modulo){
 	log_info(loggerIOMem, "IP=%s\n", ip);
 	log_info(loggerIOMem, "PUERTO=%s\n", puerto);
 
-    log_destroy(loggerIOMem);
-
-	kernel_fd[contadorDispositivosIO]= crear_conexion(ip, puerto);
+	kernel_fd[contadorDispositivosIO]= crear_conexion(loggerIOMem, "Conecto dispositivo IO a Kernel",ip, puerto);
+	log_destroy(loggerIOMem);
 
 	return kernel_fd[contadorDispositivosIO];
 }
@@ -103,10 +98,6 @@ void paquete(int conexion, t_log* logger)
 	enviar_paquete(paquete, conexion);
 	free(paquete);
 	free(leido);
-}
-
-void iterator(char* value) {
-	log_info(logger,"%s", value);
 }
 
 void terminar_programa(int conexion, t_log* logger){

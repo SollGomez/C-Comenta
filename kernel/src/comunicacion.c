@@ -8,12 +8,13 @@ int interfazIO_fd[4];
 
 int recibirConexion(char *puerto) {
 	
-	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_DEBUG);
+	t_log* logger;
+	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
 	pthread_t hilosIO[4];
 	int contadorIO=0;
 
 	
-	kernel_fd = iniciar_servidor(puerto);
+	kernel_fd = iniciar_servidor(logger,"Server Kernel",puerto);
 	
 	while(1)
 	{
@@ -26,7 +27,7 @@ int recibirConexion(char *puerto) {
 }
 
 int conectarModuloCPU(char *modulo){
-	printf("ENTRE A CONECTAR ");
+
 	char *ip;
 	char *puerto;
 	char charAux[50];
@@ -53,7 +54,7 @@ int conectarModuloCPU(char *modulo){
 	log_info(logger, "IP=%s\n", ip);
 	log_info(logger, "PUERTO=%s\n", puerto);
 
-	cpuDispatch_fd= crear_conexion(ip, puerto);
+	cpuDispatch_fd= crear_conexion(logger, "Conecto Kernel a CPU Dispatch",ip, puerto);
 
 	log_destroy(logger);
 //	terminar_programa(conexion, logger);
@@ -62,7 +63,7 @@ int conectarModuloCPU(char *modulo){
 }
 
 int conectarModuloCPUInterrupt(char *modulo){
-	printf("ENTRE A CONECTAR ");
+	
 	char *ip;
 	char *puerto;
 	char charAux[50];
@@ -89,7 +90,7 @@ int conectarModuloCPUInterrupt(char *modulo){
 	log_info(logger, "IP=%s\n", ip);
 	log_info(logger, "PUERTO=%s\n", puerto);
 
-	cpuInterrupt_fd= crear_conexion(ip, puerto);
+	cpuInterrupt_fd= crear_conexion(logger, "Conecto kernel a CPU Interrupt",ip, puerto);
 
 	log_destroy(logger);
 //	terminar_programa(conexion, logger);
@@ -98,7 +99,7 @@ int conectarModuloCPUInterrupt(char *modulo){
 }
 
 int conectarModuloMemoria(char *modulo){
-	printf("ENTRE A CONECTAR ");
+
 	char *ip;
 	char *puerto;
 	char charAux[50];
@@ -125,7 +126,7 @@ int conectarModuloMemoria(char *modulo){
 	log_info(logger, "IP=%s\n", ip);
 	log_info(logger, "PUERTO=%s\n", puerto);
 
-	memoria_fd= crear_conexion(ip, puerto);
+	memoria_fd= crear_conexion(logger, "Conecto Kernel a memoria",ip, puerto);
 
 	log_destroy(logger);
 //	terminar_programa(conexion, logger);
@@ -137,7 +138,9 @@ void *recibirIO(int contador){
 	
 	int contadorIO_local= contador;
 	while(1) {
-		
+		t_log* logger;
+		logger=iniciar_logger("recibirIO.log");;
+
 		int cod_op = recibir_operacion(interfazIO_fd[contadorIO_local]); //seguro se necesita un mutex
 		// pthread_mutex_lock(&mutexFS);
 
@@ -216,10 +219,6 @@ void paquete(t_log* logger, char* parametro){
 
 	//enviar_paquete(paquete, kernel_fd);
 	free(paquete);
-}
-
-void iterator(char* value) {
-	log_info(logger,"%s", value);
 }
 
 void terminar_programa(int conexion, t_log* logger)

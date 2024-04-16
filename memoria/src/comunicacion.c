@@ -4,15 +4,15 @@ int memoria_fd;
 int cpu_fd;
 int interfazIO_fd[4];
 int kernel_fd;
-
+t_log* logger;
 
 int recibirConexion(char *puerto) {
-	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_DEBUG);
+	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
 	pthread_t tid[2];
 	pthread_t hilosIO[4];
 	int contadorIO=0;
 
-	memoria_fd = iniciar_servidor(puerto);
+	memoria_fd = iniciar_servidor(logger, "Server Memoria", puerto);
 	log_info(logger, "Servidor listo para recibir a los clientes");
 
 	cpu_fd = esperar_cliente(memoria_fd);
