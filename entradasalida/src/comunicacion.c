@@ -44,8 +44,8 @@ int conectarKernel(char *modulo){
     char parametro[20];
 
 	strcpy(charAux, modulo);
-    t_log* loggerIOMem;
-	loggerIOMem= iniciar_logger(strcat(charAux,".log"));
+    t_log* loggerIOKernel;
+	loggerIOKernel= iniciar_logger(strcat(charAux,".log"));
 
 	strcpy(charAux, modulo);
 
@@ -60,11 +60,11 @@ int conectarKernel(char *modulo){
     strcat(parametro, charAux);
 	puerto=config_get_string_value(config,parametro);
 
-	log_info(loggerIOMem, "IP=%s\n", ip);
-	log_info(loggerIOMem, "PUERTO=%s\n", puerto);
+	log_info(loggerIOKernel, "IP=%s\n", ip);
+	log_info(loggerIOKernel, "PUERTO=%s\n", puerto);
 
-	kernel_fd[contadorDispositivosIO]= crear_conexion(loggerIOMem, "Conecto dispositivo IO a Kernel",ip, puerto);
-	log_destroy(loggerIOMem);
+	kernel_fd[contadorDispositivosIO]= crear_conexion(loggerIOKernel, "Conecto dispositivo IO a Kernel",ip, puerto);
+	log_destroy(loggerIOKernel);
 
 	return kernel_fd[contadorDispositivosIO];
 }
