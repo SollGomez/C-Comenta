@@ -23,6 +23,14 @@
 //extern t_log* warning_logger;
 //extern t_log* error_logger;
 
+bool inicializarBitmap(); //Crea un bitmap que indica que marcos están libres
+void liberarMemory(); //Libera memoria
+void liberarPagina(Pagina*); //Libera la pagina que se le manda
+bool crearSemaforos(); //Crea todos los semáforos
+bool crearEspacioContiguoDeMemoria(); //Crea el espacio contiguo
+bool crearEstructurasAdministrativas(); //Crea todas las estructuras administrativas necesarias
+bool iniciarMemoria(); //Inicia memoria
+
 /*Estructuras de Memoria de instrucciones*/
 
 /*Esquema de memoria*/

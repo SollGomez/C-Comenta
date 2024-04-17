@@ -1,6 +1,9 @@
 #include "esquema.h"
 
 bool flagComunicacion = false;
+uint32_t *marcosAsignados;
+int RETARDO_RESPUESTA;
+pthread_mutex_t mutexFS;
 
 espacioContiguoMemoria espacioUsuario;
 
@@ -45,9 +48,9 @@ void crearTablaPaginasProceso(uint32_t pid, uint32_t size){
 	        exit(EXIT_FAILURE);
 	    }
 		nuevaPagina->marco = buscarMarcoLibre();
+        printf("MARCO ELEGIDO PARA LA PAGINA %d: %d\n", i, nuevaPagina->marco);
+        list_add(nuevaTabla->paginas, nuevaPagina);
 		marcarMarcoOcupado(nuevaPagina->marco);
-		list_add(nuevaTabla->paginas, nuevaPagina);
-		free(nuevaPagina); //LINEA AGREGADA
 	}
 	pthread_mutex_lock(&mutex_tablasPaginas);
     list_add(tablaGeneral, nuevaTabla);
@@ -58,11 +61,13 @@ void crearTablaPaginasProceso(uint32_t pid, uint32_t size){
 
 void finalizacionDeProceso(uint32_t pid){
 	TablaDePaginas* tabla = obtenerTablaPorPID(pid);
+    printf("TAMAÑO TABLA: %d\n", list_size(tabla->paginas));
     for (int j = 0; j < list_size(tabla->paginas); j++) {
         Pagina* pagina = list_get(tabla->paginas, j);
+        printf("MARCO DE LA PAGINA %d: %d\n",j, pagina->marco);
         marcarMarcoLibre(pagina->marco);
     }
-	liberarTablaDePaginas(tabla);
+	liberarTablaDePaginas(pid);
 	log_info(info_logger,"Tamaño de tablaGeneral después de finalizar proceso: %d\n", list_size(tablaGeneral));
 	return;
 };
@@ -76,34 +81,52 @@ TablaDePaginas* obtenerTablaPorPID(uint32_t pid) {
     return NULL;
 }
 
-void liberarTablaDePaginas(uint32_t pid) {
-
-	bool compararPorPID(void* elemento, void* pid) {
-	    TablaDePaginas* tabla = (TablaDePaginas*)elemento;
-	    uint32_t* pidBuscado = (uint32_t*)pid;
-	    return tabla->pid == *pidBuscado;
-	}
-    int indice = -1;
-    for (int i = 0; i < list_size(tablaGeneral); i++) {
-        TablaDePaginas* tabla = list_get(tablaGeneral, i);
-        if (compararPorPID(tabla, &pid)) {
-            indice = i;
-            break;
+void liberarTablaDePaginas(uint32_t pid){
+    TablaDePaginas* tabla = obtenerTablaPorPID(pid);
+    TablaDePaginas* tabla2;
+    for (int i=0 ; i<list_size(tablaGeneral); i++){
+        tabla2 = list_get(tablaGeneral,i);
+        if (tabla->pid == tabla2->pid){
+            pthread_mutex_lock(&mutex_tablasPaginas);
+            void* element = list_remove(tablaGeneral, i);
+            pthread_mutex_unlock(&mutex_tablasPaginas);
+            free(tabla->paginas);
+            free(tabla);
+            log_info(info_logger, "Tabla con PID <%d> eliminada de tablaGeneral", pid);
+            return;
         }
     }
-
-    if (indice != -1) {
-		pthread_mutex_lock(&mutex_tablasPaginas);
-        TablaDePaginas* tabla = list_remove(tablaGeneral, indice);
-		pthread_mutex_unlock(&mutex_tablasPaginas);
-        free(tabla->paginas);
-        free(tabla);
-        log_info(info_logger, "Tabla con PID <%d> eliminada de tablaGeneral", pid);
-    } else {
-        log_info(info_logger, "No se encontró una tabla con PID <%d> en tablaGeneral", pid);
-    }
-
+    log_info(info_logger, "No se encontró una tabla con PID <%d> en tablaGeneral", pid);
 }
+
+// void liberarTablaDePaginas(uint32_t pid) {
+
+// 	bool compararPorPID(void* elemento, void* pid) {
+// 	    TablaDePaginas* tabla = (TablaDePaginas*)elemento;
+// 	    uint32_t* pidBuscado = (uint32_t*)pid;
+// 	    return tabla->pid == *pidBuscado;
+// 	}
+//     int indice = -1;
+//     for (int i = 0; i < list_size(tablaGeneral); i++) {
+//         TablaDePaginas* tabla = list_get(tablaGeneral, i);
+//         if (compararPorPID(tabla, &pid)) {
+//             indice = i;
+//             break;
+//         }
+//     }
+
+//     if (indice != -1) {
+// 		pthread_mutex_lock(&mutex_tablasPaginas);
+//         TablaDePaginas* tabla = list_remove(tablaGeneral, indice);
+// 		pthread_mutex_unlock(&mutex_tablasPaginas);
+//         free(tabla->paginas);
+//         free(tabla);
+//         log_info(info_logger, "Tabla con PID <%d> eliminada de tablaGeneral", pid);
+//     } else {
+//         log_info(info_logger, "No se encontró una tabla con PID <%d> en tablaGeneral", pid);
+//     }
+
+// }
 
 uint32_t obtenerMarcoDePagina(uint32_t pid, uint32_t numeroPagina){
 	TablaDePaginas* tabla = obtenerTablaPorPID(pid);

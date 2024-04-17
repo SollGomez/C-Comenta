@@ -2,7 +2,7 @@
 
 
 void* espacio_contiguo;
-uint32_t *marcosAsignados;
+//uint32_t *marcosAsignados;
 char* charAux[50];
 
 bool memoriaInicializada;
@@ -54,40 +54,6 @@ void liberarPagina(Pagina* pagina) {
     free(pagina); //AVISAR A FS
 }
 
-void liberarTablaDePaginas(uint32_t pid) {
-
-	bool compararPorPID(void* elemento, void* pid) {
-	    TablaDePaginas* tabla = (TablaDePaginas*)elemento;
-	    uint32_t* pidBuscado = (uint32_t*)pid;
-	    return tabla->pid == *pidBuscado;
-	}
-    int indice = -1;
-    for (int i = 0; i < list_size(tablaGeneral); i++) {
-        TablaDePaginas* tabla = list_get(tablaGeneral, i);
-        if (compararPorPID(tabla, &pid)) {
-            indice = i;
-            break;
-        }
-    }
-
-    if (indice != -1) {
-        TablaDePaginas* tabla = list_remove(tablaGeneral, indice);
-        free(tabla->paginas);
-        free(tabla);
-        log_info(info_logger, "Tabla con PID <%d> eliminada de tablaGeneral", pid);
-    } else {
-        log_info(info_logger, "No se encontró una tabla con PID <%d> en tablaGeneral", pid);
-    }
-
-}
-
-bool crearEstructurasAdministrativas(){
-    bool comp1 = crearSemaforos();
-    bool comp2 = crearEspacioContiguoDeMemoria();
-    bool comp3 = inicializarBitmap();
-    return comp1 && comp2 && comp3;
-}
-
 bool crearSemaforos(){
     int comprobacionEspacioContiguo = pthread_mutex_init(&mutex_espacioContiguo,NULL);
     int comprobacionEspacioDisponible = pthread_mutex_init(&mutex_espacioDisponible,NULL);
@@ -121,6 +87,13 @@ bool crearEspacioContiguoDeMemoria(){
     memset(espacio_contiguo,0,TAM_MEMORIA);
     memoriaInicializada = true;
     return true;
+}
+
+bool crearEstructurasAdministrativas(){
+    bool comp1 = crearSemaforos();
+    bool comp2 = crearEspacioContiguoDeMemoria();
+    bool comp3 = inicializarBitmap();
+    return comp1 && comp2 && comp3;
 }
 
 bool iniciarMemoria(){

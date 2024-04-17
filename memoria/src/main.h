@@ -16,6 +16,8 @@ extern int TAM_MEMORIA;
 extern int CANT_MARCOS;
 extern int RETARDO_RESPUESTA;
 
+extern uint32_t *marcosAsignados;
+
 extern void* espacio_contiguo;
 
 extern bool memoriaInicializada;
@@ -24,15 +26,13 @@ extern bool pagina0Creada;
 extern bool semaforosCreados;
 
 extern t_list* tablasPaginas;
-extern t_list* paginasConTimestamp;
 extern t_list* tablaGeneral;
-
-extern t_queue* colaFIFO;
 
 extern pthread_mutex_t mutex_espacioContiguo;
 extern pthread_mutex_t mutex_tablasPaginas;
 extern pthread_mutex_t mutex_idPagina;
 extern pthread_mutex_t mutex_espacioDisponible;
+extern pthread_mutex_t mutexFS;
 
 extern t_log* trace_logger;
 extern t_log* debug_logger;
