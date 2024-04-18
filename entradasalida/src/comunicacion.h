@@ -5,11 +5,11 @@
 #include <stdio.h>
 #include <utils/shared.h>
 #include "pthread.h"
-#include "main.h"
+#include <clean.h>
 
 extern int contadorDispositivosIO;
-extern int memoria_fd[4];
-extern int kernel_fd[4];
+extern int memoria_fd;
+extern int kernel_fd;
 
 int conectarKernel(char *modulo);
 int conectarMemoria(char *modulo);

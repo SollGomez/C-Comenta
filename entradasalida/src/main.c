@@ -14,12 +14,11 @@ int main(int argc, char* argv[]) {
     cargar_configuracion();
     
     
-	for(int i=0; i<4; i++)
-	{
-		conectarKernel("KERNEL");
-		conectarMemoria("MEMORIA");
-		contadorDispositivosIO++;
-	}
+
+	conectarKernel("KERNEL");
+	conectarMemoria("MEMORIA");
+	
+	
 	
 	char nombre[50];
 	scanf("%s", nombre);

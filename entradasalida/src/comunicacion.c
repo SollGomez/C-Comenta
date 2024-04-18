@@ -1,8 +1,8 @@
-#include "comunicacion.h"
+#include <comunicacion.h>
 
 int contadorDispositivosIO=0;
-int memoria_fd[4];
-int kernel_fd[4];
+int memoria_fd;
+int kernel_fd;
 
 int conectarMemoria(char *modulo){
 	char *ip;
@@ -18,22 +18,37 @@ int conectarMemoria(char *modulo){
 
 	strcpy(parametro, "IP_");
     strcat(parametro, charAux);
-	ip=config_get_string_value(config,parametro);
+	ip=config_get_string_value(configuracionEntradasalida,parametro);
 
 	if(!strcmp(charAux,"CPU"))
 		strcpy(charAux,"CPU_DISPATCH");
 
 	strcpy(parametro, "PUERTO_");
     strcat(parametro, charAux);
-	puerto=config_get_string_value(config,parametro);
+	puerto=config_get_string_value(configuracionEntradasalida,parametro);
 
 	log_info(loggerIOMem, "IP=%s\n", ip);
 	log_info(loggerIOMem, "PUERTO=%s\n", puerto);
 
-	memoria_fd[contadorDispositivosIO]= crear_conexion(loggerIOMem, "Conecto dispositivo IO a Memoria",ip, puerto);
+	memoria_fd= crear_conexion(loggerIOMem, "Conecto dispositivo IO a Memoria",ip, puerto);
+	
+
+	int32_t handshakeEntradasalida;
+
+	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDOUT") == 0)
+		handshakeEntradasalida = 0;
+	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDIN") == 0)
+		handshakeEntradasalida = 1;
+	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS") == 0)
+		handshakeEntradasalida = 2;
+	else
+		handshakeEntradasalida = 3;
+
+	send(kernel_fd, &handshakeEntradasalida, sizeof(int32_t), 0);
+
 	log_destroy(loggerIOMem);
 
-	return memoria_fd[contadorDispositivosIO];
+	return memoria_fd;
 }
 
 int conectarKernel(char *modulo){
@@ -51,22 +66,36 @@ int conectarKernel(char *modulo){
 
 	strcpy(parametro, "IP_");
     strcat(parametro, charAux);
-	ip=config_get_string_value(config,parametro);
+	ip=config_get_string_value(configuracionEntradasalida,parametro);
 
 	if(!strcmp(charAux,"CPU"))
 		strcpy(charAux,"CPU_DISPATCH");
 
 	strcpy(parametro, "PUERTO_");
     strcat(parametro, charAux);
-	puerto=config_get_string_value(config,parametro);
+	puerto=config_get_string_value(configuracionEntradasalida,parametro);
 
 	log_info(loggerIOKernel, "IP=%s\n", ip);
 	log_info(loggerIOKernel, "PUERTO=%s\n", puerto);
 
-	kernel_fd[contadorDispositivosIO]= crear_conexion(loggerIOKernel, "Conecto dispositivo IO a Kernel",ip, puerto);
+	kernel_fd = crear_conexion(loggerIOKernel, "Conecto dispositivo IO a Kernel",ip, puerto);
+
+	int32_t handshakeEntradasalida;
+
+	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDOUT") == 0)
+		handshakeEntradasalida = 0;
+	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDIN") == 0)
+		handshakeEntradasalida = 1;
+	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS") == 0)
+		handshakeEntradasalida = 2;
+	else
+		handshakeEntradasalida = 3;
+
+	send(kernel_fd, &handshakeEntradasalida, sizeof(int32_t), 0);
+
 	log_destroy(loggerIOKernel);
 
-	return kernel_fd[contadorDispositivosIO];
+	return kernel_fd;
 }
 
 
