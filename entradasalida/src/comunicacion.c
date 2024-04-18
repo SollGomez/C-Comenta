@@ -44,7 +44,7 @@ int conectarMemoria(char *modulo){
 	else
 		handshakeEntradasalida = 3;
 
-	send(kernel_fd, &handshakeEntradasalida, sizeof(int32_t), 0);
+	send(memoria_fd, &handshakeEntradasalida, sizeof(int32_t), 0);
 
 	log_destroy(loggerIOMem);
 

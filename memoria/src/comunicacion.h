@@ -17,5 +17,6 @@ int recibirConexion(char *);
 void *recibirCPU(void);
 void *recibirIO(int);
 void *recibirKernel();
+void cualInterfaz(int tipoInterfaz);
 
 #endif

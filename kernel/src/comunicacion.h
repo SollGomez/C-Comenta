@@ -20,7 +20,8 @@ int recibirConexion(char *puerto);
 int conectarModuloCPU(char *);
 int conectarModuloCPUInterrupt(char *);
 int conectarModuloMemoria(char *);
-void *recibirIO(int contador);
+void *recibirIO(int fdInterfaz);
+void cualInterfaz(int tipoInterfaz);
 
 t_log* iniciar_logger(char*);
 void leer_consola(t_log*);

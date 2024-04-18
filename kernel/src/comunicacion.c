@@ -4,27 +4,60 @@ int cpuDispatch_fd;
 int cpuInterrupt_fd;
 int memoria_fd;
 int kernel_fd;
-int interfazIO_fd[4];
+int vectorIO[4];
+
 
 int recibirConexion(char *puerto) {
-	
-	t_log* logger;
-	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
-	pthread_t hilosIO[4];
-	int contadorIO=0;
 
+	int entradasalida_fd;
+	t_log* logger;
+	pthread_t tid[4];
+	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
+	int32_t tipoInterfaz;
 	
 	kernel_fd = iniciar_servidor(logger,"Server Kernel",puerto);
-	
-	while(1)
-	{
-		interfazIO_fd[contadorIO] = esperar_cliente(kernel_fd);
-		pthread_create(&hilosIO[contadorIO], NULL, recibirIO, contadorIO);
-		contadorIO++;
+
+	while(1){
+		entradasalida_fd = esperar_cliente(kernel_fd);
+		recv(entradasalida_fd, &tipoInterfaz, sizeof(int32_t), MSG_WAITALL);
+		vectorIO[tipoInterfaz] = entradasalida_fd;
+		cualInterfaz(tipoInterfaz);
+		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, vectorIO[tipoInterfaz]);
 	}
+
 
 	return EXIT_SUCCESS;
 }
+
+
+void cualInterfaz(int tipoInterfaz){
+
+	t_log* logger;
+	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
+
+	switch (tipoInterfaz)
+	{
+	case 0: //STDOUT
+		log_info(logger, "Interfaz STDOUT conectada");
+		break;
+	case 1: //STDIN
+		log_info(logger, "Interfaz STDIN conectada");
+		break;
+	case 2: //DIAL_FS
+		log_info(logger, "Interfaz DIAL_FS conectada");
+		break;
+	case 3: //GENERICA
+		log_info(logger, "Interfaz GENERICA conectada");
+		break;
+	default:
+		break;
+	}
+
+	log_destroy(logger);
+}
+
+
+
 
 int conectarModuloCPU(char *modulo){
 
@@ -134,14 +167,14 @@ int conectarModuloMemoria(char *modulo){
 	return memoria_fd;
 }
 
-void *recibirIO(int contador){
+void *recibirIO(int interfaz_fd){
 	
-	int contadorIO_local= contador;
+
 	while(1) {
 		t_log* logger;
-		logger=iniciar_logger("recibirIO.log");;
+		logger=iniciar_logger("recibirIO.log");
 
-		int cod_op = recibir_operacion(interfazIO_fd[contadorIO_local]); //seguro se necesita un mutex
+		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex
 		// pthread_mutex_lock(&mutexFS);
 
 		t_list *lista = list_create();
@@ -175,11 +208,10 @@ void *recibirIO(int contador){
 			 case -1:
 				 log_error(logger, "el cliente se desconecto.");
 
-				 log_error(logger, "Terminando servidor.FILESYSTEM");
+				 log_error(logger, "Terminando servidor ENTRADASALIDA");
 				 return NULL;
 
 			 default:
-
 				log_warning(logger,"Operacion desconocida. No quieras meter la pata %d ", cod_op);
 				break;
 		}

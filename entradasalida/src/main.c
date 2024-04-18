@@ -16,9 +16,8 @@ int main(int argc, char* argv[]) {
     
 
 	conectarKernel("KERNEL");
+
 	conectarMemoria("MEMORIA");
-	
-	
 	
 	char nombre[50];
 	scanf("%s", nombre);

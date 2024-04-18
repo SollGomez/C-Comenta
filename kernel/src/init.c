@@ -79,6 +79,7 @@ void iniciarNecesidades(){
 
     //log_info(logger, "%s\n", config_get_string_value(config,"PUERTO_ESCUCHA"));
 	pthread_t tid[7];
+   
 	pthread_create(&tid[0], NULL, conectarMemoria, "MEMORIA");
 	pthread_join(tid[0], NULL);
 	pthread_create(&tid[2], NULL, conectarCPU, "CPU");
@@ -86,6 +87,8 @@ void iniciarNecesidades(){
 	pthread_create(&tid[3], NULL, conectarCPUInterrupt, "CPU");
 	pthread_join(tid[3], NULL);
     pthread_create(&tid[1], NULL, escucharConexionesIO, config_get_string_value(config,"PUERTO_ESCUCHA"));
+
+    
 	
 
     // pthread_create(&hilo_planificador_LP, NULL, (void*)planificadorLargoPlazo, NULL);

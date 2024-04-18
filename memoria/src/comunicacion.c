@@ -19,12 +19,14 @@ int recibirConexion(char *puerto) {
 	pthread_create(&tid[0], NULL, recibirCPU, NULL);
 	kernel_fd = esperar_cliente(memoria_fd);
 	pthread_create(&tid[1], NULL, recibirKernel, NULL);
-
-	while(1)
-	{
-		interfazIO_fd[contadorIO] = esperar_cliente(memoria_fd);
-		pthread_create(&hilosIO[contadorIO], NULL, recibirIO, contadorIO);
-		contadorIO++;
+	int32_t tipoInterfaz;
+	int entradasalida_fd;
+	while(1){
+		entradasalida_fd = esperar_cliente(memoria_fd);
+		recv(entradasalida_fd, &tipoInterfaz, sizeof(int32_t), MSG_WAITALL);
+		interfazIO_fd[tipoInterfaz] = entradasalida_fd;
+		cualInterfaz(tipoInterfaz);
+		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, interfazIO_fd[tipoInterfaz]);
 	}
 	// 
 	// 
@@ -36,6 +38,37 @@ int recibirConexion(char *puerto) {
 
 	return EXIT_SUCCESS;
 }
+
+
+
+void cualInterfaz(int tipoInterfaz){
+
+	t_log* logger;
+	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
+
+	switch (tipoInterfaz)
+	{
+	case 0: //STDOUT
+		log_info(logger, "Interfaz STDOUT conectada");
+		break;
+	case 1: //STDIN
+		log_info(logger, "Interfaz STDIN conectada");
+		break;
+	case 2: //DIAL_FS
+		log_info(logger, "Interfaz DIAL_FS conectada");
+		break;
+	case 3: //GENERICA
+		log_info(logger, "Interfaz GENERICA conectada");
+		break;
+	default:
+		break;
+	}
+
+	log_destroy(logger);
+}
+
+
+
 
 void *recibirCPU(void){
 		while(1) {
@@ -88,12 +121,11 @@ void *recibirCPU(void){
 		}
 }
 
-void *recibirIO(int contador){
+void *recibirIO(int interfaz_fd){
 
-	int contadorIO_local= (int) contador;
 	while(1) {
 		
-		int cod_op = recibir_operacion(interfazIO_fd[contadorIO_local]); //seguro se necesita un mutex
+		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex
 		// pthread_mutex_lock(&mutexFS);
 
 		t_list *lista = list_create();
