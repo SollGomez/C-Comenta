@@ -1,6 +1,10 @@
 #include "cicloInstruccion.h"
 
 bool cicloInstrucciones=true;
+char* nombre_instruccion_actual;
+Instruccion* instruccion;
+int interrupciones;
+
 
 char registroCPU_AX[1];
 char registroCPU_BX[1];
@@ -16,6 +20,7 @@ char registroCPU_DI[4];
 void ciclo_de_instruccion(){
     
     cicloInstrucciones=true;
+    interrupciones=0;
 
     while(cicloInstrucciones){
 
@@ -31,11 +36,35 @@ void ciclo_de_instruccion(){
 }
 
 void fetch(){
+    t_list* listaInts = list_create();
 
+	log_info(info_logger, "PID: <%d> - FETCH - Program Counter: <%d>", PCB_Actual->id, PCB_Actual->program_counter);
+	
+	list_add(listaInts, &PCB_Actual->id);
+	list_add(listaInts, &PCB_Actual->program_counter);
+
+
+	enviarListaUint32_t(listaInts,memoria_fd, info_logger, SOLICITUDINSTRUCCION);
+
+	list_clean(listaInts);
+	list_destroy(listaInts);
 }
 
 void decode(){
+    t_list* lista;
+	op_code_cliente cod = recibir_operacion(memoria_fd);
 
+	if(cod == SOLICITUDINSTRUCCION){        //en memoria mandar enviar instruccion
+		instruccion = recibirInstruccion(memoria_fd);
+
+		nombre_instruccion_actual=instruccion->id;
+		log_info(info_logger,"instruccion recibida: %s", nombre_instruccion_actual);
+
+	}
+	else{
+		log_error(error_logger,"FALLO en el recibo de la instruccion");
+		cicloInstrucciones=0; //si hay pageFault tmbn tiene que devolver -1
+	}
 }
 
 void execute(){

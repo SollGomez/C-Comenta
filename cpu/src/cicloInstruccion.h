@@ -4,6 +4,7 @@
 #include "main.h"
 
 extern bool cicloInstrucciones;
+extern int interrupciones;
 
 extern char registroCPU_AX[1];
 extern char registroCPU_BX[1];

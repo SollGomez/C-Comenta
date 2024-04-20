@@ -8,6 +8,20 @@
 #include <fcntl.h>
 
 typedef struct {
+	uint8_t idLength;
+    char* id;
+    uint8_t cantidadParametros;
+    uint8_t param1Length;
+    char* param1;
+    uint8_t param2Length;
+    char* param2;
+    uint8_t param3Length;
+    char* param3;
+    uint8_t param4Length;
+    char* param4;
+} Instruccion;
+
+typedef struct {
     t_list* cola;
     char* nombreRecurso;
     int indiceSemaforo;
