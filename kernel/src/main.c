@@ -4,14 +4,16 @@
 #include "main.h"
 
 t_config* config;
+t_log* info_logger;
+
 
 int main(int argc, char* argv[]) {
     decir_hola("Kernel");
+	info_logger = log_create("info_logger.log","Kernel", true, LOG_LEVEL_INFO);
 
     config = crearConfig(argv[1]);
     iniciarNecesidades();
 	
-
     return 0;
 }
 

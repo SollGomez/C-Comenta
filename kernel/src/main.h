@@ -7,8 +7,10 @@
 #include <commons/collections/queue.h>
 #include <commons/config.h>
 #include "init.h"
+#include <utils/shared.h>
 
 extern t_config* config;
+extern t_log* info_logger;
 
 void * conectarCPU(void *);
 void *conectarCPUInterrupt(void *);

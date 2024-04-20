@@ -6,9 +6,9 @@ int GRADO_MAX_MULTIPROGRAMACION;
 char *ALGORITMO_PLANIFICACION;
 int QUANTUM;
 
-int procesosTotales_MP=0;
-int contadorPeticionesFs=0;
-int idProcesoGlobal=0;
+int procesosTotales_MP = 0;
+int contadorPeticionesFs = 0;
+int idProcesoGlobal = 0;
 
 bool planificacionFlag=true;
 
@@ -77,7 +77,6 @@ void iniciarNecesidades(){
     sem_init(&sem_procesosExit,0,0);
     sem_init(&sem_cpuLibre,0,1);
 
-    //log_info(logger, "%s\n", config_get_string_value(config,"PUERTO_ESCUCHA"));
 	pthread_t tid[7];
    
 	pthread_create(&tid[0], NULL, conectarMemoria, "MEMORIA");
@@ -112,7 +111,7 @@ void iniciarNecesidades(){
     pthread_mutex_init(&planificacionLargo, NULL);
     pthread_mutex_init(&planificacionCorto, NULL);
 
-    //cargarRecursos();
+    cargarRecursos();
 
 	// pthread_join(tid[4], NULL);
 	// pthread_join(tid[5], NULL);
@@ -130,22 +129,22 @@ int tamanioArray(char** array){
     return n;
 }
 
-// int cargarRecursos(){
-//     listaRecursos = list_create();
-//     int dim = tamanioArray(RECURSOS);
-//     char** recursos = RECURSOS;
-//     char** instancias = INSTANCIAS_RECURSOS;
-//     for(int i = 0 ; i < dim ; i++){
-//         Recurso* recurso = malloc(sizeof(Recurso));
-//         recurso->nombreRecurso = recursos[i];
-//         recurso->instanciasRecurso = atoi(instancias[i]);
-//         recurso->indiceSemaforo = i;
-//         recurso->cola = list_create();
-//         list_add(listaRecursos,recurso);
-//     }
-//     estadoBlockRecursos = listaRecursos;
-//     return true;
-// }
+int cargarRecursos(){
+    listaRecursos = list_create();
+    int dim = tamanioArray(RECURSOS);
+    char** recursos = RECURSOS;
+    char** instancias = INSTANCIAS_RECURSOS;
+    for(int i = 0 ; i < dim ; i++){
+        Recurso* recurso = malloc(sizeof(Recurso));
+        recurso->nombreRecurso = recursos[i];
+        recurso->instanciasRecurso = atoi(instancias[i]);
+        recurso->indiceSemaforo = i;
+        recurso->cola = list_create();
+        list_add(listaRecursos,recurso);
+    }
+    estadoBlockRecursos = listaRecursos;
+    return true;
+}
 
 void iniciarSemaforoDinamico(pthread_mutex_t* semaforo, int dim){
     for (int i = 0; i <dim ; ++i)
