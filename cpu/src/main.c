@@ -4,11 +4,11 @@
 #include "main.h"
 #include <signal.h>
 
+t_log* info_logger;
+t_log* error_logger;
 char *PUERTO_DISPATCH;
 char *PUERTO_INTERRUPT;
 t_config *config;
-t_log* info_logger;
-t_log* error_logger;
 
 int main(int argc, char* argv[]) {
     decir_hola("CPU");

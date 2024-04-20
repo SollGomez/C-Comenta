@@ -7,6 +7,7 @@
 #include "pthread.h"
 #include "main.h"
 
+extern PCB* PCB_Actual;
 extern int kernel_fd;
 extern int kernel_interrupt_fd;
 extern int memoria_fd;

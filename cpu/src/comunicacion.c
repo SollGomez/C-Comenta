@@ -2,6 +2,7 @@
 
 t_log *loggerCpuMem;
 
+PCB* PCB_Actual;
 int pid;
 int kernel_fd;
 int kernel_interrupt_fd;
