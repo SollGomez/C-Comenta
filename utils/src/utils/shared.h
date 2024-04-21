@@ -3,6 +3,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "utilsServer.h"
+#include "utilsClient.h"
+#include "estructurasCompartidas.h"
 
 /**
 * @fn    decir_hola
