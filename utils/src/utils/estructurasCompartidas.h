@@ -19,6 +19,8 @@ typedef struct {
     char* param3;
     uint8_t param4Length;
     char* param4;
+    uint8_t param5Length;
+    char* param5;
 } Instruccion;
 
 typedef struct {

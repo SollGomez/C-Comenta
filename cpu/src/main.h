@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "comunicacion.h"
 #include "cicloInstruccion.h"
+#include "ejecucionInstrucciones.h"
 #include "pthread.h"
 #include <commons/collections/queue.h>
 #include <commons/config.h>

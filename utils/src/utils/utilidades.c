@@ -94,6 +94,42 @@ Instruccion* recibirInstruccion(int conexion){
 		desplazamiento += instruccion->param4Length + 1;
 	}
 
+	if (instruccion->cantidadParametros == 5) {
+		memcpy(&(instruccion->param1Length), buffer + desplazamiento, sizeof(uint8_t));
+		desplazamiento += sizeof(uint8_t);
+
+		instruccion->param1 = malloc(instruccion->param1Length + 1);
+		memcpy(instruccion->param1, buffer + desplazamiento, instruccion->param1Length + 1);
+		desplazamiento += instruccion->param1Length + 1;
+
+		memcpy(&(instruccion->param2Length), buffer + desplazamiento, sizeof(uint8_t));
+		desplazamiento += sizeof(uint8_t);
+
+		instruccion->param2 = malloc(instruccion->param2Length + 1);
+		memcpy(instruccion->param2, buffer + desplazamiento, instruccion->param2Length + 1);
+		desplazamiento += instruccion->param2Length + 1;
+
+        memcpy(&(instruccion->param3Length), buffer + desplazamiento, sizeof(uint8_t));
+		desplazamiento += sizeof(uint8_t);
+
+		instruccion->param3 = malloc(instruccion->param3Length + 1);
+		memcpy(instruccion->param3, buffer + desplazamiento, instruccion->param3Length + 1);
+		desplazamiento += instruccion->param3Length + 1;
+
+        memcpy(&(instruccion->param4Length), buffer + desplazamiento, sizeof(uint8_t));
+		desplazamiento += sizeof(uint8_t);
+
+		instruccion->param4 = malloc(instruccion->param4Length + 1);
+		memcpy(instruccion->param4, buffer + desplazamiento, instruccion->param4Length + 1);
+		desplazamiento += instruccion->param4Length + 1;
+
+		memcpy(&(instruccion->param5Length), buffer + desplazamiento, sizeof(uint8_t));
+		desplazamiento += sizeof(uint8_t);
+
+		instruccion->param5 = malloc(instruccion->param5Length + 1);
+		memcpy(instruccion->param5, buffer + desplazamiento, instruccion->param5Length + 1);
+		desplazamiento += instruccion->param5Length + 1;
+	}
 
 	return instruccion;
 }

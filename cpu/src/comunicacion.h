@@ -1,5 +1,5 @@
-#ifndef UTILS_COMUNICACION_H_
-#define UTILS_COMUNICACION_H_
+#ifndef COMUNICACION_H_
+#define COMUNICACION_H_
 
 #include <stdlib.h>
 #include <stdio.h>
