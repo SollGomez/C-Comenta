@@ -23,6 +23,13 @@ int recibirConexion(char *puerto) {
 		vectorIO[tipoInterfaz] = entradasalida_fd;
 		cualInterfaz(tipoInterfaz);
 		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, vectorIO[tipoInterfaz]);
+
+
+		if(tipoInterfaz == 3) {
+			enviarValor_uint32(8, vectorIO[tipoInterfaz], 0, logger);
+		}
+
+
 	}
 
 

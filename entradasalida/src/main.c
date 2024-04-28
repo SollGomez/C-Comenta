@@ -14,11 +14,14 @@ int main(int argc, char* argv[]) {
     cargar_configuracion();
     
     
+	if(cfg_entradaSalida->TIPO_INTERFAZ_INT == 3) {
+		conectarKernel("KERNEL");		
+	}else {
+		conectarKernel("KERNEL");
+		conectarMemoria("MEMORIA");
+	}
 
-	conectarKernel("KERNEL");
 
-	conectarMemoria("MEMORIA");
-	
 	char nombre[50];
 	scanf("%s", nombre);
 
