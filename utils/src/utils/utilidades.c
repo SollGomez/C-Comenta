@@ -134,6 +134,37 @@ Instruccion* recibirInstruccion(int conexion){
 	return instruccion;
 }
 
+void liberarInstruccion(Instruccion * instruccion){
+    if(instruccion->cantidadParametros==1)
+        free(instruccion->param1);
+
+    if(instruccion->cantidadParametros==2){
+        free(instruccion->param1);
+        free(instruccion->param2);
+    }
+	if(instruccion->cantidadParametros==3){
+        free(instruccion->param1);
+        free(instruccion->param2);
+		free(instruccion->param3);
+    }
+	if(instruccion->cantidadParametros==4){
+        free(instruccion->param1);
+        free(instruccion->param2);
+		free(instruccion->param3);
+		free(instruccion->param4);
+    }
+	if(instruccion->cantidadParametros==5){
+        free(instruccion->param1);
+        free(instruccion->param2);
+		free(instruccion->param3);
+		free(instruccion->param4);
+		free(instruccion->param5);
+    }
+
+    free(instruccion->id);
+    free(instruccion);
+}
+
 bool agregarUint32_tsAPaquete(t_list* listaInts, t_paquete* paquete)
 {
 
@@ -167,4 +198,110 @@ bool enviarListaUint32_t(t_list* listaInts, int socket_cliente, t_log* logger, o
     log_info(logger, "Se envio el paquete");
     eliminar_paquete(paquete);
     return true;
+}
+
+void agregar_registros_a_paquete(t_paquete* paquete, RegistrosCPU* registro) {
+
+    //Los valores a almacenar en los registros siempre tendrán la misma longitud que el registro,
+    // es decir que si el registro es de 16 bytes siempre se escribirán 16 caracteres.
+
+    uint32_t tamanioAx = 2;
+
+    agregar_a_paquete2(paquete, &(tamanioAx), sizeof(uint32_t));
+
+	agregar_a_paquete2(paquete, (registro->registro_AX), tamanioAx);
+	agregar_a_paquete2(paquete, (registro->registro_BX), tamanioAx);
+	agregar_a_paquete2(paquete, (registro->registro_CX), tamanioAx);
+	agregar_a_paquete2(paquete, (registro->registro_DX), tamanioAx);
+
+	uint32_t tamanioEax = 5;
+
+    agregar_a_paquete2(paquete, &(tamanioEax), sizeof(uint32_t));
+
+	agregar_a_paquete2(paquete, (registro->registro_EAX), tamanioEax);
+	agregar_a_paquete2(paquete, (registro->registro_EBX), tamanioEax);
+	agregar_a_paquete2(paquete, (registro->registro_ECX), tamanioEax);
+	agregar_a_paquete2(paquete, (registro->registro_EDX), tamanioEax);
+	agregar_a_paquete2(paquete, (registro->registro_SI), tamanioEax);
+	agregar_a_paquete2(paquete, (registro->registro_DI), tamanioEax);
+
+}
+
+void agregar_ContextoEjecucion_a_paquete(t_paquete *paquete, PCB* pcb) {
+    //PCB(UINTS_32T): ID
+    agregar_a_paquete2(paquete, &(pcb->id), sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &(pcb->program_counter), sizeof(uint32_t));
+    //la parte de la PCB que no son uint32_t
+    //PCB: REGISTROS CPU
+    agregar_registros_a_paquete(paquete, pcb->registros);
+}
+
+PCB* recibir_contextoEjecucion(int conexion) {
+    //Pido el stream del buffer en el que viene serilizada la pcb
+    uint32_t tamanioBuffer;
+    uint32_t desplazamiento = 0;
+    void *buffer = recibir_buffer(&tamanioBuffer, conexion);
+
+    //Inicializo todas las estructuras que necesito
+    PCB *PcbRecv = malloc(sizeof(PCB));
+    RegistrosCPU *registros = malloc(sizeof(RegistrosCPU));
+
+
+    //ID
+    memcpy(&(PcbRecv->id), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    //Program counter
+    memcpy(&(PcbRecv->program_counter), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    //la parte de la PCB que no son uint32_t
+    //PCB: REGISTROS CPU
+
+    //REGISTROS CPU 
+
+    uint32_t tamanioAx = 0;
+
+    memcpy(&tamanioAx, buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    //Una vez obtenidos los tamaños, obtenemos los registros
+    memcpy(&(registros->registro_AX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_BX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_CX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_DX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+
+	uint32_t tamanioEax = 0;
+
+	memcpy(&tamanioEax, buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+	//Una vez obtenidos los tamaños, obtenemos los registros
+    memcpy(&(registros->registro_EAX), buffer + desplazamiento, tamanioEax);
+    desplazamiento += tamanioEax;
+    memcpy(&(registros->registro_EBX), buffer + desplazamiento, tamanioEax);
+    desplazamiento += tamanioEax;
+    memcpy(&(registros->registro_ECX), buffer + desplazamiento, tamanioEax);
+    desplazamiento += tamanioEax;
+    memcpy(&(registros->registro_EDX), buffer + desplazamiento, tamanioEax);
+    desplazamiento += tamanioEax;
+	memcpy(&(registros->registro_SI), buffer + desplazamiento, tamanioEax);
+    desplazamiento += tamanioEax;
+    memcpy(&(registros->registro_DI), buffer + desplazamiento, tamanioEax);
+    desplazamiento += tamanioEax;
+
+    PcbRecv->registros = registros;
+
+    free(buffer);
+
+    return PcbRecv;
+}
+
+void liberarPcbCpu(PCB* pcb){
+    free(pcb->registros);
+    free(pcb);
 }

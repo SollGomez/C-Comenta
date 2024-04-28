@@ -27,4 +27,7 @@ void IO_FS_READ(char* interfaz, char* nombreArchivo, char* registroDireccion, ch
 
 void ejecutar_EXIT();
 
+void cambiar_valor_del_registroCPU(char* registro, char* valor);
+char* obtener_valor_registroCPU(char* registro);
+
 #endif

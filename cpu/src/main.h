@@ -8,6 +8,7 @@
 #include "pthread.h"
 #include <commons/collections/queue.h>
 #include <commons/config.h>
+#include <utils/shared.h>
 
 extern t_config* config;
 extern t_log* info_logger;

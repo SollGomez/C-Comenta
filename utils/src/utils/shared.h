@@ -6,6 +6,7 @@
 #include "utilsServer.h"
 #include "utilsClient.h"
 #include "estructurasCompartidas.h"
+#include "utilidades.h"
 
 /**
 * @fn    decir_hola

@@ -51,7 +51,7 @@ void fetch(){
 }
 
 void decode(){
-    t_list* lista;
+    
 	op_code_cliente cod = recibir_operacion(memoria_fd);
 
 	if(cod == SOLICITUDINSTRUCCION){        //en memoria mandar enviar instruccion
@@ -155,7 +155,7 @@ void execute(){
         char* interfaz = instruccion->param1;
         char* unidadesDeTrabajo = instruccion->param2;
 
-        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_GEN_SLEEP> - <%d> - <%s>", PCB_Actual->id, interfaz, unidadesDeTrabajo);
+        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_GEN_SLEEP> - <%s> - <%s>", PCB_Actual->id, interfaz, unidadesDeTrabajo);
 
 		//Esta instrucción solicita al Kernel que se envíe a una interfaz de I/O a que realice un sleep por una cantidad de unidades de trabajo.
         IO_GEN_SLEEP(interfaz, unidadesDeTrabajo);
@@ -167,7 +167,7 @@ void execute(){
         char* registroDireccion = instruccion->param2;
 		char* registroTamanio = instruccion->param3;
 
-        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_STDIN_READ> - <%d> - <%s> - <%s>", PCB_Actual->id, interfaz, registroDireccion, registroTamanio);
+        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_STDIN_READ> - <%s> - <%s> - <%s>", PCB_Actual->id, interfaz, registroDireccion, registroTamanio);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz ingresada se lea desde el STDIN (Teclado) un valor cuyo tamaño está delimitado por el valor del Registro Tamaño y el mismo se guarde a partir de la Dirección Lógica almacenada en el Registro Dirección.
         IO_STDIN_READ(interfaz, registroDireccion, registroTamanio);
@@ -179,7 +179,7 @@ void execute(){
         char* registroDireccion = instruccion->param2;
 		char* registroTamanio = instruccion->param3;
 
-        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_STDOUT_WRITE> - <%d> - <%s> - <%s>", PCB_Actual->id, interfaz, registroDireccion, registroTamanio);
+        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_STDOUT_WRITE> - <%s> - <%s> - <%s>", PCB_Actual->id, interfaz, registroDireccion, registroTamanio);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se lea desde la posición de memoria indicada por la Dirección Lógica almacenada en el Registro Dirección, un tamaño indicado por el Registro Tamaño y se imprima por pantalla.
         IO_STDOUT_WRITE(interfaz, registroDireccion, registroTamanio);
@@ -190,7 +190,7 @@ void execute(){
         char* interfaz = instruccion->param1;
         char* nombreArchivo = instruccion->param2;
 
-        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_CREATE> - <%d> - <%s>", PCB_Actual->id, interfaz, nombreArchivo);
+        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_CREATE> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se cree un archivo en el FS montado en dicha interfaz.
         IO_FS_CREATE(interfaz, nombreArchivo);
@@ -201,7 +201,7 @@ void execute(){
         char* interfaz = instruccion->param1;
         char* nombreArchivo = instruccion->param2;
 
-        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_DELETE> - <%d> - <%s>", PCB_Actual->id, interfaz, nombreArchivo);
+        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_DELETE> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se elimine un archivo en el FS montado en dicha interfaz
         IO_FS_DELETE(interfaz, nombreArchivo);
@@ -213,7 +213,7 @@ void execute(){
         char* nombreArchivo = instruccion->param2;
 		char* registroTamanio = instruccion->param3;
 
-        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_TRUNCATE> - <%d> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo, registroTamanio);
+        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_TRUNCATE> - <%s> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo, registroTamanio);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se modifique el tamaño del archivo en el FS montado en dicha interfaz, actualizando al valor que se encuentra en el registro indicado por Registro Tamaño.
         IO_FS_TRUNCATE(interfaz, nombreArchivo, registroTamanio);
@@ -227,7 +227,7 @@ void execute(){
 		char* registroTamanio = instruccion->param4;
 		char* registroPunteroArchivo = instruccion->param5;
 
-        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_WRITE> - <%d> - <%s> - <%s> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
+        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_WRITE> - <%s> - <%s> - <%s> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se lea desde Memoria la cantidad de bytes indicadas por el Registro Tamaño a partir de la dirección lógica que se encuentra en el Registro Dirección y se escriban en el archivo a partir del valor del Registro Puntero Archivo.
         IO_FS_WRITE(interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
@@ -241,7 +241,7 @@ void execute(){
 		char* registroTamanio = instruccion->param4;
 		char* registroPunteroArchivo = instruccion->param5;
 
-        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_READ> - <%d> - <%s> - <%s> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
+        log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_READ> - <%s> - <%s> - <%s> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se lea desde el archivo a partir del valor del Registro Puntero Archivo la cantidad de bytes indicada por Registro Tamaño y se escriban en la Memoria a partir de la dirección lógica indicada en el Registro Dirección.
         IO_FS_READ(interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
@@ -255,7 +255,7 @@ void execute(){
         log_info(info_logger, "PID: <%d> - NO EXISTE LA INSTRUCCION %s", PCB_Actual->id, nombre_instruccion_actual); // log_error() ?
 
     }
-    //liberarInstruccion(instruccion);
+    liberarInstruccion(instruccion);
 }
 
 void checkInsterrupt(){
