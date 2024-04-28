@@ -2,8 +2,6 @@
 #define SRC_CONSOLA_H_
 
 #include "main.h"
-//#include "pcb.h"
-//#include "planificador.h"
 
 extern int planificadorLargoAvance;
 extern int planificadorCortoAvance;

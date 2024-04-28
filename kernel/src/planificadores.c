@@ -1,32 +1,29 @@
-/*#include "planificadores.h"
+#include "planificadores.h"
 
-int proteccion=1;
+int proteccion = 1;
 
 void planificadorLargoPlazo(){
     log_info(info_logger, "Kernel - PLANIFICADOR LARGO PLAZO INICIADO.\n");
-    while(planificacionFlag){
+    while (planificacionFlag) {
         pthread_mutex_lock(&planificacionLargo);
 
-        log_info(info_logger, "%d %d %d", memoria_fd,filesystem_fd,cpuDispatch_fd);
-
-        sem_wait(&sem_procesosEnNew);
-        if(!planificacionFlag)
+        sem_wait (&sem_procesosEnNew);
+        if (!planificacionFlag)
         	planificadorLargoAvance = 1;
 
-        if(procesosTotales_MP < GRADO_MAX_MULTIPROGRAMACION && queue_size(colaNew) > 0 && planificacionFlag) {
+        if (procesosTotales_MP < GRADO_MAX_MULTIPROGRAMACION && queue_size(colaNew) > 0 && planificacionFlag) {
             pthread_mutex_lock(&mutex_colaNew);
             PCB* pcbAReady = queue_peek(colaNew);
             pthread_mutex_unlock(&mutex_colaNew);
             aumentarGradoMP();
 
-            enviar_uint32_y_uint32_y_char(pcbAReady->nombreRecurso,pcbAReady->id,pcbAReady->size,memoria_fd,INICIALIZAR_PROCESO_MEMORIA,info_logger);
-            //free(pcbAReady->nombreRecurso);
+            enviar_uint32_y_uint32_y_char(pcbAReady->nombreRecurso,pcbAReady->id, pcbAReady->size, memoria_fd, INICIALIZAR_PROCESO_MEMORIA, info_logger);
             int cod_op = recibir_operacion(memoria_fd);
 
-            if(cod_op == INICIALIZAR_PROCESO_MEMORIA){
+            if (cod_op == INICIALIZAR_PROCESO_MEMORIA) {
             	recibirOrden(memoria_fd);
             	moverProceso_NewReady();
-            	if(queue_size(colaNew) == 0 || GRADO_MAX_MULTIPROGRAMACION == procesosTotales_MP)
+            	if (queue_size(colaNew) == 0 || GRADO_MAX_MULTIPROGRAMACION == procesosTotales_MP)
             		sem_post(&sem_procesosReady);
             	else
             		sem_post(&sem_procesosEnNew);
@@ -39,22 +36,22 @@ void planificadorLargoPlazo(){
 
 void planificadorCortoPlazo(){
     log_info(info_logger, "Kernel - PLANIFICADOR CORTO PLAZO INICIADO.");
-    while(planificacionFlag){
-    	if(proteccion){
+    while (planificacionFlag){
+    	if (proteccion){
 			pthread_mutex_lock(&planificacionCorto);
 			sem_wait(&sem_cpuLibre);
 			sem_wait(&sem_procesosReady);
 			mostrarEstadoColasAux("READY", colaReady);
-			if(!planificacionFlag)
-				planificadorCortoAvance=1;
-			if(planificacionFlag && list_size(colaReady))
+			if (!planificacionFlag)
+				planificadorCortoAvance = 1;
+			if (planificacionFlag && list_size(colaReady))
 				moverProceso_readyExec();
-			if(!list_size(colaReady) && !list_size(colaExec))
-				proteccion=0;
+			if (!list_size(colaReady) && !list_size(colaExec))
+				proteccion = 0;
 			pthread_mutex_unlock(&planificacionCorto);
     	}else{
-    		if(list_size(colaReady)){
-    			proteccion=1;
+    		if (list_size(colaReady)){
+    			proteccion = 1;
     			sem_post(&sem_cpuLibre);
     			sem_post(&sem_procesosReady);
     		}
@@ -62,28 +59,27 @@ void planificadorCortoPlazo(){
     }
 }
 
-void liberar_procesos(){
-    while (1){
+void liberar_procesos() {
+    while (1) {
         sem_wait(&sem_procesosExit);
         pthread_mutex_lock(&mutex_colaExit);
         PCB* pcbALiberar = queue_pop(colaExit);
         pthread_mutex_unlock(&mutex_colaExit);
 
-        enviarValor_uint32(pcbALiberar->id,memoria_fd, FINALIZAR_PROCESO_MEMORIA, info_logger);
+        enviarValor_uint32(pcbALiberar->id, memoria_fd, FINALIZAR_PROCESO_MEMORIA, info_logger);
 
         liberarPcb(pcbALiberar);
         int cod_op = recibir_operacion(memoria_fd);
-		if(cod_op == FINALIZAR_PROCESO_MEMORIA){
+		if (cod_op == FINALIZAR_PROCESO_MEMORIA) {
 			recibirOrden(memoria_fd);
 			disminuirGradoMP();
-			if(queue_size(colaNew))
+			if (queue_size(colaNew))
 				sem_post(&sem_procesosEnNew);
 		}
     }
 }
 
-void liberarPcb(PCB* pcb) {
-
+void liberarPcb (PCB* pcb) {
     free(pcb->registros);
 
     list_destroy(pcb->listaInstrucciones);
@@ -94,72 +90,28 @@ void liberarPcb(PCB* pcb) {
     free(pcb);
 }
 
-void moverProceso_readyExec(){
-        pthread_mutex_lock(&mutex_ColaReady);
-        pthread_mutex_lock(&mutex_colaExec);
-
-        if(strcmp(ALGORITMO_PLANIFICACION, "PRIORIDADES") == 0){
-            list_sort(colaReady,criterioPrioridad);
-            mostrarEstadoColas();
-
-            PCB* pcb = list_remove(colaReady,0);
-            list_add(colaExec,pcb);
-            pthread_mutex_unlock(&mutex_ColaReady);
-            pthread_mutex_unlock(&mutex_colaExec);
-
-            mandarPaquetePCB(pcb);
-            log_info(info_logger, "PID: [%d] - Estado Anterior: READY - Estado Actual: EXEC.", pcb->id);
-
-        }else{
-            PCB *pcbReady = list_remove(colaReady,0);
-            list_add(colaExec,pcbReady);
-
-            if(strcmp(ALGORITMO_PLANIFICACION, "ROUND_ROBIN") == 0){
-    			pthread_t atenderRR;
-    			pthread_create(&atenderRR,NULL,esperarRR,(void*)pcbReady);
-    			pthread_detach(atenderRR);
-            }
-			pthread_mutex_unlock(&mutex_ColaReady);
-            pthread_mutex_unlock(&mutex_colaExec);
-            mandarPaquetePCB(pcbReady);
-            log_info(info_logger, "PID: [%d] - Estado Anterior: READY - Estado Actual: EXEC.", pcbReady->id);
-        }
-}
-
-
-void moverProceso_NewReady(){
-    pthread_mutex_lock(&mutex_colaNew);
-    PCB* pcbAReady = queue_pop(colaNew);
-    pthread_mutex_unlock(&mutex_colaNew);
-
-    pthread_mutex_lock(&mutex_ColaReady);
-    list_add(colaReady,pcbAReady);
-    pthread_mutex_unlock(&mutex_ColaReady);
-
-    //sem_post(&sem_procesosReady);
-}
-
 void mandarPaquetePCB(PCB *pcb){
-	t_paquete* paquete= crear_paquete(CONTEXTOEJECUCION, info_logger);
+	t_paquete* paquete = crear_paquete(CONTEXTOEJECUCION, info_logger);
 	agregar_ContextoEjecucion_a_paquete(paquete, pcb);
 	enviar_paquete(paquete, cpuDispatch_fd);
 	eliminar_paquete(paquete);
 }
 
-void *esperarRR(void *pcbReady){
+void* esperarRR (void* pcbReady) {
 	PCB* pcb = (PCB*) pcbReady;
 	pcb->tiempoEjecutando = 0;
-	while(1){
-		if(QUANTUM > 1000){
+	while (1) {
+		/*if (QUANTUM > 1000) {
 			usleep(1000);
-		}else{
+		} else {
 			usleep(10000);
-		}
+		}*/
+
+        usleep(QUANTUM);
 
 		pcb->tiempoEjecutando++;
-		if(pcb->tiempoEjecutando >= QUANTUM){
-			//moverProceso_ExecReady(pcb);
-			if(list_size(colaExec)){
+		if (pcb->tiempoEjecutando >= QUANTUM) {
+			if (list_size(colaExec)) {
 				PCB* pcb = obtenerPcbExec();
 				enviarValor_uint32(pcb->id, cpuInterrupt_fd, INTERRUPCIONCPU, info_logger);
 				log_info(info_logger, "PID: <%d> - Desalojado por fin de Quantum", pcb->id);
@@ -169,11 +121,45 @@ void *esperarRR(void *pcbReady){
 	}
 }
 
-void moverProceso_ExecBloq(PCB *pcbBuscado){
+void moverProceso_readyExec(){
+        pthread_mutex_lock(&mutex_ColaReady);
+        pthread_mutex_lock(&mutex_colaExec);
+
+        PCB *pcbReady = list_remove(colaReady,0);
+        list_add(colaExec,pcbReady);
+
+        if (strcmp(ALGORITMO_PLANIFICACION, "VRR") == 0) {
+            //
+            mostrarEstadoColas();
+        } 
+
+        if (strcmp(ALGORITMO_PLANIFICACION, "RR") == 0) {
+            pthread_t atenderRR;
+            pthread_create(&atenderRR, NULL, esperarRR, (void*) pcbReady);
+            pthread_detach(atenderRR);
+        }
+
+        pthread_mutex_unlock(&mutex_ColaReady);
+        pthread_mutex_unlock(&mutex_colaExec);
+        mandarPaquetePCB(pcbReady);
+        log_info(info_logger, "PID: [%d] - Estado Anterior: READY - Estado Actual: EXEC.", pcbReady->id);
+}
+
+void moverProceso_NewReady(){
+    pthread_mutex_lock(&mutex_colaNew);
+    PCB* pcbAReady = queue_pop(colaNew);
+    pthread_mutex_unlock(&mutex_colaNew);
+
+    pthread_mutex_lock(&mutex_ColaReady);
+    list_add(colaReady,pcbAReady);
+    pthread_mutex_unlock(&mutex_ColaReady);
+}
+
+void moverProceso_ExecBloq (PCB* pcbBuscado) {
     pthread_mutex_lock(&mutex_colaExec);
     eliminarElementoLista(pcbBuscado, colaExec);
     pthread_mutex_lock(&mutex_colaBloq);
-    list_add(colaBloq,pcbBuscado);
+    list_add(colaBloq, pcbBuscado);
 
     pthread_mutex_unlock(&mutex_colaExec);
     pthread_mutex_unlock(&mutex_colaBloq);
@@ -181,12 +167,11 @@ void moverProceso_ExecBloq(PCB *pcbBuscado){
     log_info(info_logger, "PID: [%d] - Estado Anterior: EXEC - Estado Actual: BLOQ.", pcbBuscado->id);
 
     sem_post(&sem_cpuLibre);
-    if(list_size(colaReady))
+    if (list_size(colaReady))
     	sem_post(&sem_procesosReady);
 }
 
-
-void moverProceso_BloqReady(PCB* pcbBuscado){
+void moverProceso_BloqReady (PCB* pcbBuscado) {
     pthread_mutex_lock(&mutex_colaBloq);
     eliminarElementoLista(pcbBuscado, colaBloq);
     pthread_mutex_unlock(&mutex_colaBloq);
@@ -196,23 +181,9 @@ void moverProceso_BloqReady(PCB* pcbBuscado){
     pthread_mutex_unlock(&mutex_ColaReady);
     log_info(info_logger, "PID: [%d] - Estado Anterior: BLOQ - Estado Actual: READY.", pcbBuscado->id);
     sem_post(&sem_procesosReady);
-
 }
 
-void liberarRecursosTomados(PCB* pcb){
-    for(int i = 0; i < list_size(pcb->recursosTomados); i++){
-        Recurso* recursoTomado = list_get(pcb->recursosTomados,i);
-        pthread_mutex_lock(&semaforos_io[recursoTomado->indiceSemaforo]);
-        recursoTomado->instanciasRecurso++;
-        pthread_mutex_unlock(&semaforos_io[recursoTomado->indiceSemaforo]);
-        log_info(info_logger,"PID:<%d> - libera Recurso:<%s> - Instancias <%d>", pcb->id, recursoTomado->nombreRecurso, recursoTomado->instanciasRecurso);
-        if(!list_is_empty(recursoTomado->cola))
-        	moverProceso_BloqrecursoReady(recursoTomado);
-    }
-    list_clean(pcb->recursosTomados);
-}
-
-void moverProceso_ExecExit(PCB *pcbBuscado){
+void moverProceso_ExecExit (PCB *pcbBuscado) {
 
     pthread_mutex_lock(&mutex_colaExec);
     eliminarElementoLista(pcbBuscado, colaExec);
@@ -223,50 +194,59 @@ void moverProceso_ExecExit(PCB *pcbBuscado){
     sem_post(&sem_cpuLibre);
 
     pthread_mutex_lock(&mutex_colaExit);
-    queue_push(colaExit,pcbBuscado);
+    queue_push(colaExit, pcbBuscado);
     pthread_mutex_unlock(&mutex_colaExit);
 
-    if(!list_is_empty(pcbBuscado->recursosTomados))
+    if (!list_is_empty(pcbBuscado->recursosTomados))
         liberarRecursosTomados(pcbBuscado);
 
-    if(!list_is_empty(pcbBuscado->archivos_abiertos))
-        eliminarPcbTGAA_Y_actualizarTGAA(pcbBuscado);
-
     sem_post(&sem_procesosExit);
-    if(list_size(colaReady))
+    if (list_size(colaReady))
      	sem_post(&sem_procesosReady);
 }
 
-void moverProceso_ExecReady(PCB* pcbBuscado){
+void moverProceso_ExecReady (PCB* pcbBuscado) {
     pthread_mutex_lock(&mutex_colaExec);
     eliminarElementoLista(pcbBuscado, colaExec);
     pthread_mutex_unlock(&mutex_colaExec);
 
     pthread_mutex_lock(&mutex_ColaReady);
-    list_add(colaReady,pcbBuscado);
+    list_add(colaReady, pcbBuscado);
     pthread_mutex_unlock(&mutex_ColaReady);
 
     log_info(info_logger, "PID: [%d] - Estado Anterior: EXEC - Estado Actual: READY", pcbBuscado->id);
     sem_post(&sem_procesosReady);
     sem_post(&sem_cpuLibre);
-
 }
 
-void aumentarGradoMP(){
+void liberarRecursosTomados (PCB* pcb) {
+    for (int i = 0; i < list_size(pcb->recursosTomados); i++) {
+        Recurso* recursoTomado = list_get(pcb->recursosTomados, i);
+        pthread_mutex_lock(&semaforos_io[recursoTomado->indiceSemaforo]);
+        recursoTomado->instanciasRecurso++;
+        pthread_mutex_unlock(&semaforos_io[recursoTomado->indiceSemaforo]);
+        log_info(info_logger,"PID:<%d> - libera Recurso:<%s> - Instancias <%d>", pcb->id, recursoTomado->nombreRecurso, recursoTomado->instanciasRecurso);
+        if (!list_is_empty(recursoTomado->cola))
+        	moverProceso_BloqrecursoReady(recursoTomado);
+    }
+    list_clean(pcb->recursosTomados);
+}
+
+void aumentarGradoMP () {
     pthread_mutex_lock(&mutex_MP);
     procesosTotales_MP++;
     pthread_mutex_unlock(&mutex_MP);
     log_info(info_logger, "Kernel - GRADO DE MULTIPROGRAMACION: %d.\n", procesosTotales_MP);
 }
 
-void disminuirGradoMP(){
+void disminuirGradoMP () {
     pthread_mutex_lock(&mutex_MP);
     procesosTotales_MP--;
     pthread_mutex_unlock(&mutex_MP);
     log_info(info_logger, "Kernel - GRADO DE MULTIPROGRAMACION: %d.\n", procesosTotales_MP);
 }
 
-void mostrarEstadoColas(){
+void mostrarEstadoColas () {
     pthread_mutex_lock(&mutex_debug_logger);
     mostrarEstadoColasAux("Nuevos", colaNew->elements);
     mostrarEstadoColasAux("Bloqueados", colaBloq);
@@ -275,18 +255,17 @@ void mostrarEstadoColas(){
     pthread_mutex_unlock(&mutex_debug_logger);
 }
 
-void mostrarEstadoColasAux(char* colaMsg, t_list* cola){
+void mostrarEstadoColasAux (char* colaMsg, t_list* cola) {
     char* idsPcb = string_new();
-    void guardarIds(void* pcbVoid){
-    	PCB* unaPcb = (PCB*)pcbVoid;
+    void guardarIds(void* pcbVoid) {
+    	PCB* unaPcb = (PCB*) pcbVoid;
         char* unId = string_itoa(unaPcb->id);
         string_append(&idsPcb, unId);
         string_append(&idsPcb, ", ");
-        //free(unId);//CHEQUEAR
     }
 
     string_append(&idsPcb, "[");
-    if(!list_is_empty(cola))
+    if (!list_is_empty(cola))
     	list_iterate(cola, guardarIds);
 
     string_append(&idsPcb, "]");
@@ -294,21 +273,21 @@ void mostrarEstadoColasAux(char* colaMsg, t_list* cola){
     free(idsPcb);
 }
 
-void eliminarElementoLista(PCB* pcbBuscado, t_list *lista){
-  PCB *pcbAux;
-  for (int i = 0; i < list_size(lista); i++)
-  {  pcbAux = list_get(lista, i);
-     if(pcbBuscado->id == pcbAux->id)
-    	 list_remove(lista, i);
+void eliminarElementoLista (PCB* pcbBuscado, t_list* lista) {
+  PCB* pcbAux;
+  for (int i = 0; i < list_size(lista); i++) {
+    pcbAux = list_get(lista, i);
+    if(pcbBuscado->id == pcbAux->id)
+    	list_remove(lista, i);
   }
 }
 
 void eliminarArchivoTablaLocal(char* nombreArchivo, PCB* pcb){
-    for(int i = 0; i < list_size(pcb->archivos_abiertos); i++){
+    for (int i = 0; i < list_size(pcb->archivos_abiertos); i++) {
         t_archivoLocal* archivoLocal = list_get(pcb->archivos_abiertos, i);
-        if(strcmp(archivoLocal->archivo->nombreArchivo, nombreArchivo) == 0){
+        if(strcmp(archivoLocal->archivo->nombreArchivo, nombreArchivo) == 0) {
             list_remove(pcb->archivos_abiertos, i);
             free(archivoLocal);
         }
     }
-}*/
+}

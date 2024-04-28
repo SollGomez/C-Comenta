@@ -1,11 +1,10 @@
 #ifndef PLANIFICADOR_H_
 #define PLANIFICADOR_H_
 
-#include "estructurasCompartidas.h"
 #include "init.h"
-#include "utilidades.h"
-//#include "consola.h"
+#include "consola.h"
 #include "comunicacion.h"
+#include "main.h"
 
 void planificadorLargoPlazo();
 void planificadorCortoPlazo();

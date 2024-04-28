@@ -8,6 +8,8 @@
 #include <commons/config.h>
 #include "init.h"
 #include <utils/shared.h>
+#include "planificadores.h"
+#include "PCB.h"
 
 extern t_config* config;
 extern t_log* info_logger;
