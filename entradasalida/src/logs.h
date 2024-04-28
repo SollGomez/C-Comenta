@@ -20,6 +20,7 @@ typedef struct
     uint32_t BLOCK_SIZE;
     uint32_t BLOCK_COUNT;
     uint32_t RETRASO_COMPACTACION;
+    uint32_t TIPO_INTERFAZ_INT;
 
 } t_config_entradaSalida;
 

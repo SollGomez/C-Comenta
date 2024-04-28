@@ -35,14 +35,7 @@ int conectarMemoria(char *modulo){
 
 	int32_t handshakeEntradasalida;
 
-	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDOUT") == 0)
-		handshakeEntradasalida = 0;
-	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDIN") == 0)
-		handshakeEntradasalida = 1;
-	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS") == 0)
-		handshakeEntradasalida = 2;
-	else
-		handshakeEntradasalida = 3;
+	handshakeEntradasalida = cfg_entradaSalida->TIPO_INTERFAZ_INT;
 
 	send(memoria_fd, &handshakeEntradasalida, sizeof(int32_t), 0);
 
@@ -82,17 +75,14 @@ int conectarKernel(char *modulo){
 
 	int32_t handshakeEntradasalida;
 
-	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDOUT") == 0)
-		handshakeEntradasalida = 0;
-	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDIN") == 0)
-		handshakeEntradasalida = 1;
-	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS") == 0)
-		handshakeEntradasalida = 2;
-	else
-		handshakeEntradasalida = 3;
+	handshakeEntradasalida = cfg_entradaSalida->TIPO_INTERFAZ_INT;
 
 	send(kernel_fd, &handshakeEntradasalida, sizeof(int32_t), 0);
 
+	pthread_t tid[2];
+
+	pthread_create(&tid[0], NULL, recibirKernel, NULL);
+	
 	log_destroy(loggerIOKernel);
 
 	return kernel_fd;
@@ -134,3 +124,31 @@ void terminar_programa(int conexion, t_log* logger){
 	liberar_conexion(conexion);
 }
 
+void *recibirKernel() {
+	while(1) {
+		int cod_op = recibir_operacion(kernel_fd);
+
+		switch (cod_op)
+		{
+		case 0: //IO_GEN_SLEEP
+			
+			ejecutarIO_GEN_SLEEP(kernel_fd);
+
+			break;
+		
+		default:
+			break;
+		}
+	}
+}
+
+
+void ejecutarIO_GEN_SLEEP(int cliente_socket) {
+
+	int conexion = cliente_socket;
+
+	uint32_t unidadesDeTrabajo = recibirValor_uint32(conexion);
+
+	manejarInterfazGenerica(unidadesDeTrabajo);
+
+}

@@ -74,6 +74,15 @@ int cargar_configuracion(){
     cfg_entradaSalida->RETRASO_COMPACTACION = config_get_int_value(configuracionEntradasalida, "RETRASO_COMPACTACION");
     log_trace(trace_logger, "RETRASO_COMPACTACION Cargado Correctamente: %d", cfg_entradaSalida->RETRASO_COMPACTACION);
 
+    if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDOUT") == 0)
+		cfg_entradaSalida->TIPO_INTERFAZ_INT = 0;
+	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDIN") == 0)
+		cfg_entradaSalida->TIPO_INTERFAZ_INT = 1;
+	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS") == 0)
+		cfg_entradaSalida->TIPO_INTERFAZ_INT = 2;
+	else
+		cfg_entradaSalida->TIPO_INTERFAZ_INT = 3;
+
     return true;
 }
 

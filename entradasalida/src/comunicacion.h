@@ -3,9 +3,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <utils/shared.h>
+#include <utils/utilidades.h>
 #include "pthread.h"
-#include <clean.h>
+#include <manejarInterfaz.h>
 
 extern int contadorDispositivosIO;
 extern int memoria_fd;
@@ -17,5 +17,7 @@ t_log* iniciar_logger(char*);
 void paquete(int, t_log*);
 void terminar_programa(int, t_log*);
 void iterator(char* value);
+void *recibirKernel();
+void ejecutarIO_GEN_SLEEP(int cliente_socket);
 
 #endif

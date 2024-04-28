@@ -98,6 +98,15 @@ Instruccion* recibirInstruccion(int conexion){
 	return instruccion;
 }
 
+void* recibir_stream(int* size, uint32_t cliente_socket) { //En realidad devuelve el stream, no el t_buffer
+    recv(cliente_socket, size, sizeof(int), MSG_WAITALL);
+    void *buffer = malloc(*size);
+    recv(cliente_socket, buffer, *size, MSG_WAITALL);
+    return buffer;
+}
+
+
+
 bool agregarUint32_tsAPaquete(t_list* listaInts, t_paquete* paquete)
 {
 
@@ -131,4 +140,33 @@ bool enviarListaUint32_t(t_list* listaInts, int socket_cliente, t_log* logger, o
     log_info(logger, "Se envio el paquete");
     eliminar_paquete(paquete);
     return true;
+}
+
+
+
+
+void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger)
+{
+    t_paquete * paquete= crear_paquete(orden, logger);
+    paquete->buffer->size = sizeof(uint32_t);
+    void* stream = malloc(paquete->buffer->size);
+    int offset = 0;
+    memcpy(stream + offset, &valor, sizeof(uint32_t));
+    paquete->buffer->stream = stream;
+    enviar_paquete(paquete,socket);
+    log_info(logger, "se envio el paquete");
+    eliminar_paquete(paquete);
+}
+
+uint32_t recibirValor_uint32(int socket) {
+
+    t_paquete *paquete = malloc(sizeof (t_paquete));
+    paquete->buffer = malloc(sizeof(t_buffer));
+    paquete->buffer->size = 0;
+    paquete->buffer->stream =recibir_stream(&paquete->buffer->size, socket);
+    uint32_t valor = -1;
+    memcpy(&valor, paquete->buffer->stream, sizeof(uint32_t));
+    eliminar_paquete(paquete);
+
+    return valor;
 }
