@@ -19,6 +19,7 @@ typedef struct
     char* PATH_BASE_DIALFS;
     uint32_t BLOCK_SIZE;
     uint32_t BLOCK_COUNT;
+    uint32_t RETRASO_COMPACTACION;
 
 } t_config_entradaSalida;
 
