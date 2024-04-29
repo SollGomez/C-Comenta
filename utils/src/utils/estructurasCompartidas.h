@@ -7,14 +7,26 @@
 #include "utilsServer.h"
 #include <fcntl.h>
 
+/* typedef struct {
+    uint32_t pid;
+    uint8_t cantidadParametros;
+    t_list* instruccionXPartes;
+} Instruccion; */
+
 typedef struct {
 	uint8_t idLength;
     char* id;
-    uint8_t cantidadParametros;
+    uint8_t cantidadParametros; //PREGUNTAR: solo parametros o instruccion + param?
     uint8_t param1Length;
     char* param1;
     uint8_t param2Length;
     char* param2;
+    uint8_t param3Length;
+    char* param3;
+    uint8_t param4Length;
+    char* param4;
+    uint8_t param5Length;
+    char* param5;          
 } Instruccion;
 
 typedef struct{

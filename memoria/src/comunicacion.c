@@ -1,9 +1,12 @@
-// #include "comunicacion.h"
+#include "comunicacion.h"
+#include "memoriaInstrucciones.h"
 
-// int memoria_fd;
-// int cpu_fd;
-// int filesystem_fd;
-// int kernel_fd;
+int memoria_fd;
+int cpu_fd;
+int interfazIO_fd[4];
+int kernel_fd;
+t_log* logger;
+
 // int RETARDO_RESPUESTA;
 // pthread_mutex_t mutexFS;
 // uint32_t pidGlobal;
@@ -17,8 +20,6 @@
 // 	char *puerto;
 // 	char charAux[50];
 //     char parametro[20];
-
-// 	t_log *logger;
 
 // 	strcpy(charAux, modulo);
 // 	logger= iniciar_logger(strcat(charAux,".log"));
@@ -44,33 +45,72 @@
 
 // 	return conexion;
 // }
+/*
+int recibirConexion(char *puerto) {
+	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
+	pthread_t tid[2];
+	pthread_t hilosIO[4];
+	int contadorIO=0;
 
-// int recibirConexion(char *puerto) {
-// 	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_DEBUG);
-// 	pthread_t tid[3];
+	memoria_fd = iniciar_servidor(logger, "Server Memoria", puerto);
+	log_info(logger, "Servidor listo para recibir a los clientes");
 
-// 	memoria_fd = iniciar_servidor(puerto);
-// 	log_info(logger, "Servidor listo para recibir a los clientes");
+	cpu_fd = esperar_cliente(memoria_fd);
+	pthread_create(&tid[0], NULL, recibirCPU, NULL);
+	kernel_fd = esperar_cliente(memoria_fd);
+	pthread_create(&tid[1], NULL, recibirKernel, NULL);
+	int32_t tipoInterfaz;
+	int entradasalida_fd;
+	while(1){
+		entradasalida_fd = esperar_cliente(memoria_fd);
+		recv(entradasalida_fd, &tipoInterfaz, sizeof(int32_t), MSG_WAITALL);
+		interfazIO_fd[tipoInterfaz] = entradasalida_fd;
+		cualInterfaz(tipoInterfaz);
+		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, interfazIO_fd[tipoInterfaz]);
+	}
+	// 
+	// 
+	
 
-// 	cpu_fd = esperar_cliente(memoria_fd);
-// 	pthread_create(&tid[0], NULL, recibirCPU, NULL);
-// 	filesystem_fd = esperar_cliente(memoria_fd);
-// 	pthread_create(&tid[1], NULL, recibirFS, NULL);
-// 	kernel_fd = esperar_cliente(memoria_fd);
-// 	pthread_create(&tid[2], NULL, recibirKernel, NULL);
+	//pthread_join(tid[0], NULL);
+	//pthread_join(tid[1], NULL);
+	// pthread_join(tid[2], NULL);
 
-// 	pthread_join(tid[0], NULL);
-// 	pthread_join(tid[1], NULL);
-// 	pthread_join(tid[2], NULL);
+	return EXIT_SUCCESS;
+}
 
-// 	return EXIT_SUCCESS;
-// }
 
-// void *recibirCPU(void){
-// 		while(1) {
-// 			int cod_op = recibir_operacion(cpu_fd);
-// 			t_list *lista;
-// 			switch (cod_op) {
+void cualInterfaz(int tipoInterfaz){
+
+	t_log* logger;
+	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
+
+	switch (tipoInterfaz)
+	{
+	case 0: //STDOUT
+		log_info(logger, "Interfaz STDOUT conectada");
+		break;
+	case 1: //STDIN
+		log_info(logger, "Interfaz STDIN conectada");
+		break;
+	case 2: //DIAL_FS
+		log_info(logger, "Interfaz DIAL_FS conectada");
+		break;
+	case 3: //GENERICA
+		log_info(logger, "Interfaz GENERICA conectada");
+		break;
+	default:
+		break;
+	}
+
+	log_destroy(logger);
+}*/
+
+//  void *recibirCPU(void){
+//  		while(1) {
+//  			int cod_op = recibir_operacion(cpu_fd);
+//  			t_list *lista;
+//  			switch (cod_op) {
 // 				case HANDSHAKE_CPU:
 // 					recibirOrden(cpu_fd);
 // 					log_info(logger,"HANDSHAKE con CPU acontecido");
@@ -107,23 +147,23 @@
 // 				case -1:
 // 					log_error(logger, "el cliente se desconecto.");
 
-// 						log_error(logger, "Terminando servidor.CPU");
-// 						return NULL;
-// 					break;//sacar
-// 				default:
-// 					log_warning(logger,"Operacion desconocida. No quieras meter la pata");
-// 					break;
-// 			}
-// 		}
-// }
+//  						log_error(logger, "Terminando servidor.CPU");
+//  						return NULL;
+//  					break;//sacar
+//  				default:
+//  					log_warning(logger,"Operacion desconocida. No quieras meter la pata");
+//  					break;
+//  			}
+//  		}
+//  }
 
-// void *recibirFS(){
-// 	while(1) {
-// 		int cod_op = recibir_operacion(filesystem_fd);
-// 		pthread_mutex_lock(&mutexFS);
+// void *recibirIO(int interfaz_fd){
+//  	while(1) {
+//  		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex
+// // 		pthread_mutex_lock(&mutexFS);
 
-// 		t_list *lista = list_create();
-// 		switch (cod_op) {
+//  		t_list *lista = list_create();
+//  		switch (cod_op) {
 // 			case ACCESO_PEDIDO_LECTURA:
 // 				realizarPedidoEscrituraFs(filesystem_fd);
 
@@ -150,33 +190,33 @@
 // 				free(unosDatos);
 // 				list_destroy_and_destroy_elements(listaConSwap, free); //LINEA AGREGADA
 // 				break;
-// 			 case -1:
-// 				 log_error(logger, "el cliente se desconecto.");
+//  			 case -1:
+//  				 log_error(logger, "el cliente se desconecto.");
 
-// 				 log_error(logger, "Terminando servidor.FILESYSTEM");
-// 				 return NULL;
+//  				 log_error(logger, "Terminando servidor.FILESYSTEM");
+//  				 return NULL;
 
-// 			 default:
+//  			 default:
 
-// 				log_warning(logger,"Operacion desconocida. No quieras meter la pata %d ", cod_op);
-// 				break;
-// 		}
-// 		pthread_mutex_unlock(&mutexFS);
-// 	}
-// }
+//  				log_warning(logger,"Operacion desconocida. No quieras meter la pata %d ", cod_op);
+//  				break;
+//  		}
+//  		//pthread_mutex_unlock(&mutexFS);
+//  	}
+//  }
 
 
 // void *recibirKernel(){
 // 	while(1) {
 // 		int cod_op = recibir_operacion(kernel_fd);
-// 		switch (cod_op) {
-//         	case INICIALIZAR_PROCESO_MEMORIA:
+//  		switch (cod_op) {
+//         	case INICIALIZAR_PROCESO_MEMORIA:   //Crea proceso
 //         		inicializarProceso(kernel_fd);
 //         		break;
-//         	case FINALIZAR_PROCESO_MEMORIA:
+//         	case FINALIZAR_PROCESO_MEMORIA:     //Elimina proceso
 //         		finalizarProceso(kernel_fd);
 //         		break;
-//         	case CARGA_PAGINA:
+//         	case CARGA_PAGINA: //EN ESTE TP NO :)
 //         		t_list *lista;
 //         		uint32_t pid;
 //         		lista = recibirListaUint32_t(kernel_fd);
@@ -189,17 +229,17 @@
 // //        		list_clean(lista);
 // //        		list_destroy(lista); //LINEA AGREGADA
 //         		break;
-// 			case -1:
-// 				log_error(logger, "el cliente se desconecto.");
-// 				log_error(logger, "Terminando servidor KERNEL");
-// 				return NULL;
-// 				break;//sacar
-// 			default:
-// 				log_warning(logger,"Operacion desconocida. No quieras meter la pata");
-// 				break;
-// 		}
-// 	}
-// }
+//  			case -1:
+//  				log_error(logger, "el cliente se desconecto.");
+//  				log_error(logger, "Terminando servidor KERNEL");
+//  				return NULL;
+//  				break; //sacar
+//  			default:
+//  				log_warning(logger,"Operacion desconocida. No quieras meter la pata");
+//  				break;
+//  		}
+//  	}
+//  }
 
 // t_log* iniciar_logger(char *nombre){
 // 	t_log* nuevo_logger;
@@ -342,20 +382,26 @@
 //     enviarOrden(LECTURA_REALIZADA, cliente_socket, info_logger);
 // }
 
-// void inicializarProceso(int cliente_socket){
+void GuardarNombreArchiv(uint32_t pid, char* file_name){
+    NombreArchivo * archivo = malloc(sizeof(NombreArchivo));
+    archivo->pid = pid;
+    archivo->nombre = file_name;
+    list_add(archivosPseudocodigo, archivo);
+}
 
-//     char* file_name=recibirEnteroEnteroChar(cliente_socket,&pidGlobal,&sizeGlobal);
-//     log_info(info_logger, "%s %d %d", file_name, pidGlobal, sizeGlobal);
+void inicializarProceso(int cliente_socket){
 
-//     list_add(instruccionesEnMemoria,obtenerArchivoPseudoCodigo(pidGlobal,file_name,PATH_INSTRUCCIONES));
-//     free(file_name);
-//     crearTablaDePaginas(sizeGlobal);
-// 	sleep(1);
-// 	log_info(info_logger,"Tamaño de tablaGeneral antes de terminar inicializarProceso: %d\n", list_size(tablaGeneral));
+    //char* file_name = recibirEnteroEnteroChar(cliente_socket, &pidGlobal, &sizeGlobal);
+    //log_info(info_logger, "%s %d %d", file_name, pidGlobal, sizeGlobal);
 
-// 	enviarOrden(INICIALIZAR_PROCESO_MEMORIA,cliente_socket, info_logger);
+    //GuardarNombreArchiv(pidGlobal, file_name);
 
-// }
+    // crearTablaDePaginas(sizeGlobal);
+	// sleep(1);
+	// log_info(info_logger,"Tamaño de tablaGeneral antes de terminar inicializarProceso: %d\n", list_size(tablaGeneral));
+
+	// enviarOrden(INICIALIZAR_PROCESO_MEMORIA,cliente_socket, info_logger);
+}
 
 // void finalizarProceso(int cliente_socket){
 // 	log_info(info_logger,"Tamaño de tablaGeneral al llegar a finalizarProceso: %d\n", list_size(tablaGeneral));

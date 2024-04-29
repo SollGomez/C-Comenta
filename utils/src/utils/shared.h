@@ -7,10 +7,11 @@
 #include "utilsClient.h"
 #include "estructurasCompartidas.h"
 
-/**
-* @fn    decir_hola
-* @brief Imprime un saludo al nombre que se pase por parámetro por consola.
-*/
-void decir_hola(char* quien);
+bool esInstruccionSinParametros(Instruccion *);
+bool esInstruccionConUnParametro(Instruccion *);
+bool esInstruccionConDosParametros(Instruccion *);
+bool esInstruccionConTresParametros(Instruccion *);
+bool esInstruccionConCincoParametros(Instruccion *);
+
 
 #endif

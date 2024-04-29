@@ -24,14 +24,20 @@
 //extern t_log* error_logger;
 
 bool inicializarBitmap(); //Crea un bitmap que indica que marcos están libres
-void liberarMemory(); //Libera memoria
-void liberarPagina(Pagina*); //Libera la pagina que se le manda
-bool crearSemaforos(); //Crea todos los semáforos
-bool crearEspacioContiguoDeMemoria(); //Crea el espacio contiguo
-bool crearEstructurasAdministrativas(); //Crea todas las estructuras administrativas necesarias
-bool iniciarMemoria(); //Inicia memoria
+void liberarMemory(); 
+void liberarPagina(Pagina*);
+bool crearSemaforos();
+bool crearEspacioContiguoDeMemoria();
+bool crearEstructurasAdministrativas();
+bool iniciarMemoria();
+char* BuscarNombreArchivo(uint32_t pid); 
+Instruccion* retornarInstruccionACPU(uint32_t pid, uint32_t pc);
 
 /*Estructuras de Memoria de instrucciones*/
+typedef struct {
+    uint32_t pid;
+    char* nombre;
+} NombreArchivo;
 
 /*Esquema de memoria*/
 

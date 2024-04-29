@@ -7,36 +7,40 @@ t_config *config;
 t_list* tablaGeneral;
 InstruccionPseudo* instrucciones;
 t_log* info_logger;
-t_list *instruccionesEnMemoria;
+t_list *archivosPseudocodigo; 
+
+void pruebaPeque();
+void pruebaSol();
 
 int main(int argc, char* argv[]) {
 	// liberar_conexion(cpu_fd);
 	// liberar_conexion(kernel_fd);
 	// liberar_conexion(filesystem_fd);
-	info_logger = log_create("info_logger.log","Memory", true, LOG_LEVEL_INFO);
-	pthread_t tid[2];
-	config = crearConfig(argv[1]);
-	PUERTO = config_get_string_value(config, "PUERTO_ESCUCHA");
-	algoritmo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
-	PATH_INSTRUCCIONES = config_get_string_value(config, "PATH_INSTRUCCIONES");
-	RETARDO_RESPUESTA = config_get_int_value(config, "RETARDO_RESPUESTA");
-	tablaGeneral = list_create();
-	instruccionesEnMemoria = list_create();
+	// info_logger = log_create("info_logger.log","Memory", true, LOG_LEVEL_INFO);
+	// pthread_t tid[2];
+	// config = crearConfig(argv[1]);
+	// PUERTO = config_get_string_value(config, "PUERTO_ESCUCHA");
+	// algoritmo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
+	// PATH_INSTRUCCIONES = config_get_string_value(config, "PATH_INSTRUCCIONES");
+	// RETARDO_RESPUESTA = config_get_int_value(config, "RETARDO_RESPUESTA");
+	// tablaGeneral = list_create();
 
+	archivosPseudocodigo = list_create();
 
-	iniciarMemoria();
+	//iniciarMemoria();
 
-	pruebas();
+	pruebaSol();
 
 	//pthread_create(&tid[0], NULL, recibir, NULL);
 	//pthread_join(tid[0], NULL);
 
 
-	config_destroy(config);
-	list_destroy(tablaGeneral);
-	log_destroy(info_logger);
-	free(espacio_contiguo);
-	return EXIT_SUCCESS;
+//	config_destroy(config);
+//	list_destroy(tablaGeneral);
+//	log_destroy(info_logger);
+//	free(espacio_contiguo);
+	//return EXIT_SUCCESS;
+	return 0;
 }
 
 // void *recibir(){
@@ -44,7 +48,34 @@ int main(int argc, char* argv[]) {
 // 	return NULL;
 // }
 
-void pruebas(){
+void pruebaSol(){
+	uint32_t pid;
+	uint32_t pc;
+	char* file_name = string_new();
+
+	for(int i=0; i<2; i++){
+		printf("PID: ");
+		scanf("%d", &pid);
+		printf("Nombre Archivo: ");
+		scanf("%s", file_name);
+
+		GuardarNombreArchiv(pid, file_name);
+	}
+
+	//printf("Nombre encontrado %s asociado al proceso %d\n", BuscarNombreArchivo(pid), pid);
+	printf("Proceso a buscar: ");
+	scanf("%d", &pid);
+
+	printf("Linea a buscar: ");
+	scanf("%d", &pc);
+
+	Instruccion* instruccion = retornarInstruccionACPU(pid, pc);
+	printf("Cantidad de Parametros: %d \n", instruccion->cantidadParametros);
+	printf("Parametro 5: %s", instruccion->param5);
+
+}
+/*
+void pruebaPeque(){
 
 	int marco;
 	int marco2;
@@ -79,4 +110,4 @@ void pruebas(){
 	printf("El marco de la pagina 2 del proceso 1 es: %d\n", pagina2->marco);
 	finalizacionDeProceso(1);
 	printf("El tamaño de la TablaGeneral es (debe ser 0): %u\n", list_size(tablaGeneral));
-}
+}*/

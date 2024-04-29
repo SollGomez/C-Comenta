@@ -10,6 +10,7 @@
 // #include <string.h>
 // #include <stddef.h>
 // #include <string.h>
+#include <stdint.h>
 // //#include "utilsClient.h"
 // #include "main.h"
 // //#include "utilsServer.h"
@@ -48,6 +49,7 @@
 // void realizarPedidoEscritura(int);
 // void realizarPedidoEscrituraFs(int cliente_socket);
 // void realizarPedidoLecturaFs(int cliente_socket);
+void GuardarNombreArchiv(uint32_t pid, char* file_name);
 
 
 // #endif
