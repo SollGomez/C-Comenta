@@ -25,9 +25,9 @@ int recibirConexion(char *puerto) {
 		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, vectorIO[tipoInterfaz]);
 
 
-		if(tipoInterfaz == 3) {
-			enviarValor_uint32(8, vectorIO[tipoInterfaz], 0, logger);
-		}
+		
+		enviarValor_uint32(8, vectorIO[tipoInterfaz], IO_GEN_SLEEP, logger);
+		
 
 
 	}

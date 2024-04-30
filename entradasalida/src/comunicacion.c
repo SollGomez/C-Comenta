@@ -125,17 +125,49 @@ void terminar_programa(int conexion, t_log* logger){
 }
 
 void *recibirKernel() {
+
 	while(1) {
 		int cod_op = recibir_operacion(kernel_fd);
 
 		switch (cod_op)
 		{
-		case 0: //IO_GEN_SLEEP
-			
-			ejecutarIO_GEN_SLEEP(kernel_fd);
+		case IO_STDOUT_WRITE:
+				
+			break;
+		
+		case IO_STDIN_READ:
 
 			break;
 		
+		case IO_FS_CREATE:
+
+
+			break;
+
+		case IO_FS_DELETE:
+	
+
+			break;
+
+		case IO_FS_READ:
+
+			break;
+
+		case IO_FS_TRUNCATE:
+	
+
+			break;
+
+		case IO_FS_WRITE:
+
+			break;
+
+		case IO_GEN_SLEEP: 	
+		
+			ejecutarIO_GEN_SLEEP(kernel_fd);
+		
+			break;
+
 		default:
 			break;
 		}
