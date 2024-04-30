@@ -26,7 +26,7 @@ int recibirConexion(char *puerto) {
 
 
 		
-		enviarValor_uint32(8, vectorIO[tipoInterfaz], IO_GEN_SLEEP, logger);
+		//enviarValor_uint32(8, vectorIO[tipoInterfaz], IO_GEN_SLEEP, logger);
 		
 
 
