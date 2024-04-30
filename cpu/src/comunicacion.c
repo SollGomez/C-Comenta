@@ -103,23 +103,23 @@ void recibirConexionInterrupt(char *puerto) {    //habría q hacer un while que 
 	while(1) {
 			int cod_op = recibir_operacion(kernel_interrupt_fd);
 			switch (cod_op) {
-				// case INTERRUPCIONCPU:
-				// 	uint32_t pidInterrupt = recibirValor_uint32(kernel_interrupt_fd);
-				// 	if(pid==pidInterrupt)
-				// 		interrupciones=1;
-				// 	log_info(logger,"Interrupcion detectada");
-				// 	break;
-				// case DESALOJOCPU:
-				// 	uint32_t pidInterrupt2 = recibirValor_uint32(kernel_interrupt_fd);
-				// 	if(pid==pidInterrupt2){
-				// 		copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
-				// 		t_paquete* paquete = crear_paquete(EXIT, info_logger);
-				// 		agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
-				// 		enviar_paquete(paquete, kernel_fd);
-				// 		eliminar_paquete(paquete);
-				// 		cicloInstrucciones = false;
-				// 	}
-				// 	break;
+				case INTERRUPCIONCPU:
+					uint32_t pidInterrupt = recibirValor_uint32(kernel_interrupt_fd);
+					if(pid==pidInterrupt)
+						interrupciones=1;
+					log_info(info_logger,"Interrupcion detectada");
+					break;
+				case DESALOJOCPU:
+					uint32_t pidInterrupt2 = recibirValor_uint32(kernel_interrupt_fd);
+					if(pid==pidInterrupt2){
+						copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+						t_paquete* paquete = crear_paquete(EXIT, info_logger);
+						agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+						enviar_paquete(paquete, kernel_fd);
+						eliminar_paquete(paquete);
+						cicloInstrucciones = false;
+					}
+					break;
 				case -1:
 					log_error(loggerI, "el cliente se desconecto.");
 

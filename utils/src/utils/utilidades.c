@@ -305,3 +305,24 @@ void liberarPcbCpu(PCB* pcb){
     free(pcb->registros);
     free(pcb);
 }
+
+uint32_t recibirValor_uint32(int socket) {
+
+    t_paquete *paquete = malloc(sizeof (t_paquete));
+    paquete->buffer = malloc(sizeof(t_buffer));
+    paquete->buffer->size = 0;
+    paquete->buffer->stream =recibir_stream(&paquete->buffer->size, socket);
+    uint32_t valor = -1;
+    memcpy(&valor, paquete->buffer->stream, sizeof(uint32_t));
+    eliminar_paquete(paquete);
+
+    return valor;
+}
+
+void* recibir_stream(int* size, uint32_t cliente_socket) { //En realidad devuelve el stream, no el t_buffer
+    recv(cliente_socket, size, sizeof(int), MSG_WAITALL);
+    void *buffer = malloc(*size);
+    recv(cliente_socket, buffer, *size, MSG_WAITALL);
+    return buffer;
+}
+

@@ -59,7 +59,8 @@ typedef enum
 	PEDIR_SWAP,
 	DEVOLVER_SWAP,
 	ESCRITURA_BLOQUE_SWAP,
-	LECTURA_BLOQUE_SWAP
+	LECTURA_BLOQUE_SWAP,
+	DESALOJOCPU
 }op_code_cliente;
 
 typedef struct

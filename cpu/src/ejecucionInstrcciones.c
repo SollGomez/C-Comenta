@@ -45,20 +45,53 @@ void COPY_STRING(char* tamanio){
 }
 
 void ejecutar_WAIT(char* nombre_recurso) {
-	
+	copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+    PCB_Actual->program_counter++;
+    t_paquete* paquete = crear_paquete(WAIT, info_logger);
+    agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+    uint32_t largo_nombre = strlen(nombre_recurso) + 1;
+    agregar_a_paquete2(paquete, &largo_nombre, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, nombre_recurso, largo_nombre);
+    enviar_paquete(paquete, kernel_fd);
+    eliminar_paquete(paquete);
+    cicloInstrucciones = false;
 }
 
 void ejecutar_SIGNAL(char* nombre_recurso) {
-	
+	copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+    PCB_Actual->program_counter++;
+    t_paquete* paquete = crear_paquete(SIGNAL, info_logger);
+    agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+    uint32_t largo_nombre = strlen(nombre_recurso) + 1;
+    agregar_a_paquete2(paquete, &largo_nombre, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, nombre_recurso, largo_nombre);
+    enviar_paquete(paquete, kernel_fd);
+    eliminar_paquete(paquete);
+    cicloInstrucciones = false;
 }
 
 void ejecutar_MOV_IN(char* registro, int direccion_logica) {
-	
+	 int direccion_fisica = traducir_direccion_logica(direccion_logica);
+
+    if (!(direccion_fisica < 0)) {
+    	   char* valor;
+           //valor = leer_valor_de_memoria(direccion_fisica);
+           cambiar_valor_del_registroCPU(registro,valor);
+           free(valor);
+           PCB_Actual->program_counter++;
+    }
 }
 
 
 void ejecutar_MOV_OUT(int direccion_logica, char* registro) {
-	
+	char* valorDelRegistro = obtener_valor_registroCPU(registro);
+    int direccion_fisica = traducir_direccion_logica(direccion_logica);
+
+    if (!(direccion_fisica < 0)) {
+        //escribir_valor_en_memoria(direccion_fisica, valorDelRegistro);
+        PCB_Actual->program_counter++;
+    }
+    free(valorDelRegistro);
 }
 
 void IO_GEN_SLEEP(char* interfaz, char* unidadesDeTrabajo){
@@ -94,7 +127,12 @@ void IO_FS_READ(char* interfaz, char* nombreArchivo, char* registroDireccion, ch
 }
 
 void ejecutar_EXIT(){
-	
+	copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+    t_paquete* paquete = crear_paquete(EXIT, info_logger);
+    agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+    enviar_paquete(paquete, kernel_fd);
+    eliminar_paquete(paquete);
+    cicloInstrucciones = false;
 }
 
 void cambiar_valor_del_registroCPU(char* registro, char* valor) {

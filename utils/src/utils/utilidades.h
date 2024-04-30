@@ -13,4 +13,7 @@ void agregar_ContextoEjecucion_a_paquete(t_paquete *paquete, PCB* pcb);
 PCB* recibir_contextoEjecucion(int conexion);
 void liberarPcbCpu(PCB* pcb);
 
+uint32_t recibirValor_uint32(int socket);
+void* recibir_stream(int* size, uint32_t cliente_socket);
+
 #endif
