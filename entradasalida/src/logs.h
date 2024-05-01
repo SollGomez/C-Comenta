@@ -4,9 +4,16 @@
 #include <commons/log.h>
 #include <commons/config.h>
 #include <string.h>
+#include <pthread.h>
 #include <utils/shared.h>
+#include <semaphore.h>
 
+extern pthread_mutex_t mutex_recvKernel;
+extern pthread_mutex_t mutex_peticiones_pendientes;
 
+extern t_list * lista_peticiones_pendientes;
+
+extern sem_t sem_contador_peticiones;
 
 typedef struct 
 {
@@ -28,7 +35,8 @@ int cargar_configuracion();
 int init_loggers_config(char* path);
 
 t_config_entradaSalida *cfg_entradaSalida_start();
-
+void crearSemaforos();
+void crearListas();
 void logOperacion(uint32_t pid, char* operacionARealizar);
 
 

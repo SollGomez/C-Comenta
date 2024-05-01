@@ -4,6 +4,11 @@ int contadorDispositivosIO=0;
 int memoria_fd;
 int kernel_fd;
 
+t_list* lista_peticiones_pendientes;
+pthread_mutex_t mutex_recvKernel;
+pthread_mutex_t mutex_peticiones_pendientes;
+sem_t sem_contador_peticiones;
+
 int conectarMemoria(char *modulo){
 	char *ip;
 	char *puerto;
@@ -117,70 +122,168 @@ void paquete(int conexion, t_log* logger)
 	enviar_paquete(paquete, conexion);
 	free(paquete);
 	free(leido);
+
+	return;
 }
 
 void terminar_programa(int conexion, t_log* logger){
 	log_destroy(logger);
 	liberar_conexion(conexion);
+
+	return;
 }
 
 void *recibirKernel() {
 
 	while(1) {
+
+		pthread_mutex_lock(&mutex_recvKernel);
 		int cod_op = recibir_operacion(kernel_fd);
 
 		switch (cod_op)
 		{
 		case IO_STDOUT_WRITE:
-				
+			
+			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
 		
 		case IO_STDIN_READ:
-
+			
+			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
 		
 		case IO_FS_CREATE:
 
-
+			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
 
 		case IO_FS_DELETE:
 	
-
+			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
 
 		case IO_FS_READ:
-
+			
+			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
 
 		case IO_FS_TRUNCATE:
 	
-
+			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
 
 		case IO_FS_WRITE:
 
+			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
 
 		case IO_GEN_SLEEP: 	
 		
-			ejecutarIO_GEN_SLEEP(kernel_fd);
-		
+			solicitudIO_GEN_SLEEP(kernel_fd);
+			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
-
+		
+		case -1:
+			log_error(info_logger, "El cliente se desconecto");
+			return NULL;
+			break;
+		
 		default:
+			log_warning(info_logger, "Operacion desconocida, cuidado");
+			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
 		}
 	}
+
+	return NULL;
 }
 
-
-void ejecutarIO_GEN_SLEEP(int cliente_socket) {
-
+void* solicitudIO_GEN_SLEEP (int cliente_socket) {
+	
 	int conexion = cliente_socket;
 
 	uint32_t unidadesDeTrabajo = recibirValor_uint32(conexion);
+	t_peticion* peticion_io_gen_sleep = malloc(sizeof(t_peticion));
+	peticion_io_gen_sleep->operacion = EJECUTAR_IO_GEN_SLEEP;
+	peticion_io_gen_sleep->unidadesDeTrabajo = unidadesDeTrabajo;
 
-	manejarInterfazGenerica(unidadesDeTrabajo);
+	agregarPeticionAPendientes(peticion_io_gen_sleep);
+	sem_post(&sem_contador_peticiones);
 
+	return NULL;
 }
+
+void agregarPeticionAPendientes(t_peticion* peticion) {
+
+	pthread_mutex_lock(&mutex_peticiones_pendientes);
+
+	list_add(lista_peticiones_pendientes, peticion);
+
+	pthread_mutex_unlock(&mutex_peticiones_pendientes);
+
+	return;
+}
+
+void atenderPeticiones() {
+
+	while(1) {
+		sem_wait(&sem_contador_peticiones);
+
+		log_trace(trace_logger, "Hay una peticion pendiente");
+
+		t_peticion* peticion = sacoPeticionDePendientes();
+
+		manejarPeticion(peticion);
+	}
+
+	return;
+}
+
+t_peticion* sacoPeticionDePendientes() {
+	pthread_mutex_lock(&mutex_peticiones_pendientes);
+	t_peticion* peticion = list_remove(lista_peticiones_pendientes, 0);
+	pthread_mutex_unlock(&mutex_peticiones_pendientes);
+	return peticion;
+}
+
+void manejarPeticion(t_peticion* peticion) {
+	t_operacion_io codOpIO = peticion->operacion;
+
+	switch (codOpIO)
+	{
+	case EJECUTAR_IO_GEN_SLEEP:
+		manejarInterfazGenerica(peticion->unidadesDeTrabajo);
+		break;
+	case EJECUTAR_IO_STDOUT_WRITE:
+		
+		break;
+	case EJECUTAR_IO_STDIN_READ:
+		
+		break;
+	case EJECUTAR_IO_FS_CREATE:
+		
+		break;
+	case EJECUTAR_IO_FS_DELETE:
+		
+		break;
+	case EJECUTAR_IO_FS_READ:
+		
+		break;
+	case EJECUTAR_IO_FS_TRUNCATE:
+		
+		break;
+	case EJECUTAR_IO_FS_WRITE:
+
+		break;						
+	
+	default:
+		log_error(info_logger, "Codigo de operacion desconocido: %d ", codOpIO);
+		return;
+		
+	}
+
+	free(peticion);
+
+	return;
+}
+

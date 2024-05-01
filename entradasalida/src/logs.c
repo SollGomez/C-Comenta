@@ -9,6 +9,17 @@ bool logsCreados = false;
 bool configCreada = false;
 t_config_entradaSalida* cfg_entradaSalida;
 
+void crearSemaforos() {
+    pthread_mutex_init(&mutex_recvKernel, NULL);
+    pthread_mutex_init(&mutex_peticiones_pendientes, NULL);
+
+    sem_init(&sem_contador_peticiones, 0, 0);
+}
+
+void crearListas() {
+    list_create(lista_peticiones_pendientes);
+}
+
 int init_loggers_config(char* path){
 
     trace_logger = log_create("trace_logger.log", "entradaSalida", true, LOG_LEVEL_TRACE);
