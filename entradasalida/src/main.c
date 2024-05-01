@@ -1,8 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <utils/shared.h>
-#include <clean.h>
-#include "main.h"
+#include <main.h>
 
 t_config* config;
 
@@ -12,14 +8,19 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
     cargar_configuracion();
+	crearListas();
+	crearSemaforos();
+	iniciarAtencionPeticiones();
     
     
 	if(cfg_entradaSalida->TIPO_INTERFAZ_INT == 3) {
-		conectarKernel("KERNEL");		
+		conectarKernel("KERNEL");
 	}else {
 		conectarKernel("KERNEL");
 		conectarMemoria("MEMORIA");
 	}
+
+
 
 
 	char nombre[50];

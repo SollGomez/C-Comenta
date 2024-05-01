@@ -178,8 +178,10 @@ void *recibirKernel() {
 			break;
 
 		case IO_GEN_SLEEP: 	
-		
-			solicitudIO_GEN_SLEEP(kernel_fd);
+
+			pthread_t genSleep;
+			pthread_create(&genSleep, NULL, (void *)solicitudIO_GEN_SLEEP, &kernel_fd);
+			pthread_join(genSleep, NULL);
 			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
 		
@@ -189,7 +191,7 @@ void *recibirKernel() {
 			break;
 		
 		default:
-			log_warning(info_logger, "Operacion desconocida, cuidado");
+			log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
 			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
 		}
@@ -198,15 +200,15 @@ void *recibirKernel() {
 	return NULL;
 }
 
-void* solicitudIO_GEN_SLEEP (int cliente_socket) {
-	
-	int conexion = cliente_socket;
+void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 
-	uint32_t unidadesDeTrabajo = recibirValor_uint32(conexion);
+	int conexion = *((int*) cliente_socket);
+
+	
 	t_peticion* peticion_io_gen_sleep = malloc(sizeof(t_peticion));
 	peticion_io_gen_sleep->operacion = EJECUTAR_IO_GEN_SLEEP;
-	peticion_io_gen_sleep->unidadesDeTrabajo = unidadesDeTrabajo;
-
+	peticion_io_gen_sleep->unidadesDeTrabajo = recibirValor_uint32(conexion);
+	
 	agregarPeticionAPendientes(peticion_io_gen_sleep);
 	sem_post(&sem_contador_peticiones);
 
@@ -222,6 +224,15 @@ void agregarPeticionAPendientes(t_peticion* peticion) {
 	pthread_mutex_unlock(&mutex_peticiones_pendientes);
 
 	return;
+}
+
+void iniciarAtencionPeticiones() {
+	pthread_t hilo_peticiones;
+	log_trace(trace_logger, "Inicio atención de peticiones");
+
+	pthread_create(&hilo_peticiones, NULL, (void *) atenderPeticiones, NULL);
+	pthread_detach(hilo_peticiones);
+
 }
 
 void atenderPeticiones() {
@@ -249,10 +260,12 @@ t_peticion* sacoPeticionDePendientes() {
 void manejarPeticion(t_peticion* peticion) {
 	t_operacion_io codOpIO = peticion->operacion;
 
+
 	switch (codOpIO)
 	{
 	case EJECUTAR_IO_GEN_SLEEP:
 		manejarInterfazGenerica(peticion->unidadesDeTrabajo);
+		logOperacion(0, "IO_GEN_SLEEP");
 		break;
 	case EJECUTAR_IO_STDOUT_WRITE:
 		

@@ -17,7 +17,7 @@ void crearSemaforos() {
 }
 
 void crearListas() {
-    list_create(lista_peticiones_pendientes);
+   lista_peticiones_pendientes = list_create();
 }
 
 int init_loggers_config(char* path){

@@ -11,7 +11,7 @@
 extern pthread_mutex_t mutex_recvKernel;
 extern pthread_mutex_t mutex_peticiones_pendientes;
 
-extern t_list * lista_peticiones_pendientes;
+extern t_list* lista_peticiones_pendientes;
 
 extern sem_t sem_contador_peticiones;
 

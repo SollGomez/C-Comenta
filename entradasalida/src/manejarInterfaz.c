@@ -27,10 +27,11 @@ void cualInterfaz() {
 
 void manejarInterfazGenerica(uint32_t unidadesDeTrabajo) {
     
+    
     for (int i = 0; i < unidadesDeTrabajo; i++) {
 
         // sleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO);               //DESPUES VER SI ES USLEEP O SLEEP
-        usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 100000);
+        usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 10);
         printf("UNIDAD: %d\n", i);
     }
 
