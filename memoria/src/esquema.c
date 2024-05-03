@@ -99,35 +99,6 @@ void liberarTablaDePaginas(uint32_t pid){
     log_info(info_logger, "No se encontró una tabla con PID <%d> en tablaGeneral", pid);
 }
 
-// void liberarTablaDePaginas(uint32_t pid) {
-
-// 	bool compararPorPID(void* elemento, void* pid) {
-// 	    TablaDePaginas* tabla = (TablaDePaginas*)elemento;
-// 	    uint32_t* pidBuscado = (uint32_t*)pid;
-// 	    return tabla->pid == *pidBuscado;
-// 	}
-//     int indice = -1;
-//     for (int i = 0; i < list_size(tablaGeneral); i++) {
-//         TablaDePaginas* tabla = list_get(tablaGeneral, i);
-//         if (compararPorPID(tabla, &pid)) {
-//             indice = i;
-//             break;
-//         }
-//     }
-
-//     if (indice != -1) {
-// 		pthread_mutex_lock(&mutex_tablasPaginas);
-//         TablaDePaginas* tabla = list_remove(tablaGeneral, indice);
-// 		pthread_mutex_unlock(&mutex_tablasPaginas);
-//         free(tabla->paginas);
-//         free(tabla);
-//         log_info(info_logger, "Tabla con PID <%d> eliminada de tablaGeneral", pid);
-//     } else {
-//         log_info(info_logger, "No se encontró una tabla con PID <%d> en tablaGeneral", pid);
-//     }
-
-// }
-
 uint32_t obtenerMarcoDePagina(uint32_t pid, uint32_t numeroPagina){
 	TablaDePaginas* tabla = obtenerTablaPorPID(pid);
 	Pagina* pagina = list_get(tabla->paginas, numeroPagina);

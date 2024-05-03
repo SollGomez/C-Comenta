@@ -68,9 +68,9 @@ int recibirConexion(char *puerto) {
 		cualInterfaz(tipoInterfaz);
 		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, interfazIO_fd[tipoInterfaz]);
 	}
-	// 
-	// 
-	
+	//
+	//
+
 
 	//pthread_join(tid[0], NULL);
 	//pthread_join(tid[1], NULL);
@@ -106,31 +106,31 @@ void cualInterfaz(int tipoInterfaz){
 	log_destroy(logger);
 }*/
 
-//  void *recibirCPU(void){
-//  		while(1) {
-//  			int cod_op = recibir_operacion(cpu_fd);
-//  			t_list *lista;
-//  			switch (cod_op) {
-// 				case HANDSHAKE_CPU:
-// 					recibirOrden(cpu_fd);
-// 					log_info(logger,"HANDSHAKE con CPU acontecido");
-// 					PaqueteHand(cpu_fd, logger);
-// 					break;
-// 				case SOLICITUDMARCO:
-// 					lista = recibirListaUint32_t(cpu_fd);
-// 					uint32_t marco = obtenerMarcoDePagina(*(uint32_t*)list_get(lista,0), *(uint32_t*)list_get(lista,1));
-// 					enviarValor_uint32(marco, cpu_fd, SOLICITUDMARCO, info_logger);
-// //					list_clean(lista);
-// 					list_destroy_and_destroy_elements(lista, free); //LINEA MODIFICADA
-// 					break;
-// 				case ACCESO_PEDIDO_LECTURA:
-// 					realizarPedidoLectura(cpu_fd);
-// 					break;
-// 				case ACCESO_PEDIDO_ESCRITURA:
-// 					realizarPedidoEscritura(cpu_fd);
-// 					break;
+ void *recibirCPU(void){
+ 		while(1) {
+ 			int cod_op = recibir_operacion(cpu_fd);
+ 			t_list *lista;
+ 			switch (cod_op) {
+				// case HANDSHAKE_CPU:
+				// 	recibirOrden(cpu_fd);
+				// 	log_info(logger,"HANDSHAKE con CPU acontecido");
+				// 	PaqueteHand(cpu_fd, logger);
+				// 	break;
+				case SOLICITUDMARCO:
+					lista = recibirListaUint32_t(cpu_fd);
+					uint32_t marco = obtenerMarcoDePagina(*(uint32_t*)list_get(lista,0), *(uint32_t*)list_get(lista,1));
+					enviarValor_uint32(marco, cpu_fd, SOLICITUDMARCO, info_logger);
+//					list_clean(lista);
+					// list_destroy_and_destroy_elements(lista, free); //LINEA MODIFICADA
+					break;
+				case ACCESO_PEDIDO_LECTURA:
+					realizarPedidoLectura(cpu_fd);
+					break;
+				case ACCESO_PEDIDO_ESCRITURA:
+					realizarPedidoEscritura(cpu_fd);
+					break;
 
-// 				case SOLICITUDINSTRUCCION:
+// 				case SOLICITUDINSTRUCCION:    //HAY QUE VER BIEN CON LAS NUEVAS FUNCIONES COMO SERIA
 // 					lista = recibirListaUint32_t(cpu_fd);
 // 					t_paquete* paquete = crear_paquete(SOLICITUDINSTRUCCION, info_logger);
 // 					Instruccion* instruccion;
@@ -144,18 +144,18 @@ void cualInterfaz(int tipoInterfaz){
 // //					list_clean(lista);
 // 					list_destroy_and_destroy_elements(lista, free); // ESTO ERA SOLO LIST_DESTROY
 // 					break;
-// 				case -1:
-// 					log_error(logger, "el cliente se desconecto.");
+				case -1:
+					log_error(logger, "el cliente se desconecto.");
 
-//  						log_error(logger, "Terminando servidor.CPU");
-//  						return NULL;
-//  					break;//sacar
-//  				default:
-//  					log_warning(logger,"Operacion desconocida. No quieras meter la pata");
-//  					break;
-//  			}
-//  		}
-//  }
+ 						log_error(logger, "Terminando servidor.CPU");
+ 						return NULL;
+ 					// break;//sacar
+ 				default:
+ 					log_warning(logger,"Operacion desconocida. No quieras meter la pata");
+ 					break;
+ 			}
+ 		}
+ }
 
 // void *recibirIO(int interfaz_fd){
 //  	while(1) {
@@ -206,16 +206,16 @@ void cualInterfaz(int tipoInterfaz){
 //  }
 
 
-// void *recibirKernel(){
-// 	while(1) {
-// 		int cod_op = recibir_operacion(kernel_fd);
-//  		switch (cod_op) {
-//         	case INICIALIZAR_PROCESO_MEMORIA:   //Crea proceso
-//         		inicializarProceso(kernel_fd);
-//         		break;
-//         	case FINALIZAR_PROCESO_MEMORIA:     //Elimina proceso
-//         		finalizarProceso(kernel_fd);
-//         		break;
+void *recibirKernel(){
+	while(1) {
+		int cod_op = recibir_operacion(kernel_fd);
+ 		switch (cod_op) {
+        	case INICIALIZAR_PROCESO_MEMORIA:   //Crea proceso
+        		inicializarProceso(kernel_fd);
+        		break;
+        	case FINALIZAR_PROCESO_MEMORIA:     //Elimina proceso
+        		finalizarProceso(kernel_fd);
+        		break;
 //         	case CARGA_PAGINA: //EN ESTE TP NO :)
 //         		t_list *lista;
 //         		uint32_t pid;
@@ -229,17 +229,17 @@ void cualInterfaz(int tipoInterfaz){
 // //        		list_clean(lista);
 // //        		list_destroy(lista); //LINEA AGREGADA
 //         		break;
-//  			case -1:
-//  				log_error(logger, "el cliente se desconecto.");
-//  				log_error(logger, "Terminando servidor KERNEL");
-//  				return NULL;
-//  				break; //sacar
-//  			default:
-//  				log_warning(logger,"Operacion desconocida. No quieras meter la pata");
-//  				break;
-//  		}
-//  	}
-//  }
+ 			case -1:
+ 				log_error(logger, "el cliente se desconecto.");
+ 				log_error(logger, "Terminando servidor KERNEL");
+ 				return NULL;
+ 				// break; //sacar
+ 			default:
+ 				log_warning(logger,"Operacion desconocida. No quieras meter la pata");
+ 				break;
+ 		}
+ 	}
+ }
 
 // t_log* iniciar_logger(char *nombre){
 // 	t_log* nuevo_logger;
@@ -301,27 +301,27 @@ void cualInterfaz(int tipoInterfaz){
 // 	free(leido);
 // }
 
-// void realizarPedidoLectura(int cliente_socket){
-//     t_list* listaInts = recibirListaUint32_t(cliente_socket);
-//     uint32_t posicion = *(uint32_t*)list_get(listaInts,0);
-//     uint32_t tamanio = *(uint32_t*)list_get(listaInts,1);
-//     uint32_t pid = *(uint32_t*)list_get(listaInts,2);
+void realizarPedidoLectura(int cliente_socket){
+    t_list* listaInts = recibirListaUint32_t(cliente_socket);
+    uint32_t posicion = *(uint32_t*)list_get(listaInts,0);
+    uint32_t tamanio = *(uint32_t*)list_get(listaInts,1);
+    uint32_t pid = *(uint32_t*)list_get(listaInts,2);
 
-//     pthread_mutex_lock(&mutex_espacioContiguo);
-//     log_info(info_logger,"Accediendo a Espacio de Usuario para Lectura en la Dirección: <%d> de Tamanio: <%d> para el Proceso con PID: <%d>", posicion, tamanio, pid);
-//     simularRetardoSinMensaje(RETARDO_RESPUESTA);
-//     log_info(info_logger,"Se accedió a Espacio de Usuario correctamente");
-//     void* datos = recibePedidoDeLectura(posicion, tamanio, pid);
-//     pthread_mutex_unlock(&mutex_espacioContiguo);
-//     t_datos* unosDatos = malloc(sizeof (t_datos));
-//     unosDatos->datos = datos;
-//     unosDatos->tamanio= tamanio;
-//     enviarListaIntsYDatos(listaInts,unosDatos, cliente_socket, info_logger, LECTURA_REALIZADA);
-//     free(datos);
-//     free(unosDatos);
-//     list_clean_and_destroy_elements(listaInts,free);
-//     list_destroy(listaInts);
-// }
+    pthread_mutex_lock(&mutex_espacioContiguo);
+    log_info(info_logger,"Accediendo a Espacio de Usuario para Lectura en la Dirección: <%d> de Tamanio: <%d> para el Proceso con PID: <%d>", posicion, tamanio, pid);
+    simularRetardoSinMensaje(RETARDO_RESPUESTA);
+    log_info(info_logger,"Se accedió a Espacio de Usuario correctamente");
+    void* datos = recibePedidoDeLectura(posicion, tamanio, pid);
+    pthread_mutex_unlock(&mutex_espacioContiguo);
+    t_datos* unosDatos = malloc(sizeof (t_datos));
+    unosDatos->datos = datos;
+    unosDatos->tamanio= tamanio;
+    enviarListaIntsYDatos(listaInts,unosDatos, cliente_socket, info_logger, LECTURA_REALIZADA);
+    free(datos);
+    free(unosDatos);
+    list_clean_and_destroy_elements(listaInts,free);
+    list_destroy(listaInts);
+}
 
 // void realizarPedidoLecturaFs(int cliente_socket){
 //     t_list* listaInts = recibirListaUint32_t(cliente_socket);
@@ -346,23 +346,23 @@ void cualInterfaz(int tipoInterfaz){
 // }
 
 
-// void realizarPedidoEscritura(int cliente_socket){
-//     t_datos* unosDatos = malloc(sizeof(t_datos));
-//     t_list* listaInts = recibirListaIntsYDatos(cliente_socket, unosDatos);
-//     uint32_t* posicion = list_get(listaInts,0);
-//     uint32_t* pid = list_get(listaInts,1);
-//     pthread_mutex_lock(&mutex_espacioContiguo);
-//     log_info(info_logger,"Accediendo a Espacio de Usuario para Escritura en la Direccion: <%d> para el Proceso con PID: <%d>", *posicion, *pid);
-//     simularRetardoSinMensaje(RETARDO_RESPUESTA);
-//     log_info(info_logger,"Se accedio a Espacio de Usuario correctamente");
-//     recibePedidoDeEscritura(*posicion,unosDatos->datos, unosDatos->tamanio, *pid);
-//     free(unosDatos->datos);
-//     free(unosDatos);
-//     list_clean_and_destroy_elements(listaInts, free);
-//     list_destroy(listaInts);
-//     pthread_mutex_unlock(&mutex_espacioContiguo);
-//     enviarOrden(ESCRITURA_REALIZADA, cliente_socket, info_logger);
-// }
+void realizarPedidoEscritura(int cliente_socket){
+    t_datos* unosDatos = malloc(sizeof(t_datos));
+    t_list* listaInts = recibirListaIntsYDatos(cliente_socket, unosDatos);
+    uint32_t* posicion = list_get(listaInts,0);
+    uint32_t* pid = list_get(listaInts,1);
+    pthread_mutex_lock(&mutex_espacioContiguo);
+    log_info(info_logger,"Accediendo a Espacio de Usuario para Escritura en la Direccion: <%d> para el Proceso con PID: <%d>", *posicion, *pid);
+    simularRetardoSinMensaje(RETARDO_RESPUESTA);
+    log_info(info_logger,"Se accedio a Espacio de Usuario correctamente");
+    recibePedidoDeEscritura(*posicion,unosDatos->datos, unosDatos->tamanio, *pid);
+    free(unosDatos->datos);
+    free(unosDatos);
+    list_clean_and_destroy_elements(listaInts, free);
+    list_destroy(listaInts);
+    pthread_mutex_unlock(&mutex_espacioContiguo);
+    enviarOrden(ESCRITURA_REALIZADA, cliente_socket, info_logger);
+}
 
 // void realizarPedidoEscrituraFs(int cliente_socket){
 //     t_datos* unosDatos = malloc(sizeof(t_datos));
@@ -391,34 +391,30 @@ void GuardarNombreArchiv(uint32_t pid, char* file_name){
 
 void inicializarProceso(int cliente_socket){
 
-    //char* file_name = recibirEnteroEnteroChar(cliente_socket, &pidGlobal, &sizeGlobal);
-    //log_info(info_logger, "%s %d %d", file_name, pidGlobal, sizeGlobal);
+    char* file_name = recibirEnteroEnteroChar(cliente_socket, &pidGlobal, &sizeGlobal); 
+    log_info(info_logger, "%s %d %d", file_name, pidGlobal, sizeGlobal);
 
-    //GuardarNombreArchiv(pidGlobal, file_name);
+    GuardarNombreArchiv(pidGlobal, file_name);
 
-    // crearTablaDePaginas(sizeGlobal);
-	// sleep(1);
-	// log_info(info_logger,"Tamaño de tablaGeneral antes de terminar inicializarProceso: %d\n", list_size(tablaGeneral));
+    crearTablaPaginasProceso(pidGlobal, sizeGlobal);
+	sleep(1);
+	log_info(info_logger,"Tamaño de tablaGeneral antes de terminar inicializarProceso: %d\n", list_size(tablaGeneral));
 
-	// enviarOrden(INICIALIZAR_PROCESO_MEMORIA,cliente_socket, info_logger);
+	enviarOrden(INICIALIZAR_PROCESO_MEMORIA,cliente_socket, info_logger);
 }
 
-// void finalizarProceso(int cliente_socket){
-// 	log_info(info_logger,"Tamaño de tablaGeneral al llegar a finalizarProceso: %d\n", list_size(tablaGeneral));
-//     pthread_mutex_lock(&mutex_tablasPaginas);
-//     pthread_mutex_lock(&mutex_espacioContiguo);
-// 	t_list* posicionesSwap = list_create();
-//     uint32_t pid = recibirValor_uint32(cliente_socket);
-// 	TablaDePaginas* tabla = obtenerTablaPorPID(pid);
-// 	if (tabla!=NULL){
-// 		for (int j = 0; j < list_size(tabla->paginas); j++) {
-// 			Pagina* pagina = list_get(tabla->paginas, j);
-// 			list_add(posicionesSwap, &(pagina->posSwap));
-// 			marcarMarcoLibre(pagina->marco);
-// 		}
-// 		liberarModuloSwap(posicionesSwap);
-// 		list_destroy_and_destroy_elements(posicionesSwap, free); //LINEA AGREGADA
-// 	}
+void finalizarProceso(int cliente_socket){
+	log_info(info_logger,"Tamaño de tablaGeneral al llegar a finalizarProceso: %d\n", list_size(tablaGeneral));
+    pthread_mutex_lock(&mutex_tablasPaginas);
+    pthread_mutex_lock(&mutex_espacioContiguo);
+    uint32_t pid = recibirValor_uint32(cliente_socket);
+	TablaDePaginas* tabla = obtenerTablaPorPID(pid);
+	if (tabla!=NULL){
+		for (int j = 0; j < list_size(tabla->paginas); j++) {
+			Pagina* pagina = list_get(tabla->paginas, j);
+			marcarMarcoLibre(pagina->marco);
+		}
+	}
 //    bool buscarPorPID(ProgramaDeProceso* programa){
 // 	if(programa->pid == pid) return true;
 // 	return false;
@@ -435,11 +431,11 @@ void inicializarProceso(int cliente_socket){
 //    list_remove_by_condition(instruccionesEnMemoria,buscarPorPID);
 //    free(programa);
 
-//     if(tabla!=NULL)
-//     	liberarTablaDePaginas(pid);
-//     pthread_mutex_unlock(&mutex_tablasPaginas);
-//     pthread_mutex_unlock(&mutex_espacioContiguo);
-//     enviarOrden(FINALIZAR_PROCESO_MEMORIA, cliente_socket, info_logger);
-//     log_info(info_logger, "Proceso finalizado con éxito");
-//     log_info(info_logger,"Tamaño de tablaGeneral al terminar finalizarProceso: %d\n", list_size(tablaGeneral));
-// }
+    if(tabla!=NULL)
+    	liberarTablaDePaginas(pid);
+    pthread_mutex_unlock(&mutex_tablasPaginas);
+    pthread_mutex_unlock(&mutex_espacioContiguo);
+    enviarOrden(FINALIZAR_PROCESO_MEMORIA, cliente_socket, info_logger);
+    log_info(info_logger, "Proceso finalizado con éxito");
+    log_info(info_logger,"Tamaño de tablaGeneral al terminar finalizarProceso: %d\n", list_size(tablaGeneral));
+}
