@@ -52,5 +52,8 @@ t_peticion* sacoPeticionDePendientes();
 void atenderPeticiones();
 void manejarPeticion(t_peticion* peticion);
 
+void* iniciarMemoria();
+void* iniciarKernel();
+
 
 #endif

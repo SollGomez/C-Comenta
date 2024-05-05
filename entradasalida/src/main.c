@@ -11,20 +11,21 @@ int main(int argc, char* argv[]) {
 	crearListas();
 	crearSemaforos();
 	iniciarAtencionPeticiones();
-    
-    
-	if(cfg_entradaSalida->TIPO_INTERFAZ_INT == 3) {
-		conectarKernel("KERNEL");
-	}else {
-		conectarKernel("KERNEL");
-		conectarMemoria("MEMORIA");
+
+	pthread_t kernel;
+	pthread_t memoria;
+
+    pthread_create(&kernel, NULL, iniciarKernel, NULL);
+
+	if(cfg_entradaSalida->TIPO_INTERFAZ_INT != 3) {
+		pthread_create(&memoria, NULL, iniciarMemoria, NULL);
+		pthread_join(memoria, NULL);
 	}
 
-
-
+	pthread_join(kernel, NULL);
 
 	char nombre[50];
-	scanf("%s", nombre);
+	//scanf("%s", nombre);
 
 	cerrarPrograma();
     return 0;

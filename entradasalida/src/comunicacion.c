@@ -9,6 +9,10 @@ pthread_mutex_t mutex_recvKernel;
 pthread_mutex_t mutex_peticiones_pendientes;
 sem_t sem_contador_peticiones;
 
+void* iniciarMemoria () {
+	conectarMemoria("MEMORIA");
+}
+
 int conectarMemoria(char *modulo){
 	char *ip;
 	char *puerto;
@@ -49,8 +53,11 @@ int conectarMemoria(char *modulo){
 	return memoria_fd;
 }
 
-int conectarKernel(char *modulo){
+void* iniciarKernel () {
+	conectarKernel("KERNEL");
+}
 
+int conectarKernel(char *modulo){
 	char *ip;
 	char *puerto;
 	char charAux[50];
@@ -87,6 +94,7 @@ int conectarKernel(char *modulo){
 	pthread_t tid[2];
 
 	pthread_create(&tid[0], NULL, recibirKernel, NULL);
+	pthread_join(tid[0], NULL);
 	
 	log_destroy(loggerIOKernel);
 
