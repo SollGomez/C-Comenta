@@ -149,6 +149,7 @@ void *recibirKernel() {
 		
 		case IO_STDIN_READ:
 			
+			solicitudIO_STDIN_READ(&kernel_fd);
 			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
 		
@@ -209,7 +210,10 @@ void *solicitudIO_STDIN_READ(void* cliente_socket) {
 	t_list* listaEnteros = list_create();
 	listaEnteros = recibirListaUint32_t(conexion);
 	peticion_io_stdin_read->pid = *(uint32_t*)list_get(listaEnteros, 0); 
-	peticion_io_stdin_read->direccionFisica = *(uint32_t*)list_get(listaEnteros, 1); 
+	peticion_io_stdin_read->direccionFisica = *(uint32_t*)list_get(listaEnteros, 1);
+
+	agregarPeticionAPendientes(peticion_io_stdin_read);
+	sem_post(&sem_contador_peticiones); 
 
 	return NULL;
 }
@@ -283,14 +287,15 @@ void manejarPeticion(t_peticion* peticion) {
 	switch (codOpIO)
 	{
 	case EJECUTAR_IO_GEN_SLEEP:
-		manejarInterfazGenerica(peticion->unidadesDeTrabajo);
 		logOperacion(peticion->pid, "IO_GEN_SLEEP");
+		manejarInterfazGenerica(peticion->unidadesDeTrabajo);
 		break;
 	case EJECUTAR_IO_STDOUT_WRITE:
 		
 		break;
 	case EJECUTAR_IO_STDIN_READ:
-		
+		logOperacion(peticion->pid, "IO_STDIN_READ");
+		manejarInterfazStdin(peticion->direccionFisica);
 		break;
 	case EJECUTAR_IO_FS_CREATE:
 		

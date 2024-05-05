@@ -30,7 +30,7 @@ int recibirConexion(char *puerto) {
 		list_add(listaDatosDePrueba, &pid);
 		list_add(listaDatosDePrueba, &unidadesTrabajo);
 		//enviarValor_uint32(8, vectorIO[tipoInterfaz], IO_GEN_SLEEP, logger);
-		enviarListaUint32_t(listaDatosDePrueba, vectorIO[tipoInterfaz], logger, IO_GEN_SLEEP);
+		enviarListaUint32_t(listaDatosDePrueba, vectorIO[tipoInterfaz], logger, IO_STDIN_READ);
 
 
 	}

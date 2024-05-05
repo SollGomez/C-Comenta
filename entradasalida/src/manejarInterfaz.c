@@ -31,8 +31,22 @@ void manejarInterfazGenerica(uint32_t unidadesDeTrabajo) {
     for (int i = 0; i < unidadesDeTrabajo; i++) {
 
         // sleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO);               //DESPUES VER SI ES USLEEP O SLEEP
-        usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 10);
+        usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 100000);
         printf("UNIDAD: %d\n", i);
     }
+
+}
+
+void manejarInterfazStdin(uint32_t direccionFisicaAEscribir) {
+
+    char* input;
+
+    input = readline(">");
+
+    if(input == NULL) {
+        log_error(info_logger, "Error al leer la linea por teclado");
+    }
+    log_trace(trace_logger, "El texto ingresado fue: %s", input);
+    //enviarEnteroYString(direccionFisicaAEscribir, input, memoria_fd, info_logger, IO_STDIN_READ_DONE);
 
 }

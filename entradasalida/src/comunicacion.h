@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <utils/utilidades.h>
 #include <pthread.h>
 #include <manejarInterfaz.h>
 
@@ -44,8 +43,9 @@ t_log* iniciar_logger(char*);
 void paquete(int, t_log*);
 void terminar_programa(int, t_log*);
 void iterator(char* value);
-void *recibirKernel();
+void* recibirKernel();
 void* solicitudIO_GEN_SLEEP (void* cliente_socket);
+void* solicitudIO_STDIN_READ(void* cliente_socket);
 void agregarPeticionAPendientes(t_peticion* peticion_io_gen_sleep);
 void iniciarAtencionPeticiones();
 t_peticion* sacoPeticionDePendientes();

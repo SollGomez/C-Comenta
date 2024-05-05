@@ -156,7 +156,7 @@ t_list* recibirListaUint32_t(int socket_cliente){
         memcpy(nuevoEntero, buffer + desplazamiento, sizeof (uint32_t));
         desplazamiento+=sizeof(uint32_t);
         list_add(listaInts, nuevoEntero);
-        free(nuevoEntero); //linea agregada
+        //free(nuevoEntero); // Linea que me rompio todo loco, ubiquense. Probablemente un free de kiki seguro.  (bauti)
     }
     free(buffer);
     return listaInts;
@@ -188,4 +188,66 @@ uint32_t recibirValor_uint32(int socket) {
     eliminar_paquete(paquete);
 
     return valor;
+}
+
+
+bool enviarEnteroYString(uint32_t entero,char* string, int socket_cliente, t_log* logger, op_code_cliente codigo)
+
+{
+    t_paquete* paquete = crear_paquete(codigo, logger);
+    if(!agregarEnteroYStringAPaquete(entero,string, paquete)){
+        log_error(logger, "Hubo un error cuando se intento agregar las instrucciones al paquete");
+        return false;
+    }
+    enviar_paquete(paquete, socket_cliente);
+    log_info(logger, "Se envio el paquete");
+    eliminar_paquete(paquete);
+    return true;
+}
+
+bool agregarEnteroYStringAPaquete(uint32_t entero, char* string, t_paquete* paquete)
+{
+
+    paquete->buffer->size+= sizeof(uint32_t);
+    uint32_t tamanioString = strlen(string) +1;
+    paquete->buffer->size+= tamanioString + sizeof(uint32_t);
+
+
+    void* stream = malloc(paquete->buffer->size); //Reservo memoria para el stream
+    int offset=0; //desplazamiento
+
+
+
+    memcpy(stream + offset, &entero, sizeof(uint32_t));
+    offset += sizeof(uint32_t);
+
+    memcpy(stream + offset, &tamanioString, sizeof(uint32_t));
+    offset+= sizeof(uint32_t);
+    memcpy(stream + offset, string, tamanioString);
+    paquete->buffer->stream = stream;
+
+    return true;
+
+}
+
+
+
+char* recibirEnteroYString(int socket_cliente,uint32_t* entero)
+{
+    int tamanio;
+    int desplazamiento = 0;
+    void *buffer = recibir_stream(&tamanio, socket_cliente);
+
+    memcpy(&entero, buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento+=sizeof(uint32_t);
+
+    uint32_t tamanioString =0;
+    memcpy(&tamanioString, buffer + desplazamiento, sizeof (uint32_t));
+    desplazamiento+=sizeof(uint32_t);
+    char* string = malloc(tamanioString);
+    memcpy(string, buffer + desplazamiento, tamanioString);
+
+    free(buffer);
+    return string;
+
 }
