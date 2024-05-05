@@ -95,7 +95,27 @@ void ejecutar_MOV_OUT(int direccion_logica, char* registro) {
 }
 
 void IO_GEN_SLEEP(char* interfaz, char* unidadesDeTrabajo){
+    uint32_t numeroInterfaz=0;
+    uint32_t tiempoEspera=atoi(unidadesDeTrabajo);
 
+    if(!strcmp(interfaz,"STDOUT"))
+        numeroInterfaz=0;
+    if(!strcmp(interfaz,"STDIN"))
+        numeroInterfaz=1;
+    if(!strcmp(interfaz,"DIAL_FS"))
+        numeroInterfaz=2;
+    if(!strcmp(interfaz,"GENERICA"))
+        numeroInterfaz=3;
+
+    copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+    PCB_Actual->program_counter++;
+    t_paquete* paquete = crear_paquete(IO_GEN_SLEEP_OPC, info_logger);
+    agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+    agregar_a_paquete2(paquete, &numeroInterfaz, sizeof(uint32_t)); //Diseñar para Kernel recibir contexto ejecución y uint y uint
+    agregar_a_paquete2(paquete, &tiempoEspera, sizeof(uint32_t));
+    enviar_paquete(paquete, kernel_fd);
+    eliminar_paquete(paquete);
+    cicloInstrucciones = false;
 }
 
 void IO_STDIN_READ(char* interfaz, char* registroDireccion, char* registroTamanio){
