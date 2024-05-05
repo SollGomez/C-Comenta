@@ -142,6 +142,25 @@ bool enviarListaUint32_t(t_list* listaInts, int socket_cliente, t_log* logger, o
     return true;
 }
 
+t_list* recibirListaUint32_t(int socket_cliente){
+    int tamanio;
+    int desplazamiento = 0;
+    void *buffer = recibir_stream(&tamanio, socket_cliente);
+    t_list* listaInts = list_create();
+    int cantidad_ints = 0;
+    memcpy(&cantidad_ints, buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento+=sizeof(uint8_t);
+
+    for (int i = 0; i < cantidad_ints; ++i) {
+        uint32_t* nuevoEntero = malloc(sizeof(uint32_t));
+        memcpy(nuevoEntero, buffer + desplazamiento, sizeof (uint32_t));
+        desplazamiento+=sizeof(uint32_t);
+        list_add(listaInts, nuevoEntero);
+        free(nuevoEntero); //linea agregada
+    }
+    free(buffer);
+    return listaInts;
+}
 
 
 

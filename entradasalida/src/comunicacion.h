@@ -25,6 +25,8 @@ typedef struct
 {
     t_operacion_io operacion;
     uint32_t unidadesDeTrabajo;
+    uint32_t pid;
+    uint32_t direccionFisica;
 
 }t_peticion;
 

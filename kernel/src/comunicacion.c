@@ -24,10 +24,13 @@ int recibirConexion(char *puerto) {
 		cualInterfaz(tipoInterfaz);
 		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, vectorIO[tipoInterfaz]);
 
-
-		
+		uint32_t pid = 10;
+		uint32_t unidadesTrabajo = 8;
+		t_list* listaDatosDePrueba = list_create();
+		list_add(listaDatosDePrueba, &pid);
+		list_add(listaDatosDePrueba, &unidadesTrabajo);
 		//enviarValor_uint32(8, vectorIO[tipoInterfaz], IO_GEN_SLEEP, logger);
-		
+		enviarListaUint32_t(listaDatosDePrueba, vectorIO[tipoInterfaz], logger, IO_GEN_SLEEP);
 
 
 	}

@@ -200,6 +200,20 @@ void *recibirKernel() {
 	return NULL;
 }
 
+void *solicitudIO_STDIN_READ(void* cliente_socket) {
+
+	int conexion = *((int*) cliente_socket);
+
+	t_peticion* peticion_io_stdin_read = malloc(sizeof(t_peticion));
+	peticion_io_stdin_read->operacion = EJECUTAR_IO_STDIN_READ;
+	t_list* listaEnteros = list_create();
+	listaEnteros = recibirListaUint32_t(conexion);
+	peticion_io_stdin_read->pid = *(uint32_t*)list_get(listaEnteros, 0); 
+	peticion_io_stdin_read->direccionFisica = *(uint32_t*)list_get(listaEnteros, 1); 
+
+	return NULL;
+}
+
 void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 
 	int conexion = *((int*) cliente_socket);
@@ -207,11 +221,16 @@ void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 	
 	t_peticion* peticion_io_gen_sleep = malloc(sizeof(t_peticion));
 	peticion_io_gen_sleep->operacion = EJECUTAR_IO_GEN_SLEEP;
-	peticion_io_gen_sleep->unidadesDeTrabajo = recibirValor_uint32(conexion);
-	
+	t_list* listaEnteros = list_create();
+
+	listaEnteros = recibirListaUint32_t(conexion);
+
+	peticion_io_gen_sleep->pid = *(uint32_t*)list_get(listaEnteros, 0);
+
+	peticion_io_gen_sleep->unidadesDeTrabajo = *(uint32_t*)list_get(listaEnteros, 1);
+
 	agregarPeticionAPendientes(peticion_io_gen_sleep);
 	sem_post(&sem_contador_peticiones);
-
 	return NULL;
 }
 
@@ -265,7 +284,7 @@ void manejarPeticion(t_peticion* peticion) {
 	{
 	case EJECUTAR_IO_GEN_SLEEP:
 		manejarInterfazGenerica(peticion->unidadesDeTrabajo);
-		logOperacion(0, "IO_GEN_SLEEP");
+		logOperacion(peticion->pid, "IO_GEN_SLEEP");
 		break;
 	case EJECUTAR_IO_STDOUT_WRITE:
 		
