@@ -1,12 +1,12 @@
 #include <comunicacion.h>
 
-int contadorDispositivosIO=0;
+int contadorDispositivosIO = 0;
 int memoria_fd;
 int kernel_fd;
 
-int conectarMemoria(char *modulo){
-	char *ip;
-	char *puerto;
+int conectarMemoria(char* modulo){
+	char* ip;
+	char* puerto;
 	char charAux[50];
     char parametro[20];
 
