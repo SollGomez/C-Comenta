@@ -259,7 +259,20 @@ void execute(){
 }
 
 void checkInsterrupt(){
+    if(interrupciones && cicloInstrucciones)
+	{
+		copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
 
+		t_paquete* paquete= crear_paquete(INTERRUPCIONCPU, info_logger);
+		agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+		enviar_paquete(paquete, kernel_fd);
+		eliminar_paquete(paquete);
+		interrupciones=0;
+
+
+		cicloInstrucciones = false;
+		log_info(info_logger, "PID: <%d> - Error Interrupcion", PCB_Actual->id);
+	}
 }
 
 void copiar_registroPCB_a_los_registrosCPU (RegistrosCPU* registro) {

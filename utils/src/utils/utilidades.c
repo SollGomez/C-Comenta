@@ -306,6 +306,19 @@ void liberarPcbCpu(PCB* pcb){
     free(pcb);
 }
 
+uint32_t recibirValor_uint32(int socket) {
+
+    t_paquete *paquete = malloc(sizeof (t_paquete));
+    paquete->buffer = malloc(sizeof(t_buffer));
+    paquete->buffer->size = 0;
+    paquete->buffer->stream =recibir_stream(&paquete->buffer->size, socket);
+    uint32_t valor = -1;
+    memcpy(&valor, paquete->buffer->stream, sizeof(uint32_t));
+    eliminar_paquete(paquete);
+
+    return valor;
+}
+
 void enviar_uint32_y_uint32_y_char(char* path, uint32_t valor1, uint32_t valor2, int socket, op_code_cliente orden, t_log *logger){
     t_paquete * paquete= crear_paquete(orden, logger);
     agregar_a_paquete2(paquete, &valor1, sizeof(uint32_t));

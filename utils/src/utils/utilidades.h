@@ -19,4 +19,7 @@ void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log
 void* recibir_stream(int* size, uint32_t cliente_socket);
 PCB* recibir_contextoEjecucion_y_char(int conexion);
 
+uint32_t recibirValor_uint32(int socket);
+void* recibir_stream(int* size, uint32_t cliente_socket);
+
 #endif
