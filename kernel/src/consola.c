@@ -64,17 +64,13 @@ void ejecutar_script (char* linea) {
 }
 
 void* ejecutar_script_operaciones (void* parametros) {
-	printf("ENTRE A LA FUNCION");
-
 	pthread_mutex_lock(&semaforo);
     char* pathptr = (char*) parametros;
 
 	FILE *fptr;
 
-		printf("voy a buscar el archivo");
-
 	fptr = fopen(pathptr, "r");
-	char* instruccion;
+	char instruccion[100];
 	
 	
 if(fptr == NULL)
@@ -83,17 +79,33 @@ if(fptr == NULL)
 if(fptr != NULL)
 	printf("\n encontre el archivo %s", fptr);
 
-	/*while (fread(instruccion, 100, 1, fptr)) {
-		printf("%s", instruccion);
-	}*/
-	//fread(instruccion, 100, 1, fptr);
+	while (fgets(instruccion, sizeof(instruccion), fptr)) {
+		if (!strncmp(instruccion,"EJECUTAR_SCRIPT", strlen("EJECUTAR_SCRIPT")))
+	    	ejecutar_script(instruccion);
 
-	printf("");
+	    if (!strncmp(instruccion,"INICIAR_PROCESO", strlen("INICIAR_PROCESO")))
+	    	iniciar_proceso(instruccion);
+
+	    if (!strncmp(instruccion, "FINALIZAR_PROCESO", strlen("FINALIZAR_PROCESO")))
+	    	finalizar_proceso(instruccion);
+
+	    if (!strncmp(instruccion,"DETENER_PLANIFICACION", strlen("DETENER_PLANIFICACION")))
+	    	DETENER_PLANIFICACION(instruccion);
+
+	    if (!strncmp(instruccion,"INICIAR_PLANIFICACION", strlen("INICIAR_PLANIFICACION")))
+	    	INICIAR_PLANIFICACION(instruccion);
+
+	    if (!strncmp(instruccion,"MULTIPROGRAMACION", strlen("MULTIPROGRAMACION"))){
+	    	MULTIPROGRAMACION(instruccion);
+	    	log_info(info_logger, "Grado multiprog actualizado: %d", GRADO_MAX_MULTIPROGRAMACION);
+	    }
+	    if (!strncmp(instruccion, "PROCESO_ESTADO", strlen("PROCESO_ESTADO")))
+	    	PROCESO_ESTADO(instruccion);
+	}
 
     pthread_mutex_unlock(&semaforo);
 	        
-	//fclose(file);
-
+	fclose(fptr);
     //free(pathptr);
 
 	return NULL;
