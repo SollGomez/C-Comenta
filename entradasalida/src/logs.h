@@ -9,6 +9,7 @@
 #include <semaphore.h>
 
 extern pthread_mutex_t mutex_recvKernel;
+extern pthread_mutex_t mutex_recvMemoria;
 extern pthread_mutex_t mutex_peticiones_pendientes;
 
 extern t_list* lista_peticiones_pendientes;

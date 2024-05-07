@@ -12,6 +12,9 @@ int main(int argc, char* argv[]) {
 	crearSemaforos();
 	iniciarAtencionPeticiones();
 
+	printf("\n\n PID < HOLA >- < Hola >\n\n");
+
+
 	pthread_t kernel;
 	pthread_t memoria;
 

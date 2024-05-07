@@ -11,6 +11,8 @@ t_config_entradaSalida* cfg_entradaSalida;
 
 void crearSemaforos() {
     pthread_mutex_init(&mutex_recvKernel, NULL);
+    pthread_mutex_init(&mutex_recvMemoria, NULL);
+    
     pthread_mutex_init(&mutex_peticiones_pendientes, NULL);
 
     sem_init(&sem_contador_peticiones, 0, 0);
