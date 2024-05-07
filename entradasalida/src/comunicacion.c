@@ -50,6 +50,12 @@ int conectarMemoria(char *modulo){
 
 	send(memoria_fd, &handshakeEntradasalida, sizeof(int32_t), 0);
 
+
+	pthread_t tid;
+
+	pthread_create(&tid, NULL, recibirMemoria, NULL);
+	pthread_join(tid, NULL);
+
 	log_destroy(loggerIOMem);
 
 	return memoria_fd;
@@ -94,10 +100,10 @@ int conectarKernel(char *modulo){
 
 	send(kernel_fd, &handshakeEntradasalida, sizeof(int32_t), 0);
 
-	pthread_t tid[2];
+	pthread_t tid;
 
-	pthread_create(&tid[0], NULL, recibirKernel, NULL);
-	pthread_join(tid[0], NULL);
+	pthread_create(&tid, NULL, recibirKernel, NULL);
+	pthread_join(tid, NULL);
 	
 	log_destroy(loggerIOKernel);
 
@@ -249,6 +255,8 @@ void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede ca
 	uint32_t* pid = malloc(sizeof(uint32_t));
 
 	strcpy(textoAMostrar, recibirEnteroYString(conexion, pid));
+
+	usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 10000);
 
 	printf("\n\n PID <%d> - <%s>\n\n", *pid, textoAMostrar);
 
