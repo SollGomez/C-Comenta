@@ -10,6 +10,7 @@
 #include <utils/shared.h>
 #include "planificadores.h"
 #include "PCB.h"
+#include "consola.h"
 
 extern t_config* config;
 extern t_log* info_logger;

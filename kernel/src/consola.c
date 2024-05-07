@@ -15,7 +15,7 @@ void* iniciarConsola () {
 	    log_info(info_logger,"linea: %s",linea);
 
 	    if (!strncmp(linea,"EJECUTAR_SCRIPT", strlen("EJECUTAR_SCRIPT")))
-	    	//ejecutar_script(linea);
+	    	ejecutar_script(linea);
 
 	    if (!strncmp(linea,"INICIAR_PROCESO", strlen("INICIAR_PROCESO")))
 	    	iniciar_proceso(linea);
@@ -43,6 +43,60 @@ void* iniciarConsola () {
 	    }
 	    free(linea);
 	}
+}
+
+void ejecutar_script (char* linea) {
+	printf("RECONOCI LA LINEA");
+
+	path = malloc(sizeof(linea));
+	char* saveptr = malloc(sizeof(linea));
+
+	saveptr[0] =' \0';
+	path[0] = '\0';
+	sscanf(linea,"%s %s",saveptr, path);
+
+    pthread_t tid;
+    pthread_create(&(tid), NULL, ejecutar_script_operaciones, path);
+    pthread_join(tid, NULL);
+    free(saveptr);
+
+    return;
+}
+
+void* ejecutar_script_operaciones (void* parametros) {
+	printf("ENTRE A LA FUNCION");
+
+	pthread_mutex_lock(&semaforo);
+    char* pathptr = (char*) parametros;
+
+	FILE *fptr;
+
+		printf("voy a buscar el archivo");
+
+	fptr = fopen(pathptr, "r");
+	char* instruccion;
+	
+	
+if(fptr == NULL)
+	printf("\nNO ENCONTRE EL ARCHIVO");
+
+if(fptr != NULL)
+	printf("\n encontre el archivo %s", fptr);
+
+	/*while (fread(instruccion, 100, 1, fptr)) {
+		printf("%s", instruccion);
+	}*/
+	//fread(instruccion, 100, 1, fptr);
+
+	printf("");
+
+    pthread_mutex_unlock(&semaforo);
+	        
+	//fclose(file);
+
+    //free(pathptr);
+
+	return NULL;
 }
 
 void iniciar_proceso (char* linea) {

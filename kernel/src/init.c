@@ -22,6 +22,7 @@ t_list* estadoBlockRecursos;
 t_queue* colaReady_FIFO;
 t_list* listaRecursos;
 t_list* colaReady;
+t_list* colaReadyVRR;
 
 t_list* tablaGlobal_ArchivosAbiertos;
 t_list* listaPeticionesArchivos;
@@ -90,11 +91,11 @@ void iniciarNecesidades(){
     
 	
 
-    // pthread_create(&hilo_planificador_LP, NULL, (void*)planificadorLargoPlazo, NULL);
-    // pthread_create(&hilo_planificador_corto, NULL, (void*)planificadorCortoPlazo, NULL);
-    // pthread_create(&hilo_liberador_procesos, NULL, (void*)liberar_procesos, NULL);
+    pthread_create(&hilo_planificador_LP, NULL, (void*)planificadorLargoPlazo, NULL);
+    pthread_create(&hilo_planificador_corto, NULL, (void*)planificadorCortoPlazo, NULL);
+    pthread_create(&hilo_liberador_procesos, NULL, (void*)liberar_procesos, NULL);
 
-	// pthread_create(&tid[4], NULL, iniciarConsola, NULL);
+    pthread_create(&tid[4], NULL, iniciarConsola, NULL);
 	// pthread_create(&tid[5], NULL, escucharFilesystemRef, NULL);
 	// pthread_create(&tid[6], NULL, escucharCPURef, NULL);
 
@@ -102,6 +103,9 @@ void iniciarNecesidades(){
 	INSTANCIAS_RECURSOS = config_get_array_value(config, "INSTANCIAS_RECURSOS");
 	GRADO_MAX_MULTIPROGRAMACION = config_get_int_value(config, "GRADO_MULTIPROGRAMACION");
 	ALGORITMO_PLANIFICACION = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
+    if(!strcmp(ALGORITMO_PLANIFICACION, "VRR"))
+        colaReadyVRR = list_create();
+
 	QUANTUM = config_get_int_value(config, "QUANTUM");
 
     int dim = tamanioArray(RECURSOS);
@@ -113,12 +117,12 @@ void iniciarNecesidades(){
 
     cargarRecursos();
 
-	// pthread_join(tid[4], NULL);
+    pthread_join(tid[4], NULL);
 	// pthread_join(tid[5], NULL);
 	// pthread_join(tid[6], NULL);
-	// pthread_join(hilo_planificador_LP, NULL);
-	// pthread_join(hilo_planificador_corto,NULL);
-	// pthread_join(hilo_liberador_procesos,NULL);
+    pthread_join(hilo_planificador_LP, NULL);
+    pthread_join(hilo_planificador_corto,NULL);
+    pthread_join(hilo_liberador_procesos,NULL);
     pthread_join(tid[1], NULL);
 }
 

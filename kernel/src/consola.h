@@ -20,5 +20,8 @@ void* mostrarColasPuntero();
 void* detenerPlanificacion();
 void* iniciarPlanificacion();
 void* multiprogramacion(void*);
+void* ejecutar_script_operaciones (void* parametros);
+void iniciar_proceso (char* linea);
+void* iniciarConsola ();
 
 #endif /* SRC_CONSOLA_H_ */

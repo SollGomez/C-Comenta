@@ -2,12 +2,12 @@
 
 int proteccion = 1;
 
-void planificadorLargoPlazo(){
+void planificadorLargoPlazo() {
     log_info(info_logger, "Kernel - PLANIFICADOR LARGO PLAZO INICIADO.\n");
     while (planificacionFlag) {
         pthread_mutex_lock(&planificacionLargo);
 
-        sem_wait (&sem_procesosEnNew);
+        sem_wait(&sem_procesosEnNew);
         if (!planificacionFlag)
         	planificadorLargoAvance = 1;
 
@@ -98,6 +98,30 @@ void mandarPaquetePCB(PCB *pcb){
 }
 
 void* esperarRR (void* pcbReady) {
+	PCB* pcb = (PCB*) pcbReady;
+	pcb->tiempoEjecutando = 0;
+	while (1) {
+		/*if (QUANTUM > 1000) {
+			usleep(1000);
+		} else {
+			usleep(10000);
+		}*/
+
+        usleep(QUANTUM);
+
+		pcb->tiempoEjecutando++;
+		if (pcb->tiempoEjecutando >= QUANTUM) {
+			if (list_size(colaExec)) {
+				PCB* pcb = obtenerPcbExec();
+				enviarValor_uint32(pcb->id, cpuInterrupt_fd, INTERRUPCIONCPU, info_logger);
+				log_info(info_logger, "PID: <%d> - Desalojado por fin de Quantum", pcb->id);
+			}
+			return NULL;
+		}
+	}
+}
+
+void* esperarVRR (void* pcbReady) {
 	PCB* pcb = (PCB*) pcbReady;
 	pcb->tiempoEjecutando = 0;
 	while (1) {
