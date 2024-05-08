@@ -134,37 +134,36 @@ bool iniciarMemoria(){
     return estructurasAdministrativas;//Retorna si se pudieron crear las estructuras administrativas
 }*/
 
-char* BuscarNombreArchivo(uint32_t pid){
-    bool coincideProceso(void* archivo){    //hay un "casteo" de tipos para que coincida con la funcion list_find
-        NombreArchivo *arch = (NombreArchivo*)archivo;
-        return arch->pid == pid;
-    }
-    NombreArchivo* archivo =  list_find(archivosPseudocodigo, coincideProceso);
-    return archivo->nombre;
-}
+// Guarda en una lista de procesos pid y lista de instrucciones
+void GuardarInstrucsDeProceso(uint32_t pid, char* file_name){
+    Proceso * newProceso = malloc(sizeof(Proceso));
+    newProceso->pid = pid;
 
-Instruccion* retornarInstruccionACPU(uint32_t pid, uint32_t pc){
-	Instruccion* instruccion = malloc(sizeof(Instruccion));
+    t_list* listaInstrucciones = list_create();
     char* path = string_new();
-    char linea[60];
-
-    char* file_name = BuscarNombreArchivo(pid);
+    
     string_append(&path, "/home/utnso/scripts-pruebas"); //CAMBIAR A: PATH_INSTRUCCIONES
 	string_append(&path, "/");
 	string_append(&path, file_name);
 
-	FILE* archivoPseudocodigo;
+    FILE* archivoPseudocodigo;
 	archivoPseudocodigo = fopen(path, "r");
-	if(archivoPseudocodigo == NULL) printf("El archivo no existe");    //CAMBIAR A: log_info(info_logger, "No se pudo abrir el archivo");
-
-    for(int i=0; i<pc; i++){ //PREGUNTAR: si pc es 2 va a leer la linea 2
-        strcpy(linea, "");
-        fgets(linea, sizeof(linea), archivoPseudocodigo);
-    }
-	fclose(archivoPseudocodigo);
-
-    printf("Lei: %s\n", linea);
+	if(archivoPseudocodigo == NULL) printf("El archivo no existe"); //CAMBIAR A: log_info(info_logger, "No se pudo abrir el archivo");
     
+    char linea[60];
+    while (!feof(archivoPseudocodigo)) {
+        fgets(linea, sizeof(linea), archivoPseudocodigo);
+        list_add(listaInstrucciones, FormatearInstruccion(linea));
+    }
+    
+    fclose(archivoPseudocodigo);
+    newProceso->instrucciones = listaInstrucciones;
+    list_add(instruccionesDeProcesos, newProceso);
+}
+
+//Pasa una linea de pseudocodigo a nuestro formato Instruccion
+Instruccion* FormatearInstruccion(char* linea){ 
+    Instruccion * instruccion = malloc(sizeof(Instruccion));
     char** partesInstruccion = string_split(linea, " ");
     instruccion->idLength = string_length(partesInstruccion[0]);
     instruccion->id = partesInstruccion[0];
@@ -195,4 +194,15 @@ Instruccion* retornarInstruccionACPU(uint32_t pid, uint32_t pc){
         cantParametros--;
     }
 	return instruccion;
-} 
+}
+
+Instruccion* retornarInstruccionACPU(uint32_t pid,uint32_t pc){
+	bool coincidePid(Proceso* proceso){
+		return proceso->pid == pid;
+	}
+
+	Proceso* proceso = list_find(instruccionesDeProcesos, coincidePid);
+	Instruccion* instruccion = list_get(proceso->instrucciones, pc);
+
+	return instruccion;
+}

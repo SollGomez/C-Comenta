@@ -382,19 +382,13 @@ void realizarPedidoEscritura(int cliente_socket){
 //     enviarOrden(LECTURA_REALIZADA, cliente_socket, info_logger);
 // }
 
-void GuardarNombreArchiv(uint32_t pid, char* file_name){
-    NombreArchivo * archivo = malloc(sizeof(NombreArchivo));
-    archivo->pid = pid;
-    archivo->nombre = file_name;
-    list_add(archivosPseudocodigo, archivo);
-}
 
 void inicializarProceso(int cliente_socket){
 
     char* file_name = recibirEnteroEnteroChar(cliente_socket, &pidGlobal, &sizeGlobal); 
     log_info(info_logger, "%s %d %d", file_name, pidGlobal, sizeGlobal);
 
-    GuardarNombreArchiv(pidGlobal, file_name);
+	GuardarInstrucsDeProceso(pidGlobal, file_name);
 
     crearTablaPaginasProceso(pidGlobal, sizeGlobal);
 	sleep(1);

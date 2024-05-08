@@ -39,7 +39,7 @@ extern t_log* debug_logger;
 extern t_log* info_logger;
 extern t_log* warning_logger;
 extern t_log* error_logger;
-extern t_list* archivosPseudocodigo;
+extern t_list* instruccionesDeProcesos;
 
 extern char* PATH_INSTRUCCIONES;
 

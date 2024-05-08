@@ -7,10 +7,12 @@ t_config *config;
 t_list* tablaGeneral;
 InstruccionPseudo* instrucciones;
 t_log* info_logger;
-t_list *archivosPseudocodigo; 
+t_list *instruccionesDeProcesos;
 
-void pruebaPeque();
+
 void pruebaSol();
+void pruebaSol2();
+void pruebaPeque();
 
 int main(int argc, char* argv[]) {
 	// liberar_conexion(cpu_fd);
@@ -18,14 +20,14 @@ int main(int argc, char* argv[]) {
 	// liberar_conexion(filesystem_fd);
 	// info_logger = log_create("info_logger.log","Memory", true, LOG_LEVEL_INFO);
 	// pthread_t tid[2];
-	config = crearConfig(argv[1]);
+	// config = crearConfig(argv[1]);
 	// PUERTO = config_get_string_value(config, "PUERTO_ESCUCHA");
 	// algoritmo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
-	PATH_INSTRUCCIONES = config_get_string_value(config, "PATH_INSTRUCCIONES");
+	// PATH_INSTRUCCIONES = config_get_string_value(config, "PATH_INSTRUCCIONES");
 	// RETARDO_RESPUESTA = config_get_int_value(config, "RETARDO_RESPUESTA");
 	// tablaGeneral = list_create();
 
-	archivosPseudocodigo = list_create();
+	instruccionesDeProcesos = list_create();
 
 	//iniciarMemoria();
 
@@ -48,31 +50,44 @@ int main(int argc, char* argv[]) {
 // 	return NULL;
 // }
 
-void pruebaSol(){
+void pruebaSol2(){
 	uint32_t pid;
 	uint32_t pc;
 
-	for(int i=0; i<2; i++){
-		char* file_name = string_new();
-		printf("PID: ");
-		scanf("%d", &pid);
-		printf("Nombre Archivo: ");
-		scanf("%s", file_name);
+	printf("Hola, ando :)\n");
+	GuardarInstrucsDeProceso(1, "p1.txt");
+	GuardarInstrucsDeProceso(2, "p2.txt");
+	GuardarInstrucsDeProceso(3, "p3.txt");
 
-		GuardarNombreArchiv(pid, file_name);
-	}
-
-	//printf("Nombre encontrado %s asociado al proceso %d\n", BuscarNombreArchivo(pid), pid);
 	printf("Proceso a buscar: ");
 	scanf("%d", &pid);
 
 	printf("Linea a buscar: ");
 	scanf("%d", &pc);
 
-	Instruccion* instruccion = retornarInstruccionACPU(pid, pc);
-	printf("Cantidad de Parametros: %d \n", instruccion->cantidadParametros);
-	printf("Parametro 5: %s", instruccion->param5);
+	Instruccion* inst = retornarInstruccionACPU(pid, pc);
+	printf("Instruccion: %s ", inst->id);
+	printf("%s %s %s %s %s\n", inst->param1, inst->param2, inst->param3, inst->param4, inst->param5);
 }
+
+void pruebaSol(){
+	printf("Hola, ando :)\n");
+	GuardarInstrucsDeProceso(1, "p1.txt");
+	GuardarInstrucsDeProceso(2, "p2.txt");
+	GuardarInstrucsDeProceso(3, "p3.txt");
+
+	for(int i=0; i<3; i++){
+		Proceso* proceso = list_get(instruccionesDeProcesos, i);
+		printf("\nProceso: %d\n", proceso->pid);
+
+		for(int j=0; j<=list_size(proceso->instrucciones)-1; j++){
+			Instruccion* inst = list_get(proceso->instrucciones, j);
+			printf("Instruccion: %s ", inst->id);
+			printf("%s %s %s %s %s\n", inst->param1, inst->param2, inst->param3, inst->param4, inst->param5);
+		}
+	}
+}
+
 /*
 void pruebaPeque(){
 

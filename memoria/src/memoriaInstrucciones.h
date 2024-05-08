@@ -30,7 +30,10 @@ bool crearSemaforos();
 bool crearEspacioContiguoDeMemoria();
 bool crearEstructurasAdministrativas();
 bool iniciarMemoria();
-char* BuscarNombreArchivo(uint32_t pid); 
+
+
+void GuardarInstrucsDeProceso(uint32_t pid, char* file_name); // Guarda en una lista de procesos pid y lista de instrucciones
+Instruccion* FormatearInstruccion(char* linea); //Pasa una linea de pseudocodigo a nuestro formato Instruccion
 Instruccion* retornarInstruccionACPU(uint32_t pid, uint32_t pc);
 
 
@@ -42,8 +45,8 @@ void liberarTablaDePaginas(uint32_t pid);      //REVISAR
 /*Estructuras de Memoria de instrucciones*/
 typedef struct {
     uint32_t pid;
-    char* nombre;
-} NombreArchivo;
+    t_list* instrucciones;
+} Proceso;
 
 /*Esquema de memoria*/
 
