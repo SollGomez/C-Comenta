@@ -7,7 +7,6 @@ char* path;
 int planificadorLargoAvance;
 int planificadorCortoAvance;
 
-
 void* iniciarConsola () {
 	pthread_mutex_init(&semaforo, NULL);
 	while (1) {

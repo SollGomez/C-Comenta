@@ -311,6 +311,20 @@ void escucharCPU (void) {
 				moverProceso_ExecExit(pcbActualizada);
 				break;
 			}
+
+			case IO_GEN_SLEEP_OPC: {
+				uint32_t tiempoSleep;
+				uint32_t interfaz;
+				PCB* pcbRecibida = recibir_contextoEjecucion_y_uint32_y_uint32(cpuDispatch_fd, interfaz, tiempoSleep);
+				actualizarPcbEjecucion(pcbRecibida);
+				PCB* pcbActualizada = obtenerPcbExec();
+				t_paquete* paquete = crear_paquete(IO_GEN_SLEEP_OPC, info_logger);
+				agregar_a_paquete2(paquete, &tiempoSleep, sizeof(uint32_t));
+				enviar_paquete(paquete, vectorIO[interfaz]);//recibirValor_uint32
+				eliminar_paquete(paquete);
+
+				break;
+			}
 			case -1:
 				log_error(info_logger, "Cliente desconectado de %s...", "CPU");
 				return;
