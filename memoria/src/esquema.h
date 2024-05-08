@@ -12,7 +12,7 @@ typedef struct{
 	int tamanioMemoria;
 	void *espacioDisponible;
 	int memoriaIniciada;
-}espacioContiguoMemoria;
+} espacioContiguoMemoria;
 
 uint32_t buscarMarcoLibre(); //Devuelve el primer marco libre que encuentra
 void marcarMarcoOcupado(int); //Marca como ocupado el marco que le pasemos
@@ -23,9 +23,14 @@ TablaDePaginas* obtenerTablaPorPID(uint32_t); //Devuelve la tabla cuyo PID sea e
 void liberarTablaDePaginas(uint32_t); //Elimina la tabla del proceso de la TablaGeneral
 uint32_t obtenerMarcoDePagina(uint32_t, uint32_t); //Devuelve el numero de marco de la pagina solicitada
 
+
 extern espacioContiguoMemoria espacioUsuario;
 extern TablaDePaginas tablaDePaginas;
 extern int tam_pagina;
 extern bool flagComunicacion;
+
+//Devuelve el valor de la direccion fisica pedida
+void* recibePedidoDeLectura(uint32_t direccionFisica, uint32_t tamanio, uint32_t pid); //REVISAR
+void recibePedidoDeEscritura(int direccionFisica, void* datos, uint32_t tamanio,uint32_t pid); //REVISAR
 
 #endif /* ESQUEMA_H_ */

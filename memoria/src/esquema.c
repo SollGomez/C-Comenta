@@ -81,24 +81,6 @@ TablaDePaginas* obtenerTablaPorPID(uint32_t pid) {
     return NULL;
 }
 
-void liberarTablaDePaginas(uint32_t pid){
-    TablaDePaginas* tabla = obtenerTablaPorPID(pid);
-    TablaDePaginas* tabla2;
-    for (int i=0 ; i<list_size(tablaGeneral); i++){
-        tabla2 = list_get(tablaGeneral,i);
-        if (tabla->pid == tabla2->pid){
-            pthread_mutex_lock(&mutex_tablasPaginas);
-            void* element = list_remove(tablaGeneral, i);
-            pthread_mutex_unlock(&mutex_tablasPaginas);
-            free(tabla->paginas);
-            free(tabla);
-            log_info(info_logger, "Tabla con PID <%d> eliminada de tablaGeneral", pid);
-            return;
-        }
-    }
-    log_info(info_logger, "No se encontró una tabla con PID <%d> en tablaGeneral", pid);
-}
-
 uint32_t obtenerMarcoDePagina(uint32_t pid, uint32_t numeroPagina){
 	TablaDePaginas* tabla = obtenerTablaPorPID(pid);
 	Pagina* pagina = list_get(tabla->paginas, numeroPagina);
@@ -108,4 +90,30 @@ uint32_t obtenerMarcoDePagina(uint32_t pid, uint32_t numeroPagina){
 	}
 	else
 		return -1;//HAY QUE VER QUE PASA SI HAY OUT OF MEMORY
+}
+
+// REVISAR con tp nuevo
+void* recibePedidoDeLectura(uint32_t direccionFisica, uint32_t tamanio, uint32_t pid){	//Devuelve el valor de la direccion fisica pedida
+	uint32_t marcoALeer = direccionFisica / TAM_PAGINA;
+	Pagina* paginaLeida = obtenerPaginaConMarco(marcoALeer);
+	void* datos= malloc(tamanio);
+	log_info(info_logger,"PID: <%d> - Accion: <LEER> - Direccion fisica: <%d>", pid,direccionFisica);
+	char *algoritmo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
+	if (strcmp(algoritmo, "LRU") == 0)
+	            //actualizarTimestamp(paginaLeida);
+    memcpy(datos, espacio_contiguo + direccionFisica, tamanio);
+
+    return datos;
+}
+
+//REVISAR con tp nuevo
+void recibePedidoDeEscritura(int direccionFisica, void* datos, uint32_t tamanio,uint32_t pid){	//Escribir lo indicado a partir de la dirección física pedida
+	uint32_t marcoAEscribir = direccionFisica / TAM_PAGINA;
+	Pagina* paginaModificada = obtenerPaginaConMarco(marcoAEscribir);
+	paginaModificada->modificado = 1;
+	char *algoritmo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
+	if (strcmp(algoritmo, "LRU") == 0)
+	            //actualizarTimestamp(paginaModificada);
+	log_info(info_logger,"PID: <%d> - Accion: <ESCRIBIR> - Direccion fisica: <%d>", pid,direccionFisica);
+	memcpy(espacio_contiguo + direccionFisica, datos, tamanio);
 }

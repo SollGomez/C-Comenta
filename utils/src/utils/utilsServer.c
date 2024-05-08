@@ -1,48 +1,67 @@
 #include "utilsServer.h"
+#define handle_error(msg) \
+           do { perror(msg); exit(EXIT_FAILURE); } while (0)
 
-t_log* logger;
+// t_log* logger;
 
-int iniciar_servidor(char* PUERTO)
-{
-	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	//assert(!"no implementado!");
+int iniciar_servidor(t_log* logger, const char* name, char* puerto) {
+    int socket_servidor;
+    struct addrinfo hints, *servinfo;
 
-	int socket_servidor;
+    // Inicializando hints
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
 
-	struct addrinfo hints, *servinfo;
+    // Recibe los addrinfo
+    getaddrinfo(NULL, puerto, &hints, &servinfo);
 
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
+    bool conecto = false;
 
-	getaddrinfo(NULL, PUERTO, &hints, &servinfo);
+    // Itera por cada addrinfo devuelto
+    for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next) {
+        socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (socket_servidor == -1) // fallo de crear socket
+            continue;
+        int yes=1;
+        setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
+        if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
+            // Si entra aca fallo el bind
+            handle_error("bind");
+            close(socket_servidor);
+            continue;
+        }
+        // Ni bien conecta uno nos vamos del for
+        conecto = true;
+        break;
+    }
 
-	// Creamos el socket de escucha del servidor
-	socket_servidor = socket(servinfo->ai_family,
-							 servinfo->ai_socktype,
-							 servinfo->ai_protocol);
+    if(!conecto) {
+        free(servinfo);
+        return 0;
+    }
 
-	// Asociamos el socket a un puerto
-	bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen);
+    listen(socket_servidor, SOMAXCONN); // Escuchando (hasta SOMAXCONN conexiones simultaneas)
 
-	// Escuchamos las conexiones entrantes
-	listen(socket_servidor, SOMAXCONN);
+    // Aviso al logger
+    log_info(logger, "Escuchando en %s (%s)\n", puerto, name);
 
-	freeaddrinfo(servinfo);
-	log_trace(logger, "Listo para escuchar a mi cliente");
+    freeaddrinfo(servinfo);
 
-	return socket_servidor;
+    return socket_servidor;
 }
 
 int esperar_cliente(int socket_servidor)
 {
 	// Quitar esta línea cuando hayamos terminado de implementar la funcion
 	//assert(!"no implementado!");
-
+	t_log* logger_espera;
+	logger_espera=log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
 	// Aceptamos un nuevo cliente
 	int socket_cliente=accept(socket_servidor, NULL, NULL);
-	log_info(logger, "Se conecto un cliente!");
+	log_info(logger_espera, "Se conecto un cliente!");
+	log_destroy(logger_espera);
 
 	return socket_cliente;
 }
@@ -85,7 +104,6 @@ void recibir_mensaje(int socket_cliente)
 {
 	int size;
 	char* buffer = recibir_buffer(&size, socket_cliente);
-	log_info(logger, "Me llego el mensaje %s", buffer);
 	free(buffer);
 }
 

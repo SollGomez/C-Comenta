@@ -35,7 +35,11 @@ typedef struct{
 } TablaDePaginas;
 
 typedef struct{
-	 uint32_t marco;
+	uint32_t marco;
+    uint32_t presencia;  //revisar si sirve
+	uint32_t modificado; //revisar si sirve
+	uint32_t posSwap;    //revisar si sirve
+	uint64_t timestamp;  //revisar si sirve
 } Pagina;
 
 typedef enum {

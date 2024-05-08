@@ -33,6 +33,12 @@ bool iniciarMemoria();
 char* BuscarNombreArchivo(uint32_t pid); 
 Instruccion* retornarInstruccionACPU(uint32_t pid, uint32_t pc);
 
+
+//REVISAR
+Pagina* obtenerPaginaConMarco(uint32_t marco); //REVISAR
+void liberarTablaDePaginas(uint32_t pid);      //REVISAR
+
+
 /*Estructuras de Memoria de instrucciones*/
 typedef struct {
     uint32_t pid;

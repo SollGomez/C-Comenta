@@ -89,6 +89,39 @@ bool crearEspacioContiguoDeMemoria(){
     return true;
 }
 
+//REVISAR
+void liberarTablaDePaginas(uint32_t pid){
+    TablaDePaginas* tabla = obtenerTablaPorPID(pid);
+    TablaDePaginas* tabla2;
+    for (int i=0 ; i<list_size(tablaGeneral); i++){
+        tabla2 = list_get(tablaGeneral,i);
+        if (tabla->pid == tabla2->pid){
+            pthread_mutex_lock(&mutex_tablasPaginas);
+            // void* element = list_remove(tablaGeneral, i); //no se usa...
+            pthread_mutex_unlock(&mutex_tablasPaginas);
+            free(tabla->paginas);
+            free(tabla);
+            log_info(info_logger, "Tabla con PID <%d> eliminada de tablaGeneral", pid);
+            return;
+        }
+    }
+    log_info(info_logger, "No se encontró una tabla con PID <%d> en tablaGeneral", pid);
+}
+
+//REVISAR
+Pagina* obtenerPaginaConMarco(uint32_t marco){
+    for (int i = 0; i < list_size(tablaGeneral); i++) {
+        TablaDePaginas* tabla = list_get(tablaGeneral, i);
+        for (int j = 0; j < list_size(tabla->paginas); j++) {
+            Pagina* pagina = list_get(tabla->paginas, j);
+            if (pagina->marco == marco)
+                return pagina;
+        }
+    }
+    printf("El marco solicitado está vacío");
+    return NULL;
+}
+
 /*bool crearEstructurasAdministrativas(){
     bool comp1 = crearSemaforos();
     bool comp2 = crearEspacioContiguoDeMemoria();

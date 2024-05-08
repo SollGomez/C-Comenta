@@ -18,10 +18,10 @@ int main(int argc, char* argv[]) {
 	// liberar_conexion(filesystem_fd);
 	// info_logger = log_create("info_logger.log","Memory", true, LOG_LEVEL_INFO);
 	// pthread_t tid[2];
-	// config = crearConfig(argv[1]);
+	config = crearConfig(argv[1]);
 	// PUERTO = config_get_string_value(config, "PUERTO_ESCUCHA");
 	// algoritmo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
-	// PATH_INSTRUCCIONES = config_get_string_value(config, "PATH_INSTRUCCIONES");
+	PATH_INSTRUCCIONES = config_get_string_value(config, "PATH_INSTRUCCIONES");
 	// RETARDO_RESPUESTA = config_get_int_value(config, "RETARDO_RESPUESTA");
 	// tablaGeneral = list_create();
 
@@ -51,9 +51,9 @@ int main(int argc, char* argv[]) {
 void pruebaSol(){
 	uint32_t pid;
 	uint32_t pc;
-	char* file_name = string_new();
 
 	for(int i=0; i<2; i++){
+		char* file_name = string_new();
 		printf("PID: ");
 		scanf("%d", &pid);
 		printf("Nombre Archivo: ");
@@ -72,7 +72,6 @@ void pruebaSol(){
 	Instruccion* instruccion = retornarInstruccionACPU(pid, pc);
 	printf("Cantidad de Parametros: %d \n", instruccion->cantidadParametros);
 	printf("Parametro 5: %s", instruccion->param5);
-
 }
 /*
 void pruebaPeque(){

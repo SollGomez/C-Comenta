@@ -1,4 +1,4 @@
-#include "comunicacion.h"
+#include <comunicacion.h>
 #include "memoriaInstrucciones.h"
 
 int memoria_fd;
@@ -9,8 +9,8 @@ t_log* logger;
 
 // int RETARDO_RESPUESTA;
 // pthread_mutex_t mutexFS;
-// uint32_t pidGlobal;
-// uint32_t sizeGlobal;
+uint32_t pidGlobal;
+uint32_t sizeGlobal;
 
 
 // int conectarModulo(char *modulo){
@@ -45,14 +45,14 @@ t_log* logger;
 
 // 	return conexion;
 // }
-/*
+
 int recibirConexion(char *puerto) {
 	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
 	pthread_t tid[2];
-	pthread_t hilosIO[4];
-	int contadorIO=0;
+//	pthread_t hilosIO[4];
+//	int contadorIO=0;
 
-	memoria_fd = iniciar_servidor(logger, "Server Memoria", puerto);
+	memoria_fd = iniciar_servidor(logger, "Server Memoria" , puerto);
 	log_info(logger, "Servidor listo para recibir a los clientes");
 
 	cpu_fd = esperar_cliente(memoria_fd);
@@ -104,7 +104,7 @@ void cualInterfaz(int tipoInterfaz){
 	}
 
 	log_destroy(logger);
-}*/
+}
 
  void *recibirCPU(void){
  		while(1) {
@@ -130,20 +130,20 @@ void cualInterfaz(int tipoInterfaz){
 					realizarPedidoEscritura(cpu_fd);
 					break;
 
-// 				case SOLICITUDINSTRUCCION:    //HAY QUE VER BIEN CON LAS NUEVAS FUNCIONES COMO SERIA
-// 					lista = recibirListaUint32_t(cpu_fd);
-// 					t_paquete* paquete = crear_paquete(SOLICITUDINSTRUCCION, info_logger);
-// 					Instruccion* instruccion;
-// 					log_info(logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
-// 					instruccion = retornarInstruccionACPU(*(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
-// 					usleep(RETARDO_RESPUESTA*1000);
-// 					log_info(info_logger, "instruccion: %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2);
-// 					agregar_instruccion_a_paquete(paquete, instruccion);
-// 					enviar_paquete(paquete, cpu_fd);
-// 					eliminar_paquete(paquete);
-// //					list_clean(lista);
-// 					list_destroy_and_destroy_elements(lista, free); // ESTO ERA SOLO LIST_DESTROY
-// 					break;
+				case SOLICITUDINSTRUCCION:    //HAY QUE VER BIEN CON LAS NUEVAS FUNCIONES COMO SERIA
+					lista = recibirListaUint32_t(cpu_fd);
+					t_paquete* paquete = crear_paquete(SOLICITUDINSTRUCCION, info_logger);
+					Instruccion* instruccion;
+					log_info(logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
+					instruccion = retornarInstruccionACPU(*(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1)); // pid y pc
+					usleep(RETARDO_RESPUESTA*1000);
+					log_info(info_logger, "instruccion: %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2);
+					agregar_instruccion_a_paquete(paquete, instruccion);
+					enviar_paquete(paquete, cpu_fd);
+					eliminar_paquete(paquete);
+//					list_clean(lista);
+//					list_destroy_and_destroy_elements(lista, free); // ESTO ERA SOLO LIST_DESTROY
+					break;
 				case -1:
 					log_error(logger, "el cliente se desconecto.");
 
@@ -157,26 +157,27 @@ void cualInterfaz(int tipoInterfaz){
  		}
  }
 
-// void *recibirIO(int interfaz_fd){
-//  	while(1) {
-//  		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex
-// // 		pthread_mutex_lock(&mutexFS);
+void *recibirIO(int interfaz_fd){
+  	while(1) {
+  		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex
+// 		pthread_mutex_lock(&mutexFS);
 
 //  		t_list *lista = list_create();
-//  		switch (cod_op) {
-// 			case ACCESO_PEDIDO_LECTURA:
+  		switch (cod_op) {
+ 			case ACCESO_PEDIDO_LECTURA:
 // 				realizarPedidoEscrituraFs(filesystem_fd);
+ 				break;
 
-// 				break;
-// 			case ACCESO_PEDIDO_ESCRITURA:
+ 			case ACCESO_PEDIDO_ESCRITURA:
 // 				realizarPedidoLecturaFs(filesystem_fd);
+ 				break;
 
-// 				break;
 // 			case PEDIR_SWAP:
 // 				lista = recibirListaUint32_t(filesystem_fd);
 // 				cargarPaginasEnTabla(pidGlobal, sizeGlobal, lista);
 // 				list_destroy_and_destroy_elements(lista, free); //LINEA AGREGADA
-// 				break;
+ 				break;
+
 // 			case LECTURA_BLOQUE_SWAP:
 // 				t_datos* unosDatos = malloc(sizeof(t_datos));
 // 				void* datos;
@@ -190,20 +191,19 @@ void cualInterfaz(int tipoInterfaz){
 // 				free(unosDatos);
 // 				list_destroy_and_destroy_elements(listaConSwap, free); //LINEA AGREGADA
 // 				break;
-//  			 case -1:
-//  				 log_error(logger, "el cliente se desconecto.");
+  			 case -1:
+  				 log_error(logger, "el cliente se desconecto.");
 
-//  				 log_error(logger, "Terminando servidor.FILESYSTEM");
-//  				 return NULL;
+  				 log_error(logger, "Terminando servidor.FILESYSTEM");
+  				 return NULL;
+  			 default:
 
-//  			 default:
-
-//  				log_warning(logger,"Operacion desconocida. No quieras meter la pata %d ", cod_op);
-//  				break;
-//  		}
+  				log_warning(logger,"Operacion desconocida. No quieras meter la pata %d ", cod_op);
+  				break;
+  		}
 //  		//pthread_mutex_unlock(&mutexFS);
-//  	}
-//  }
+  	}
+}
 
 
 void *recibirKernel(){
@@ -241,15 +241,15 @@ void *recibirKernel(){
  	}
  }
 
-// t_log* iniciar_logger(char *nombre){
-// 	t_log* nuevo_logger;
-// 	nuevo_logger = log_create(nombre, "tp", 1, LOG_LEVEL_INFO);
-// 	if(nuevo_logger == NULL){
-// 		printf("No se genero de forma correcta el logger");
-// 		exit(1);
-// 	}
-// 	return nuevo_logger;
-// }
+t_log* iniciar_logger(char *nombre){
+	t_log* nuevo_logger;
+	nuevo_logger = log_create(nombre, "tp", 1, LOG_LEVEL_INFO);
+	if(nuevo_logger == NULL){
+		printf("No se genero de forma correcta el logger");
+		exit(1);
+	}
+	return nuevo_logger;
+}
 
 // void leer_consola(t_log* logger){
 // 	char* leido;
