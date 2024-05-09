@@ -46,6 +46,7 @@ void simularRetardoSinMensaje(int retardo){
     usleep(retardo*1000);
 }
 
+//VER porque esta fea... es nueva
 void agregar_instruccion_a_paquete(t_paquete *paquete, Instruccion* instruccion) {
 
         agregar_a_paquete2(paquete, &(instruccion->cantidadParametros), sizeof(uint8_t));
@@ -64,6 +65,28 @@ void agregar_instruccion_a_paquete(t_paquete *paquete, Instruccion* instruccion)
             agregar_a_paquete2(paquete, instruccion->param1, instruccion->param1Length+1);
             agregar_a_paquete2(paquete,  &(instruccion->param2Length), sizeof(uint8_t));
             agregar_a_paquete2(paquete, instruccion->param2, instruccion->param2Length+1);        }
+        
+        if(instruccion->cantidadParametros == 3){
+
+            agregar_a_paquete2(paquete, &(instruccion->param1Length), sizeof(uint8_t));
+            agregar_a_paquete2(paquete, instruccion->param1, instruccion->param1Length+1);
+            agregar_a_paquete2(paquete,  &(instruccion->param2Length), sizeof(uint8_t));
+            agregar_a_paquete2(paquete, instruccion->param2, instruccion->param2Length+1); 
+            agregar_a_paquete2(paquete,  &(instruccion->param3Length), sizeof(uint8_t));
+            agregar_a_paquete2(paquete, instruccion->param3, instruccion->param3Length+1);        }
+        
+        if(instruccion->cantidadParametros == 5){
+
+            agregar_a_paquete2(paquete, &(instruccion->param1Length), sizeof(uint8_t));
+            agregar_a_paquete2(paquete, instruccion->param1, instruccion->param1Length+1);
+            agregar_a_paquete2(paquete,  &(instruccion->param2Length), sizeof(uint8_t));
+            agregar_a_paquete2(paquete, instruccion->param2, instruccion->param2Length+1); 
+            agregar_a_paquete2(paquete,  &(instruccion->param3Length), sizeof(uint8_t));
+            agregar_a_paquete2(paquete, instruccion->param3, instruccion->param3Length+1);
+            agregar_a_paquete2(paquete,  &(instruccion->param4Length), sizeof(uint8_t));
+            agregar_a_paquete2(paquete, instruccion->param4, instruccion->param4Length+1);
+            agregar_a_paquete2(paquete,  &(instruccion->param5Length), sizeof(uint8_t));
+            agregar_a_paquete2(paquete, instruccion->param5, instruccion->param5Length+1);         }
 
 }
 

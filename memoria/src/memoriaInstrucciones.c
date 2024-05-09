@@ -147,7 +147,7 @@ void GuardarInstrucsDeProceso(uint32_t pid, char* file_name){
 
     FILE* archivoPseudocodigo;
 	archivoPseudocodigo = fopen(path, "rb");
-	if(archivoPseudocodigo == NULL) printf("El archivo no existe"); //CAMBIAR A: log_info(info_logger, "No se pudo abrir el archivo");
+	if(archivoPseudocodigo == NULL) log_info(info_logger, "No se pudo abrir el archivo");
     
     char linea[60];
     while (!feof(archivoPseudocodigo)) {
@@ -196,8 +196,8 @@ Instruccion* FormatearInstruccion(char* linea){
 }
 
 Instruccion* retornarInstruccionACPU(uint32_t pid,uint32_t pc){
-	bool coincidePid(Proceso* proceso){
-		return proceso->pid == pid;
+	bool coincidePid(void* proceso){
+		return ((Proceso*)proceso)->pid == pid;
 	}
 
 	Proceso* proceso = list_find(instruccionesDeProcesos, coincidePid);

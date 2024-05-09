@@ -130,14 +130,15 @@ void cualInterfaz(int tipoInterfaz){
 					realizarPedidoEscritura(cpu_fd);
 					break;
 
-				case SOLICITUDINSTRUCCION:    //HAY QUE VER BIEN CON LAS NUEVAS FUNCIONES COMO SERIA
+				case SOLICITUDINSTRUCCION:
 					lista = recibirListaUint32_t(cpu_fd);
 					t_paquete* paquete = crear_paquete(SOLICITUDINSTRUCCION, info_logger);
 					Instruccion* instruccion;
 					log_info(logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
 					instruccion = retornarInstruccionACPU(*(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1)); // pid y pc
 					usleep(RETARDO_RESPUESTA*1000);
-					log_info(info_logger, "instruccion: %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2);
+					log_info(info_logger, "instruccion: %s %s %s %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2
+																			, instruccion->param3, instruccion->param4, instruccion->param5);
 					agregar_instruccion_a_paquete(paquete, instruccion);
 					enviar_paquete(paquete, cpu_fd);
 					eliminar_paquete(paquete);
@@ -409,21 +410,19 @@ void finalizarProceso(int cliente_socket){
 			marcarMarcoLibre(pagina->marco);
 		}
 	}
-//    bool buscarPorPID(ProgramaDeProceso* programa){
-// 	if(programa->pid == pid) return true;
-// 	return false;
-//    }
 
-//    ProgramaDeProceso* programa = list_find(instruccionesEnMemoria, buscarPorPID);
-//    for(int i=0;i<list_size(programa->instrucciones);i++){
-// 	   Instruccion* instruccion = list_get(programa->instrucciones,i);
-// 	   free(instruccion->id);
-// 	   free(instruccion->param1);
-// 	   free(instruccion->param2);
-//    }
+	bool buscarPorPID(void* programa){
+		return ((Proceso*)programa)->pid == pid;
+	}
 
-//    list_remove_by_condition(instruccionesEnMemoria,buscarPorPID);
-//    free(programa);
+	Proceso* programa = list_find(instruccionesDeProcesos, buscarPorPID);
+	for(int i=0;i<list_size(programa->instrucciones);i++){
+		Instruccion* instruccion = list_get(programa->instrucciones,i);
+		free(instruccion);
+	}
+
+	list_remove_by_condition(instruccionesDeProcesos, buscarPorPID);
+	free(programa);
 
     if(tabla!=NULL)
     	liberarTablaDePaginas(pid);

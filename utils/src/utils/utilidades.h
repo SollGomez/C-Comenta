@@ -11,7 +11,7 @@ extern int idProcesoGlobal;
 t_list* recibirListaUint32_t(int);
 void simularRetardoSinMensaje(int);
 void enviarValor_uint32(uint32_t, int, op_code_cliente, t_log *);
-void agregar_instruccion_a_paquete(t_paquete *paquete, Instruccion* instruccion);
+void agregar_instruccion_a_paquete(t_paquete *paquete, Instruccion* instruccion); //VER porque esta fea... es nueva
 bool agregarIntsYDatosAPaquete(t_list* listaInts, t_datos* datos, t_paquete* paquete);
 bool enviarListaIntsYDatos(t_list* listaInts,t_datos* datos, int socket_cliente, t_log* logger, op_code_cliente codigo);
 t_list* recibirListaIntsYDatos(int socket_cliente,t_datos* datos);

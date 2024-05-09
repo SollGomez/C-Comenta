@@ -95,7 +95,7 @@ uint32_t obtenerMarcoDePagina(uint32_t pid, uint32_t numeroPagina){
 // REVISAR con tp nuevo
 void* recibePedidoDeLectura(uint32_t direccionFisica, uint32_t tamanio, uint32_t pid){	//Devuelve el valor de la direccion fisica pedida
 	uint32_t marcoALeer = direccionFisica / TAM_PAGINA;
-	Pagina* paginaLeida = obtenerPaginaConMarco(marcoALeer);
+	// Pagina* paginaLeida = obtenerPaginaConMarco(marcoALeer);
 	void* datos= malloc(tamanio);
 	log_info(info_logger,"PID: <%d> - Accion: <LEER> - Direccion fisica: <%d>", pid,direccionFisica);
 	char *algoritmo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");

@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include "main.h"
 #include "esquema.h"
-
+#include "memoriaInstrucciones.h"
 
 extern t_config *config;
 

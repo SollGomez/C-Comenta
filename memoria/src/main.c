@@ -17,13 +17,13 @@ int main(int argc, char* argv[]) {
 	// liberar_conexion(cpu_fd);
 	// liberar_conexion(kernel_fd);
 	// liberar_conexion(filesystem_fd);
-	// info_logger = log_create("info_logger.log","Memory", true, LOG_LEVEL_INFO);
+	info_logger = log_create("info_logger.log","Memory", true, LOG_LEVEL_INFO);
 	// pthread_t tid[2];
 	config = crearConfig(argv[1]);
 	// PUERTO = config_get_string_value(config, "PUERTO_ESCUCHA");
 	// algoritmo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
 	PATH_INSTRUCCIONES = config_get_string_value(config, "PATH_INSTRUCCIONES");
-	// RETARDO_RESPUESTA = config_get_int_value(config, "RETARDO_RESPUESTA");
+	RETARDO_RESPUESTA = config_get_int_value(config, "RETARDO_RESPUESTA");
 	// tablaGeneral = list_create();
 
 	instruccionesDeProcesos = list_create();
