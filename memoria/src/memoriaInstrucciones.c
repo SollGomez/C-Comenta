@@ -141,13 +141,12 @@ void GuardarInstrucsDeProceso(uint32_t pid, char* file_name){
 
     t_list* listaInstrucciones = list_create();
     char* path = string_new();
-    
-    string_append(&path, "/home/utnso/scripts-pruebas"); //CAMBIAR A: PATH_INSTRUCCIONES
+    string_append(&path, PATH_INSTRUCCIONES);
 	string_append(&path, "/");
 	string_append(&path, file_name);
 
     FILE* archivoPseudocodigo;
-	archivoPseudocodigo = fopen(path, "r");
+	archivoPseudocodigo = fopen(path, "rb");
 	if(archivoPseudocodigo == NULL) printf("El archivo no existe"); //CAMBIAR A: log_info(info_logger, "No se pudo abrir el archivo");
     
     char linea[60];

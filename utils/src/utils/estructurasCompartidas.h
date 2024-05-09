@@ -16,7 +16,7 @@
 typedef struct {
 	uint8_t idLength;
     char* id;
-    uint8_t cantidadParametros; //PREGUNTAR: solo parametros o instruccion + param?
+    uint8_t cantidadParametros; //PREGUNTAR: solo cant de parametros (no cuenta id)
     uint8_t param1Length;
     char* param1;
     uint8_t param2Length;
