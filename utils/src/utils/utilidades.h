@@ -6,8 +6,6 @@
 
 extern int idProcesoGlobal;
 
-//REVISAR TODAS
-
 t_list* recibirListaUint32_t(int);
 void simularRetardoSinMensaje(int);
 void enviarValor_uint32(uint32_t, int, op_code_cliente, t_log *);

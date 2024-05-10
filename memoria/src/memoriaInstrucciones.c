@@ -29,7 +29,7 @@ int TAM_MEMORIA;
 int TAM_PAGINA;
 int CANT_MARCOS;
 
-/*bool inicializarBitmap() {
+bool inicializarBitmap() {
     TAM_PAGINA = config_get_int_value(config, "TAM_PAGINA");
     TAM_MEMORIA = config_get_int_value(config, "TAM_MEMORIA");
     CANT_MARCOS = TAM_MEMORIA / TAM_PAGINA;
@@ -43,7 +43,7 @@ int CANT_MARCOS;
         marcosAsignados[i] = 0;
     }
     return true;
-}*/
+}
 
 void liberarMemory() {
     free(marcosAsignados);
@@ -97,7 +97,7 @@ void liberarTablaDePaginas(uint32_t pid){
         tabla2 = list_get(tablaGeneral,i);
         if (tabla->pid == tabla2->pid){
             pthread_mutex_lock(&mutex_tablasPaginas);
-            // void* element = list_remove(tablaGeneral, i); //no se usa...
+            void* element = list_remove(tablaGeneral, i);
             pthread_mutex_unlock(&mutex_tablasPaginas);
             free(tabla->paginas);
             free(tabla);
@@ -122,7 +122,7 @@ Pagina* obtenerPaginaConMarco(uint32_t marco){
     return NULL;
 }
 
-/*bool crearEstructurasAdministrativas(){
+bool crearEstructurasAdministrativas(){
     bool comp1 = crearSemaforos();
     bool comp2 = crearEspacioContiguoDeMemoria();
     bool comp3 = inicializarBitmap();
@@ -132,7 +132,7 @@ Pagina* obtenerPaginaConMarco(uint32_t marco){
 bool iniciarMemoria(){
     bool estructurasAdministrativas = crearEstructurasAdministrativas();//Crea y comprueba que se hayan inicializado todas las estructuras administrativas
     return estructurasAdministrativas;//Retorna si se pudieron crear las estructuras administrativas
-}*/
+}
 
 // Guarda en una lista de procesos pid y lista de instrucciones
 void GuardarInstrucsDeProceso(uint32_t pid, char* file_name){
@@ -147,8 +147,10 @@ void GuardarInstrucsDeProceso(uint32_t pid, char* file_name){
 
     FILE* archivoPseudocodigo;
 	archivoPseudocodigo = fopen(path, "rb");
-	if(archivoPseudocodigo == NULL) log_info(info_logger, "No se pudo abrir el archivo");
-    
+	if(archivoPseudocodigo == NULL){
+        log_info(info_logger, "No se pudo abrir el archivo");
+        exit(EXIT_FAILURE);
+    }
     char linea[60];
     while (!feof(archivoPseudocodigo)) {
         fgets(linea, sizeof(linea), archivoPseudocodigo);

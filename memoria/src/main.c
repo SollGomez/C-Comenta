@@ -12,6 +12,7 @@ t_list *instruccionesDeProcesos;
 
 void pruebaSol();
 void pruebaPeque();
+void prueba();
 
 int main(int argc, char* argv[]) {
 	// liberar_conexion(cpu_fd);
@@ -21,27 +22,25 @@ int main(int argc, char* argv[]) {
 	// pthread_t tid[2];
 	config = crearConfig(argv[1]);
 	// PUERTO = config_get_string_value(config, "PUERTO_ESCUCHA");
-	// algoritmo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
-	PATH_INSTRUCCIONES = config_get_string_value(config, "PATH_INSTRUCCIONES");
-	RETARDO_RESPUESTA = config_get_int_value(config, "RETARDO_RESPUESTA");
-	// tablaGeneral = list_create();
+	// PATH_INSTRUCCIONES = config_get_string_value(config, "PATH_INSTRUCCIONES");
+	// RETARDO_RESPUESTA = config_get_int_value(config, "RETARDO_RESPUESTA");
+	tablaGeneral = list_create();
 
-	instruccionesDeProcesos = list_create();
+	// instruccionesDeProcesos = list_create();
 
-	//iniciarMemoria();
+	iniciarMemoria();
 
-	pruebaSol();
+	prueba();
 
 	//pthread_create(&tid[0], NULL, recibir, NULL);
 	//pthread_join(tid[0], NULL);
 
-
-//	config_destroy(config);
+	config_destroy(config);
 //	list_destroy(tablaGeneral);
 //	log_destroy(info_logger);
 //	free(espacio_contiguo);
 	//return EXIT_SUCCESS;
-	list_destroy(instruccionesDeProcesos);
+//	list_destroy(instruccionesDeProcesos);
 	return 0;
 }
 
@@ -102,7 +101,29 @@ void pruebaSol(){
 	}
 }	
 
-/*
+void prueba(){
+	uint32_t rta = 0;
+
+	crearTablaPaginasProceso(1,64);
+	crearTablaPaginasProceso(2,64);
+
+	TablaDePaginas* tabla1 = obtenerTablaPorPID(1);
+	TablaDePaginas* tabla2 = obtenerTablaPorPID(2);
+
+	printf("La tabla de paginas del proceso con PID 1 tiene estas paginas: %d\n", list_size(tabla1->paginas));
+	rta = resizeProceso(1, 128);
+	printf("La tabla de paginas del proceso con PID 1 tiene estas paginas despues del resize: %d\n", list_size(tabla1->paginas));
+	printf("La tabla de paginas del proceso con PID 2 tiene estas paginas: %d\n", list_size(tabla2->paginas));
+	resizeProceso(2, 32);
+	printf("La tabla de paginas del proceso con PID 2 tiene estas paginas despues del resize: %d\n", list_size(tabla2->paginas));
+
+	rta = resizeProceso(1, 128);
+	if(rta == 0){
+		printf("se pudo hacer resize\n");
+	}else
+		printf("No se pudo hacer resize\n");
+}
+
 void pruebaPeque(){
 
 	int marco;
@@ -136,6 +157,9 @@ void pruebaPeque(){
 	Pagina* pagina2 = list_get(tabla->paginas, 1);
 	printf("El marco de la pagina 1 del proceso 1 es: %d\n", pagina1->marco);
 	printf("El marco de la pagina 2 del proceso 1 es: %d\n", pagina2->marco);
+	uint32_t pagsVacias = cantidadMarcosVacios();
+	printf("Pags vacias: %d\n", pagsVacias);
+
 	finalizacionDeProceso(1);
 	printf("El tamaño de la TablaGeneral es (debe ser 0): %u\n", list_size(tablaGeneral));
-}*/
+}

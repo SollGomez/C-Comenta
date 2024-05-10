@@ -48,7 +48,7 @@ void crearTablaPaginasProceso(uint32_t pid, uint32_t size){
 	        exit(EXIT_FAILURE);
 	    }
 		nuevaPagina->marco = buscarMarcoLibre();
-        printf("MARCO ELEGIDO PARA LA PAGINA %d: %d\n", i, nuevaPagina->marco);
+        //printf("MARCO ELEGIDO PARA LA PAGINA %d: %d\n", i, nuevaPagina->marco);
         list_add(nuevaTabla->paginas, nuevaPagina);
 		marcarMarcoOcupado(nuevaPagina->marco);
 	}
@@ -92,15 +92,10 @@ uint32_t obtenerMarcoDePagina(uint32_t pid, uint32_t numeroPagina){
 		return -1;//HAY QUE VER QUE PASA SI HAY OUT OF MEMORY
 }
 
-// REVISAR con tp nuevo
+
 void* recibePedidoDeLectura(uint32_t direccionFisica, uint32_t tamanio, uint32_t pid){	//Devuelve el valor de la direccion fisica pedida
-	uint32_t marcoALeer = direccionFisica / TAM_PAGINA;
-	// Pagina* paginaLeida = obtenerPaginaConMarco(marcoALeer);
 	void* datos= malloc(tamanio);
 	log_info(info_logger,"PID: <%d> - Accion: <LEER> - Direccion fisica: <%d>", pid,direccionFisica);
-	char *algoritmo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
-	if (strcmp(algoritmo, "LRU") == 0)
-	            //actualizarTimestamp(paginaLeida);
     memcpy(datos, espacio_contiguo + direccionFisica, tamanio);
 
     return datos;
@@ -108,12 +103,64 @@ void* recibePedidoDeLectura(uint32_t direccionFisica, uint32_t tamanio, uint32_t
 
 //REVISAR con tp nuevo
 void recibePedidoDeEscritura(int direccionFisica, void* datos, uint32_t tamanio,uint32_t pid){	//Escribir lo indicado a partir de la dirección física pedida
-	uint32_t marcoAEscribir = direccionFisica / TAM_PAGINA;
-	Pagina* paginaModificada = obtenerPaginaConMarco(marcoAEscribir);
-	paginaModificada->modificado = 1;
-	char *algoritmo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
-	if (strcmp(algoritmo, "LRU") == 0)
-	            //actualizarTimestamp(paginaModificada);
 	log_info(info_logger,"PID: <%d> - Accion: <ESCRIBIR> - Direccion fisica: <%d>", pid,direccionFisica);
 	memcpy(espacio_contiguo + direccionFisica, datos, tamanio);
+}
+
+// resize
+uint32_t resizeProceso(uint32_t pid, uint32_t tamanio) {
+    //printf("\nEstoy en resize\n");
+	uint32_t respuesta = 1;
+    TablaDePaginas* tabla = obtenerTablaPorPID(pid);
+    
+    int tamOriginal = list_size(tabla->paginas) * TAM_PAGINA;
+
+	if(list_size(tabla->paginas)*TAM_PAGINA >= tamanio){
+		achicar(tabla, tamanio);
+        log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Reducir: <%d>", pid, tamOriginal, tamanio);
+	}else{
+		respuesta = agrandar(tabla, tamanio);
+        log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Ampliar: <%d>", pid, tamOriginal, tamanio);
+	}
+	return respuesta;
+}
+
+void achicar(TablaDePaginas* tabla, uint32_t tamanio){
+    int tope = tamanio / TAM_PAGINA; //pags finales
+
+    for(int i=list_size(tabla->paginas); i>tope; i--){
+        Pagina* pag = list_get(tabla->paginas, i-1);
+        list_remove(tabla->paginas, i-1);
+        liberarPagina(pag);
+    }
+}
+
+uint32_t cantidadMarcosVacios() {
+    uint32_t marcosVacios = 0;
+
+    for (uint32_t i = 0; i < CANT_MARCOS; ++i) {
+        if (marcosAsignados[i] == 0)
+            marcosVacios ++;
+    }
+    return marcosVacios;
+}
+
+uint32_t agrandar(TablaDePaginas* tabla, uint32_t tamanio){ //ANDA :)
+    int pagsIniciales = list_size(tabla->paginas);
+    int pagsFinales = tamanio / TAM_PAGINA; //pags finales
+
+    if(cantidadMarcosVacios() >= pagsFinales-pagsIniciales){
+        for(int i=list_size(tabla->paginas); i<pagsFinales; i++){
+            Pagina* nuevaPagina = malloc(sizeof(Pagina));
+            if (nuevaPagina == NULL) {
+                printf("Error: No se pudo asignar memoria para nuevaPagina\n");
+                exit(EXIT_FAILURE);
+            }
+            nuevaPagina->marco = buscarMarcoLibre();
+            //printf("MARCO ELEGIDO PARA LA PAGINA %d: %d\n", i, nuevaPagina->marco);
+            list_add(tabla->paginas, nuevaPagina);
+            marcarMarcoOcupado(nuevaPagina->marco);
+        }
+    }else return -1; //VER retorna Out Of Memory.
+    return 1;
 }

@@ -23,6 +23,10 @@ TablaDePaginas* obtenerTablaPorPID(uint32_t); //Devuelve la tabla cuyo PID sea e
 void liberarTablaDePaginas(uint32_t); //Elimina la tabla del proceso de la TablaGeneral
 uint32_t obtenerMarcoDePagina(uint32_t, uint32_t); //Devuelve el numero de marco de la pagina solicitada
 
+uint32_t resizeProceso(uint32_t pid, uint32_t tamanio);
+uint32_t agrandar(TablaDePaginas* tabla, uint32_t tamanio);
+void achicar(TablaDePaginas* tabla, uint32_t tamanio);
+uint32_t cantidadMarcosVacios();
 
 extern espacioContiguoMemoria espacioUsuario;
 extern TablaDePaginas tablaDePaginas;
@@ -30,7 +34,7 @@ extern int tam_pagina;
 extern bool flagComunicacion;
 
 //Devuelve el valor de la direccion fisica pedida
-void* recibePedidoDeLectura(uint32_t direccionFisica, uint32_t tamanio, uint32_t pid); //REVISAR
-void recibePedidoDeEscritura(int direccionFisica, void* datos, uint32_t tamanio,uint32_t pid); //REVISAR
+void* recibePedidoDeLectura(uint32_t direccionFisica, uint32_t tamanio, uint32_t pid);
+void recibePedidoDeEscritura(int direccionFisica, void* datos, uint32_t tamanio,uint32_t pid);
 
 #endif /* ESQUEMA_H_ */
