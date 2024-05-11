@@ -3,7 +3,6 @@
 t_config* config;
 
 int main(int argc, char* argv[]) {
-    decir_hola("una Interfaz de Entrada/Salida");
   
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
@@ -11,8 +10,6 @@ int main(int argc, char* argv[]) {
 	crearListas();
 	crearSemaforos();
 	iniciarAtencionPeticiones();
-
-	printf("\n\n PID < HOLA >- < Hola >\n\n");
 
 
 	pthread_t kernel;
@@ -26,9 +23,6 @@ int main(int argc, char* argv[]) {
 	}
 
 	pthread_join(kernel, NULL);
-
-	char nombre[50];
-	//scanf("%s", nombre);
 
 	cerrarPrograma();
     return 0;

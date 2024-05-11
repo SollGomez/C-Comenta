@@ -181,69 +181,139 @@ void *recibirMemoria() {
 
 void *recibirKernel() {
 
-	while(1) {
 
-		pthread_mutex_lock(&mutex_recvKernel);
-		int cod_op = recibir_operacion(kernel_fd);
+	switch (cfg_entradaSalida->TIPO_INTERFAZ_INT)
+    {
+		case 0:  					//STDOUT
+			while(1) {
 
-		switch (cod_op)
-		{
-		case IO_STDOUT_WRITE:
+			pthread_mutex_lock(&mutex_recvKernel);
+			int cod_op = recibir_operacion(kernel_fd);
+
+			switch (cod_op)
+			{
+			case IO_STDOUT_WRITE:
+				
+				solicitudIO_STDOUT_WRITE(&kernel_fd);
+				pthread_mutex_unlock(&mutex_recvKernel);
+				break;
+
+			case -1:
+				log_error(info_logger, "El cliente se desconecto");
+				return NULL;
+				break;
 			
-			solicitudIO_STDOUT_WRITE(&kernel_fd);
-			pthread_mutex_unlock(&mutex_recvKernel);
-			break;
-		
-		case IO_STDIN_READ:
-			
-			solicitudIO_STDIN_READ(&kernel_fd);
-			pthread_mutex_unlock(&mutex_recvKernel);
-			break;
-		
-		case IO_FS_CREATE:
-
-			pthread_mutex_unlock(&mutex_recvKernel);
-			break;
-
-		case IO_FS_DELETE:
-	
-			pthread_mutex_unlock(&mutex_recvKernel);
-			break;
-
-		case IO_FS_READ:
-			
-			pthread_mutex_unlock(&mutex_recvKernel);
-			break;
-
-		case IO_FS_TRUNCATE:
-	
-			pthread_mutex_unlock(&mutex_recvKernel);
-			break;
-
-		case IO_FS_WRITE:
-
-			pthread_mutex_unlock(&mutex_recvKernel);
-			break;
-
-		case IO_GEN_SLEEP: 	
-
-			pthread_t genSleep;
-			pthread_create(&genSleep, NULL, (void *)solicitudIO_GEN_SLEEP, &kernel_fd);
-			pthread_join(genSleep, NULL);
-			pthread_mutex_unlock(&mutex_recvKernel);
-			break;
-		
-		case -1:
-			log_error(info_logger, "El cliente se desconecto");
-			return NULL;
-			break;
-		
-		default:
-			log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-			pthread_mutex_unlock(&mutex_recvKernel);
-			break;
+			default:
+				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+				pthread_mutex_unlock(&mutex_recvKernel);
+				break;
+			}
 		}
-	}
+			break;
+		case 1:  						//STDIN
+			while(1) {
+
+			pthread_mutex_lock(&mutex_recvKernel);
+			int cod_op = recibir_operacion(kernel_fd);
+
+			switch (cod_op)
+			{
+			case IO_STDIN_READ:
+				
+				solicitudIO_STDIN_READ(&kernel_fd);
+				pthread_mutex_unlock(&mutex_recvKernel);
+				break;
+			
+			case -1:
+				log_error(info_logger, "El cliente se desconecto");
+				return NULL;
+				break;
+			
+			default:
+				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+				pthread_mutex_unlock(&mutex_recvKernel);
+				break;
+			}
+		}
+			break;
+		case 2: 					 	//DIALFS
+			while(1) {
+
+			pthread_mutex_lock(&mutex_recvKernel);
+			int cod_op = recibir_operacion(kernel_fd);
+
+			switch (cod_op)
+			{
+			case IO_FS_CREATE:
+
+				pthread_mutex_unlock(&mutex_recvKernel);
+				break;
+
+			case IO_FS_DELETE:
+		
+				pthread_mutex_unlock(&mutex_recvKernel);
+				break;
+
+			case IO_FS_READ:
+				
+				pthread_mutex_unlock(&mutex_recvKernel);
+				break;
+
+			case IO_FS_TRUNCATE:
+		
+				pthread_mutex_unlock(&mutex_recvKernel);
+				break;
+
+			case IO_FS_WRITE:
+
+				pthread_mutex_unlock(&mutex_recvKernel);
+				break;
+			
+			case -1:
+				log_error(info_logger, "El cliente se desconecto");
+				return NULL;
+				break;
+			
+			default:
+				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+				pthread_mutex_unlock(&mutex_recvKernel);
+				break;
+			}
+		}
+			break;
+		case 3:  						//GENERICA
+			while(1) {
+
+				pthread_mutex_lock(&mutex_recvKernel);
+				int cod_op = recibir_operacion(kernel_fd);
+
+				switch (cod_op)
+				{
+				case IO_GEN_SLEEP: 	
+
+					pthread_t genSleep;
+					pthread_create(&genSleep, NULL, (void *)solicitudIO_GEN_SLEEP, &kernel_fd);
+					pthread_join(genSleep, NULL);
+					pthread_mutex_unlock(&mutex_recvKernel);
+					break;
+				
+				case -1:
+					log_error(info_logger, "El cliente se desconecto");
+					return NULL;
+					break;
+				
+				default:
+					log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+					pthread_mutex_unlock(&mutex_recvKernel);
+					break;
+				}
+		}
+			break;
+		default:
+			printf("Esa interfaz no existe :/");
+			break;
+    }
+
 
 	return NULL;
 }
