@@ -9,6 +9,19 @@ bool logsCreados = false;
 bool configCreada = false;
 t_config_entradaSalida* cfg_entradaSalida;
 
+void crearSemaforos() {
+    pthread_mutex_init(&mutex_recvKernel, NULL);
+    pthread_mutex_init(&mutex_recvMemoria, NULL);
+    
+    pthread_mutex_init(&mutex_peticiones_pendientes, NULL);
+
+    sem_init(&sem_contador_peticiones, 0, 0);
+}
+
+void crearListas() {
+   lista_peticiones_pendientes = list_create();
+}
+
 int init_loggers_config(char* path){
 
     trace_logger = log_create("trace_logger.log", "entradaSalida", true, LOG_LEVEL_TRACE);
@@ -70,6 +83,18 @@ int cargar_configuracion(){
 
     cfg_entradaSalida->TIPO_INTERFAZ = config_get_string_value(configuracionEntradasalida, "TIPO_INTERFAZ");
     log_trace(trace_logger, "TIPO_INTERFAZ Cargada Correctamente: %s", cfg_entradaSalida->TIPO_INTERFAZ);
+
+    cfg_entradaSalida->RETRASO_COMPACTACION = config_get_int_value(configuracionEntradasalida, "RETRASO_COMPACTACION");
+    log_trace(trace_logger, "RETRASO_COMPACTACION Cargado Correctamente: %d", cfg_entradaSalida->RETRASO_COMPACTACION);
+
+    if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDOUT") == 0)
+		cfg_entradaSalida->TIPO_INTERFAZ_INT = 0;
+	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDIN") == 0)
+		cfg_entradaSalida->TIPO_INTERFAZ_INT = 1;
+	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS") == 0)
+		cfg_entradaSalida->TIPO_INTERFAZ_INT = 2;
+	else
+		cfg_entradaSalida->TIPO_INTERFAZ_INT = 3;
 
     return true;
 }
