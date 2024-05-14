@@ -165,6 +165,15 @@ void liberarInstruccion(Instruccion * instruccion){
     free(instruccion);
 }
 
+void* recibir_stream(int* size, uint32_t cliente_socket) { //En realidad devuelve el stream, no el t_buffer
+    recv(cliente_socket, size, sizeof(int), MSG_WAITALL);
+    void *buffer = malloc(*size);
+    recv(cliente_socket, buffer, *size, MSG_WAITALL);
+    return buffer;
+}
+
+
+
 bool agregarUint32_tsAPaquete(t_list* listaInts, t_paquete* paquete)
 {
 
@@ -304,6 +313,39 @@ PCB* recibir_contextoEjecucion(int conexion) {
 void liberarPcbCpu(PCB* pcb){
     free(pcb->registros);
     free(pcb);
+t_list* recibirListaUint32_t(int socket_cliente){
+    int tamanio;
+    int desplazamiento = 0;
+    void *buffer = recibir_stream(&tamanio, socket_cliente);
+    t_list* listaInts = list_create();
+    int cantidad_ints = 0;
+    memcpy(&cantidad_ints, buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento+=sizeof(uint8_t);
+
+    for (int i = 0; i < cantidad_ints; ++i) {
+        uint32_t* nuevoEntero = malloc(sizeof(uint32_t));
+        memcpy(nuevoEntero, buffer + desplazamiento, sizeof (uint32_t));
+        desplazamiento+=sizeof(uint32_t);
+        list_add(listaInts, nuevoEntero);
+        //free(nuevoEntero); // Linea que me rompio todo loco, ubiquense. Probablemente un free de kiki seguro.  (bauti)
+    }
+    free(buffer);
+    return listaInts;
+}
+
+
+
+void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger)
+{
+    t_paquete * paquete= crear_paquete(orden, logger);
+    paquete->buffer->size = sizeof(uint32_t);
+    void* stream = malloc(paquete->buffer->size);
+    int offset = 0;
+    memcpy(stream + offset, &valor, sizeof(uint32_t));
+    paquete->buffer->stream = stream;
+    enviar_paquete(paquete,socket);
+    log_info(logger, "se envio el paquete");
+    eliminar_paquete(paquete);
 }
 
 uint32_t recibirValor_uint32(int socket) {
@@ -493,4 +535,64 @@ PCB* recibir_contextoEjecucion_y_uint32_y_uint32(int conexion, uint32_t* direcci
     free(buffer);
 
     return PcbRecv;
+
+bool enviarEnteroYString(uint32_t entero,char* string, int socket_cliente, t_log* logger, op_code_cliente codigo)
+
+{
+    t_paquete* paquete = crear_paquete(codigo, logger);
+    if(!agregarEnteroYStringAPaquete(entero,string, paquete)){
+        log_error(logger, "Hubo un error cuando se intento agregar las instrucciones al paquete");
+        return false;
+    }
+    enviar_paquete(paquete, socket_cliente);
+    log_info(logger, "Se envio el paquete");
+    eliminar_paquete(paquete);
+    return true;
+}
+
+bool agregarEnteroYStringAPaquete(uint32_t entero, char* string, t_paquete* paquete)
+{
+
+    paquete->buffer->size+= sizeof(uint32_t);
+    uint32_t tamanioString = strlen(string) +1;
+    paquete->buffer->size+= tamanioString + sizeof(uint32_t);
+
+
+    void* stream = malloc(paquete->buffer->size); //Reservo memoria para el stream
+    int offset=0; //desplazamiento
+
+
+
+    memcpy(stream + offset, &entero, sizeof(uint32_t));
+    offset += sizeof(uint32_t);
+
+    memcpy(stream + offset, &tamanioString, sizeof(uint32_t));
+    offset+= sizeof(uint32_t);
+    memcpy(stream + offset, string, tamanioString);
+    paquete->buffer->stream = stream;
+
+    return true;
+
+}
+
+
+
+char* recibirEnteroYString(int socket_cliente,uint32_t* entero)
+{
+    int tamanio;
+    int desplazamiento = 0;
+    void *buffer = recibir_stream(&tamanio, socket_cliente);
+
+    memcpy(&entero, buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento+=sizeof(uint32_t);
+
+    uint32_t tamanioString =0;
+    memcpy(&tamanioString, buffer + desplazamiento, sizeof (uint32_t));
+    desplazamiento+=sizeof(uint32_t);
+    char* string = malloc(tamanioString);
+    memcpy(string, buffer + desplazamiento, tamanioString);
+
+    free(buffer);
+    return string;
+
 }

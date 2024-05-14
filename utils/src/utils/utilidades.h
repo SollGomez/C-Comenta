@@ -25,4 +25,11 @@ PCB* recibir_contextoEjecucion_y_uint32_y_uint32(int conexion, uint32_t* direcci
 uint32_t recibirValor_uint32(int socket);
 void* recibir_stream(int* size, uint32_t cliente_socket);
 
+t_list* recibirListaUint32_t(int socket_cliente);
+void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger);
+uint32_t recibirValor_uint32(int socket);
+void* recibir_stream(int* size, uint32_t cliente_socket);
+bool enviarEnteroYString(uint32_t entero,char* string, int socket_cliente, t_log* logger, op_code_cliente codigo);
+bool agregarEnteroYStringAPaquete(uint32_t entero, char* string, t_paquete* paquete);
+char* recibirEnteroYString(int socket_cliente,uint32_t* entero);
 #endif

@@ -1,8 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <utils/shared.h>
-#include <clean.h>
-#include "main.h"
+#include <main.h>
 
 t_config* config;
 
@@ -12,15 +8,24 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
     cargar_configuracion();
-    
-    
+	crearListas();
+	crearSemaforos();
+	iniciarAtencionPeticiones();
 
-	conectarKernel("KERNEL");
+	pthread_t kernel;
+	pthread_t memoria;
 
-	conectarMemoria("MEMORIA");
-	
+    pthread_create(&kernel, NULL, iniciarKernel, NULL);
+
+	if(cfg_entradaSalida->TIPO_INTERFAZ_INT != 3) {
+		pthread_create(&memoria, NULL, iniciarMemoria, NULL);
+		pthread_join(memoria, NULL);
+	}
+
+	pthread_join(kernel, NULL);
+
 	char nombre[50];
-	scanf("%s", nombre);
+	//scanf("%s", nombre);
 
 	cerrarPrograma();
     return 0;

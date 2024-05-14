@@ -159,7 +159,7 @@ void *recibirIO(int interfaz_fd){
 			 case -1:
 				 log_error(logger, "el cliente se desconecto.");
 
-				 log_error(logger, "Terminando servidor.FILESYSTEM");
+				 log_error(logger, "Terminando servidor ENTRADASALIDA");
 				 return NULL;
 
 			 default:
