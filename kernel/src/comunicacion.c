@@ -320,7 +320,7 @@ void escucharCPU (void) {
 				PCB* pcbActualizada = obtenerPcbExec();
 				t_paquete* paquete = crear_paquete(IO_GEN_SLEEP_OPC, info_logger);
 				agregar_a_paquete2(paquete, &tiempoSleep, sizeof(uint32_t));
-				enviar_paquete(paquete, vectorIO[interfaz]);//recibirValor_uint32
+				enviar_paquete(paquete, vectorIO[interfaz]);//recibir con recibirValor_uint32
 				eliminar_paquete(paquete);
 
 				break;

@@ -7,6 +7,7 @@
         "comunicacion.h": "c",
         "estructurascompartidas.h": "c",
         "main.h": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "pcb.h": "c"
     }
 }

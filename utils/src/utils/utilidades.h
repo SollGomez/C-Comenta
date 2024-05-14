@@ -18,6 +18,9 @@ void enviarOrden(op_code_cliente orden, int socket, t_log *logger);
 void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger);
 void* recibir_stream(int* size, uint32_t cliente_socket);
 PCB* recibir_contextoEjecucion_y_char(int conexion);
+PCB* recibir_contextoEjecucion_y_uint32(int conexion, uint32_t* direccion);
+PCB* recibir_contextoEjecucion_y_uint32_y_uint32(int conexion, uint32_t* direccion, uint32_t* direccion2);
+
 
 uint32_t recibirValor_uint32(int socket);
 void* recibir_stream(int* size, uint32_t cliente_socket);

@@ -95,8 +95,8 @@ void ejecutar_MOV_OUT(int direccion_logica, char* registro) {
 }
 
 void IO_GEN_SLEEP(char* interfaz, char* unidadesDeTrabajo){
-    uint32_t numeroInterfaz=0;
-    uint32_t tiempoEspera=atoi(unidadesDeTrabajo);
+    uint32_t numeroInterfaz = 0;
+    uint32_t tiempoEspera = atoi(unidadesDeTrabajo);
 
     if(!strcmp(interfaz,"STDOUT"))
         numeroInterfaz=0;
@@ -115,7 +115,7 @@ void IO_GEN_SLEEP(char* interfaz, char* unidadesDeTrabajo){
     agregar_a_paquete2(paquete, &tiempoEspera, sizeof(uint32_t));
     enviar_paquete(paquete, kernel_fd);
     eliminar_paquete(paquete);
-    cicloInstrucciones = false;
+    //cicloInstrucciones = false;
 }
 
 void IO_STDIN_READ(char* interfaz, char* registroDireccion, char* registroTamanio){
