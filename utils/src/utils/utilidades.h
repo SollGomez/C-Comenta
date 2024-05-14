@@ -1,7 +1,10 @@
 #ifndef UTILIDADES_H_
 #define UTILIDADES_H_
 
-#include "shared.h"
+#include "estructurasCompartidas.h"
+#include "utilsServer.h"
+
+extern int idProcesoGlobal;
 
 Instruccion* recibirInstruccion(int conexion);
 void liberarInstruccion(Instruccion * instruccion);
@@ -21,15 +24,20 @@ PCB* recibir_contextoEjecucion_y_char(int conexion);
 PCB* recibir_contextoEjecucion_y_uint32(int conexion, uint32_t* direccion);
 PCB* recibir_contextoEjecucion_y_uint32_y_uint32(int conexion, uint32_t* direccion, uint32_t* direccion2);
 
-
-uint32_t recibirValor_uint32(int socket);
 void* recibir_stream(int* size, uint32_t cliente_socket);
 
 t_list* recibirListaUint32_t(int socket_cliente);
-void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger);
 uint32_t recibirValor_uint32(int socket);
 void* recibir_stream(int* size, uint32_t cliente_socket);
 bool enviarEnteroYString(uint32_t entero,char* string, int socket_cliente, t_log* logger, op_code_cliente codigo);
 bool agregarEnteroYStringAPaquete(uint32_t entero, char* string, t_paquete* paquete);
 char* recibirEnteroYString(int socket_cliente,uint32_t* entero);
+
+void simularRetardoSinMensaje(int);
+void agregar_instruccion_a_paquete(t_paquete *paquete, Instruccion* instruccion); //VER porque esta fea... es nueva
+bool agregarIntsYDatosAPaquete(t_list* listaInts, t_datos* datos, t_paquete* paquete);
+bool enviarListaIntsYDatos(t_list* listaInts,t_datos* datos, int socket_cliente, t_log* logger, op_code_cliente codigo);
+t_list* recibirListaIntsYDatos(int socket_cliente,t_datos* datos);
+char* recibirEnteroEnteroChar(int socket_cliente, uint32_t* entero1, uint32_t* entero2);
+
 #endif

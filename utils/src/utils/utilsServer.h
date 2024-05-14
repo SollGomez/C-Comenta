@@ -26,4 +26,6 @@ t_list* recibir_paquete(int);
 void recibir_mensaje(int);
 int recibir_operacion(int);
 
+
+void simularRetardoSinMensaje(int); //REVISAR
 #endif /* UTILSSERVER_H_ */

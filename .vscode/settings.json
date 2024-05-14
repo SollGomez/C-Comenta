@@ -8,6 +8,18 @@
         "estructurascompartidas.h": "c",
         "main.h": "c",
         "type_traits": "c",
-        "pcb.h": "c"
+        "pcb.h": "c",
+        "utilsclient.h": "c",
+        "main.h": "c",
+        "comunicacion.h": "c",
+        "stddef.h": "c",
+        "stdbool.h": "c",
+        "estructurascompartidas.h": "c",
+        "memoriainstrucciones.h": "c",
+        "leerconfigmemory.h": "c",
+        "shared.h": "c",
+        "stdlib.h": "c",
+        "queue.h": "c",
+        "esquema.h": "c"
     }
 }
