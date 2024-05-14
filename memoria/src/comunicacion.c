@@ -132,38 +132,17 @@ void *recibirIO(int interfaz_fd){
 //  		t_list *lista = list_create();
   		switch (cod_op) {
  			case IO_STDIN_READ_DONE:
-// 				realizarPedidoEscrituraFs(filesystem_fd);
+				realizarPedidoEscrituraInterfaz(interfaz_fd);
  				break;
-
  			case IO_STDOUT_WRITE_LEER_DIRECCION_EN_MEMORIA:
-// 				realizarPedidoLecturaFs(filesystem_fd);
+				realizarPedidoLecturaInterfaz(interfaz_fd);
  				break;
-
-// 			case PEDIR_SWAP:
-// 				lista = recibirListaUint32_t(filesystem_fd);
-// 				cargarPaginasEnTabla(pidGlobal, sizeGlobal, lista);
-// 				list_destroy_and_destroy_elements(lista, free); //LINEA AGREGADA
- 				break;
-
-// 			case LECTURA_BLOQUE_SWAP:
-// 				t_datos* unosDatos = malloc(sizeof(t_datos));
-// 				void* datos;
-
-// 				t_list* listaConSwap = recibirListaIntsYDatos(filesystem_fd,unosDatos);
-// 				uint32_t posSwap = *(uint32_t *)list_get(listaConSwap, 0);
-// 				datos = unosDatos->datos;
-// 				recibirDatosDeFs(datos, posSwap);
-
-// 				free(unosDatos->datos);
-// 				free(unosDatos);
-// 				list_destroy_and_destroy_elements(listaConSwap, free); //LINEA AGREGADA
-// 				break;
-  			 case -1:
+  			case -1:
   				 log_error(logger, "el cliente se desconecto.");
 
   				 log_error(logger, "Terminando servidor.FILESYSTEM");
   				 return NULL;
-  			 default:
+  			default:
 
   				log_warning(logger,"Operacion desconocida. No quieras meter la pata %d ", cod_op);
   				break;
@@ -289,27 +268,27 @@ void realizarPedidoLectura(int cliente_socket){
     list_destroy(listaInts);
 }
 
-// void realizarPedidoLecturaFs(int cliente_socket){
-//     t_list* listaInts = recibirListaUint32_t(cliente_socket);
-//     uint32_t posicion = *(uint32_t*)list_get(listaInts,0);
-//     uint32_t tamanio = *(uint32_t*)list_get(listaInts,1);
-//     uint32_t pid = *(uint32_t*)list_get(listaInts,2);
+void realizarPedidoLecturaInterfaz(int cliente_socket){
+    t_list* listaInts = recibirListaUint32_t(cliente_socket);
+    uint32_t posicion = *(uint32_t*)list_get(listaInts,0);
+    uint32_t tamanio = *(uint32_t*)list_get(listaInts,1);
+    uint32_t pid = *(uint32_t*)list_get(listaInts,2);
 
-//     pthread_mutex_lock(&mutex_espacioContiguo);
-//     log_info(info_logger,"Accediendo a Espacio de Usuario para Lectura en la Dirección: <%d> de Tamanio: <%d> para el Proceso con PID: <%d>", posicion, tamanio, pid);
-//     simularRetardoSinMensaje(RETARDO_RESPUESTA);
-//     log_info(info_logger,"Se accedió a Espacio de Usuario correctamente");
-//     void* datos = recibePedidoDeLectura(posicion, tamanio, pid);
-//     pthread_mutex_unlock(&mutex_espacioContiguo);
-//     t_datos* unosDatos = malloc(sizeof (t_datos));
-//     unosDatos->datos = datos;
-//     unosDatos->tamanio= tamanio;
-//     enviarListaIntsYDatos(listaInts,unosDatos, cliente_socket, info_logger, ESCRITURA_REALIZADA);
-//     free(datos);
-//     free(unosDatos);
-//     list_clean_and_destroy_elements(listaInts,free);
-//     list_destroy(listaInts);
-// }
+    pthread_mutex_lock(&mutex_espacioContiguo);
+    log_info(info_logger,"Accediendo a Espacio de Usuario para Lectura en la Dirección: <%d> de Tamanio: <%d> para el Proceso con PID: <%d>", posicion, tamanio, pid);
+    simularRetardoSinMensaje(RETARDO_RESPUESTA);
+    log_info(info_logger,"Se accedió a Espacio de Usuario correctamente");
+    void* datos = recibePedidoDeLectura(posicion, tamanio, pid);
+    pthread_mutex_unlock(&mutex_espacioContiguo);
+    t_datos* unosDatos = malloc(sizeof (t_datos));
+    unosDatos->datos = datos;
+    unosDatos->tamanio= tamanio;
+    enviarListaIntsYDatos(listaInts,unosDatos, cliente_socket, info_logger, ESCRITURA_REALIZADA);
+    free(datos);
+    free(unosDatos);
+    list_clean_and_destroy_elements(listaInts,free);
+    list_destroy(listaInts);
+}
 
 
 void realizarPedidoEscritura(int cliente_socket){
@@ -330,23 +309,23 @@ void realizarPedidoEscritura(int cliente_socket){
     enviarOrden(ESCRITURA_REALIZADA, cliente_socket, info_logger);
 }
 
-// void realizarPedidoEscrituraFs(int cliente_socket){
-//     t_datos* unosDatos = malloc(sizeof(t_datos));
-//     t_list* listaInts = recibirListaIntsYDatos(cliente_socket, unosDatos);
-//     uint32_t* posicion = list_get(listaInts,0);
-//     uint32_t* pid = list_get(listaInts,1);
-//     pthread_mutex_lock(&mutex_espacioContiguo);
-//     log_info(info_logger,"Accediendo a Espacio de Usuario para Escritura en la Direccion: <%d> para el Proceso con PID: <%d>", *posicion, *pid);
-//     simularRetardoSinMensaje(RETARDO_RESPUESTA);
-//     log_info(info_logger,"Se accedio a Espacio de Usuario correctamente");
-//     recibePedidoDeEscritura(*posicion,unosDatos->datos, unosDatos->tamanio, *pid);
-//     free(unosDatos->datos);
-//     free(unosDatos);
-//     list_clean_and_destroy_elements(listaInts, free);
-//     list_destroy(listaInts);
-//     pthread_mutex_unlock(&mutex_espacioContiguo);
-//     enviarOrden(LECTURA_REALIZADA, cliente_socket, info_logger);
-// }
+void realizarPedidoEscrituraInterfaz(int cliente_socket){
+    t_datos* unosDatos = malloc(sizeof(t_datos));
+    t_list* listaInts = recibirListaIntsYDatos(cliente_socket, unosDatos);
+    uint32_t* posicion = list_get(listaInts,0);
+    uint32_t* pid = list_get(listaInts,1);
+    pthread_mutex_lock(&mutex_espacioContiguo);
+    log_info(info_logger,"Accediendo a Espacio de Usuario para Escritura en la Direccion: <%d> para el Proceso con PID: <%d>", *posicion, *pid);
+    simularRetardoSinMensaje(RETARDO_RESPUESTA);
+    log_info(info_logger,"Se accedio a Espacio de Usuario correctamente");
+    recibePedidoDeEscritura(*posicion,unosDatos->datos, unosDatos->tamanio, *pid);
+    free(unosDatos->datos);
+    free(unosDatos);
+    list_clean_and_destroy_elements(listaInts, free);
+    list_destroy(listaInts);
+    pthread_mutex_unlock(&mutex_espacioContiguo);
+    enviarOrden(LECTURA_REALIZADA, cliente_socket, info_logger);
+}
 
 
 void inicializarProceso(int cliente_socket){

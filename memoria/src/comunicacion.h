@@ -53,8 +53,8 @@ t_log* iniciar_logger(char*);
 // bool agregarTablasAPaquete(t_list*, t_paquete*);
 // int finalizarProcesoConPid(uint32_t);
 // void liberarModuloSwap(t_list*);
-// void realizarPedidoEscrituraFs(int cliente_socket);
-// void realizarPedidoLecturaFs(int cliente_socket);
+void realizarPedidoEscrituraInterfaz(int cliente_socket);
+void realizarPedidoLecturaInterfaz(int cliente_socket);
 
 
 #endif
