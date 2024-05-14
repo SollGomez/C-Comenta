@@ -6,6 +6,7 @@
 #include "cicloInstruccion.h"
 #include "ejecucionInstrucciones.h"
 #include "mmu.h"
+#include <utils/utilidades.h>
 #include "pthread.h"
 #include <commons/collections/queue.h>
 #include <commons/config.h>

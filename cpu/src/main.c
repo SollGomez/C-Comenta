@@ -10,7 +10,7 @@ char *PUERTO_INTERRUPT;
 t_config *config;
 
 int main(int argc, char* argv[]) {
-    decir_hola("CPU");
+    //decir_hola("CPU");
     
 	if (signal(SIGINT, sigint_handler) == SIG_ERR) {
         perror("Error al configurar el manejador de señal");

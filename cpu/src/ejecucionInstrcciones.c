@@ -192,16 +192,16 @@ char* obtener_valor_registroCPU(char* registro) {
 
     if (strcmp(registro, "AX") == 0){
 
-         char* valor = (char *) malloc (1 + 1);
-         strcpy (valor,"p");
-         memcpy(valor,registroCPU_AX,1);
+        char* valor = (char *) malloc (1 + 1);
+        strcpy (valor,"p");
+        memcpy(valor,registroCPU_AX,1);
 
         return valor;
     }
     if (strcmp(registro, "BX") == 0) {
 
-         char* valor = (char *) malloc (1 + 1);
-         strcpy (valor,"p");
+        char* valor = (char *) malloc (1 + 1);
+        strcpy (valor,"p");
         memcpy(valor,registroCPU_BX, 1);
 
         return valor;

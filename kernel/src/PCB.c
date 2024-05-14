@@ -11,6 +11,8 @@ PCB* crearPcb(char* path){
 	pcb->tiempoEjecutando = 0;
 	pcb->nombreRecurso = malloc(strlen(path)+1);
   pcb->quantum = 0;
+  pcb->size = 0;
+
 	strcpy(pcb->nombreRecurso, path);
 
 	idProcesoGlobal++;
