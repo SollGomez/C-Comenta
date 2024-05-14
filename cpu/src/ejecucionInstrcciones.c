@@ -35,7 +35,7 @@ void JNZ(char* registro, char* numeroInstruccion){
 		PCB_Actual->program_counter++;
 }
 
-void RESIZE(char* tamanio){
+void resize(char* tamanio){
 
 }
 
@@ -94,7 +94,7 @@ void ejecutar_MOV_OUT(int direccion_logica, char* registro) {
     free(valorDelRegistro);
 }
 
-void IO_GEN_SLEEP(char* interfaz, char* unidadesDeTrabajo){
+void ioGenSleep(char* interfaz, char* unidadesDeTrabajo){
     uint32_t numeroInterfaz = 0;
     uint32_t tiempoEspera = atoi(unidadesDeTrabajo);
 
@@ -118,31 +118,31 @@ void IO_GEN_SLEEP(char* interfaz, char* unidadesDeTrabajo){
     //cicloInstrucciones = false;
 }
 
-void IO_STDIN_READ(char* interfaz, char* registroDireccion, char* registroTamanio){
+void ioStdinRead(char* interfaz, char* registroDireccion, char* registroTamanio){
 
 }
 
-void IO_STDOUT_WRITE(char* interfaz, char* registroDireccion, char* registroTamanio){
+void ioStdOutWrite(char* interfaz, char* registroDireccion, char* registroTamanio){
 
 }
 
-void IO_FS_CREATE(char* interfaz, char* nombreArchivo){
+void ioFsCreate(char* interfaz, char* nombreArchivo){
 
 }
 
-void IO_FS_DELETE(char* interfaz, char* nombreArchivo){
+void ioFsDelete(char* interfaz, char* nombreArchivo){
 
 }
 
-void IO_FS_TRUNCATE(char* interfaz, char* nombreArchivo, char* registroTamanio){
+void ioFsTruncate(char* interfaz, char* nombreArchivo, char* registroTamanio){
 
 }
 
-void IO_FS_WRITE(char* interfaz, char* nombreArchivo, char* registroDireccion, char* registroTamanio, char* registroPunteroArchivo){
+void ioFsWrite(char* interfaz, char* nombreArchivo, char* registroDireccion, char* registroTamanio, char* registroPunteroArchivo){
 
 }
 
-void IO_FS_READ(char* interfaz, char* nombreArchivo, char* registroDireccion, char* registroTamanio, char* registroPunteroArchivo){
+void ioFsRead(char* interfaz, char* nombreArchivo, char* registroDireccion, char* registroTamanio, char* registroPunteroArchivo){
 
 }
 

@@ -5,7 +5,7 @@
 #include <commons/config.h>
 #include <string.h>
 #include <pthread.h>
-#include <utils/shared.h>
+#include <utils/estructurasCompartidas.h>
 #include <semaphore.h>
 
 extern pthread_mutex_t mutex_recvKernel;

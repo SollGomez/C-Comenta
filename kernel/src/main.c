@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <utils/shared.h>
 #include "main.h"
 
 t_config* config;

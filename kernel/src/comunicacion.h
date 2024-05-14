@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <utils/shared.h>
 #include <utils/utilidades.h>
 #include "pthread.h"
 #include "main.h"
@@ -37,6 +36,5 @@ void manejoDeRecursos(char* orden, char* recursoSolicitado);
 void waitRecursoPcb(Recurso* recurso, PCB* unaPcb);
 void signalRecursoPcb (Recurso* recurso, PCB* unaPcb);
 void bloquearProcesoPorRecurso(Recurso* recurso);
-
 
 #endif

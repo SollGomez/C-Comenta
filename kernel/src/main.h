@@ -7,7 +7,6 @@
 #include <commons/collections/queue.h>
 #include <commons/config.h>
 #include "init.h"
-#include <utils/shared.h>
 #include "planificadores.h"
 #include "PCB.h"
 #include "consola.h"

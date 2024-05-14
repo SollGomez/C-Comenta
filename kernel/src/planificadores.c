@@ -84,7 +84,6 @@ void liberarPcb (PCB* pcb) {
 
     list_destroy(pcb->listaInstrucciones);
     list_destroy(pcb->tablaPaginas);
-    list_destroy(pcb->archivos_abiertos);
     list_destroy(pcb->recursosTomados);
 
     free(pcb);
@@ -304,14 +303,4 @@ void eliminarElementoLista (PCB* pcbBuscado, t_list* lista) {
     if(pcbBuscado->id == pcbAux->id)
     	list_remove(lista, i);
   }
-}
-
-void eliminarArchivoTablaLocal(char* nombreArchivo, PCB* pcb){
-    for (int i = 0; i < list_size(pcb->archivos_abiertos); i++) {
-        t_archivoLocal* archivoLocal = list_get(pcb->archivos_abiertos, i);
-        if(strcmp(archivoLocal->archivo->nombreArchivo, nombreArchivo) == 0) {
-            list_remove(pcb->archivos_abiertos, i);
-            free(archivoLocal);
-        }
-    }
 }

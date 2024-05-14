@@ -1,14 +1,8 @@
-#ifndef MAIN_H_
-#define MAIN_H_
-
 #include "comunicacion.h"
 #include "pthread.h"
-#include "leerConfigMemory.h"
 #include "esquema.h"
 #include <commons/collections/queue.h>
 #include<commons/config.h>
-
-extern t_config* config;
 
 extern t_config* config;
 

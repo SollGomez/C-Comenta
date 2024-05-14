@@ -109,7 +109,7 @@ void execute(){
 
 		log_info(info_logger, "PID: <%d> - Ejecutando: <RESIZE> - <%s>", PCB_Actual->id, tamanio);
 
-		RESIZE(tamanio);
+		resize(tamanio);
 
 	}
 	else if (strcmp(nombre_instruccion_actual , "COPY_STRING") == 0) {
@@ -158,7 +158,7 @@ void execute(){
         log_info(info_logger, "PID: <%d> - Ejecutando: <IO_GEN_SLEEP> - <%s> - <%s>", PCB_Actual->id, interfaz, unidadesDeTrabajo);
 
 		//Esta instrucción solicita al Kernel que se envíe a una interfaz de I/O a que realice un sleep por una cantidad de unidades de trabajo.
-        IO_GEN_SLEEP(interfaz, unidadesDeTrabajo);
+        ioGenSleep(interfaz, unidadesDeTrabajo);
     }
 
 	else if (strcmp(nombre_instruccion_actual, "IO_STDIN_READ") == 0) {
@@ -170,7 +170,7 @@ void execute(){
         log_info(info_logger, "PID: <%d> - Ejecutando: <IO_STDIN_READ> - <%s> - <%s> - <%s>", PCB_Actual->id, interfaz, registroDireccion, registroTamanio);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz ingresada se lea desde el STDIN (Teclado) un valor cuyo tamaño está delimitado por el valor del Registro Tamaño y el mismo se guarde a partir de la Dirección Lógica almacenada en el Registro Dirección.
-        IO_STDIN_READ(interfaz, registroDireccion, registroTamanio);
+        ioStdinRead(interfaz, registroDireccion, registroTamanio);
     }
 
 	else if (strcmp(nombre_instruccion_actual, "IO_STDOUT_WRITE") == 0) {
@@ -182,7 +182,7 @@ void execute(){
         log_info(info_logger, "PID: <%d> - Ejecutando: <IO_STDOUT_WRITE> - <%s> - <%s> - <%s>", PCB_Actual->id, interfaz, registroDireccion, registroTamanio);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se lea desde la posición de memoria indicada por la Dirección Lógica almacenada en el Registro Dirección, un tamaño indicado por el Registro Tamaño y se imprima por pantalla.
-        IO_STDOUT_WRITE(interfaz, registroDireccion, registroTamanio);
+        ioStdOutWrite(interfaz, registroDireccion, registroTamanio);
     }
 
 	else if (strcmp(nombre_instruccion_actual, "IO_FS_CREATE") == 0) {
@@ -193,7 +193,7 @@ void execute(){
         log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_CREATE> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se cree un archivo en el FS montado en dicha interfaz.
-        IO_FS_CREATE(interfaz, nombreArchivo);
+        ioFsCreate(interfaz, nombreArchivo);
     }
 
 	else if (strcmp(nombre_instruccion_actual, "IO_FS_DELETE") == 0) {
@@ -204,7 +204,7 @@ void execute(){
         log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_DELETE> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se elimine un archivo en el FS montado en dicha interfaz
-        IO_FS_DELETE(interfaz, nombreArchivo);
+        ioFsDelete(interfaz, nombreArchivo);
     }
 
 	else if (strcmp(nombre_instruccion_actual, "IO_FS_TRUNCATE") == 0) {
@@ -216,7 +216,7 @@ void execute(){
         log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_TRUNCATE> - <%s> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo, registroTamanio);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se modifique el tamaño del archivo en el FS montado en dicha interfaz, actualizando al valor que se encuentra en el registro indicado por Registro Tamaño.
-        IO_FS_TRUNCATE(interfaz, nombreArchivo, registroTamanio);
+        ioFsTruncate(interfaz, nombreArchivo, registroTamanio);
     }
 
 	else if (strcmp(nombre_instruccion_actual, "IO_FS_WRITE") == 0) {
@@ -230,7 +230,7 @@ void execute(){
         log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_WRITE> - <%s> - <%s> - <%s> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se lea desde Memoria la cantidad de bytes indicadas por el Registro Tamaño a partir de la dirección lógica que se encuentra en el Registro Dirección y se escriban en el archivo a partir del valor del Registro Puntero Archivo.
-        IO_FS_WRITE(interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
+        ioFsWrite(interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
     }
 
 	else if (strcmp(nombre_instruccion_actual, "IO_FS_READ") == 0) {
@@ -244,7 +244,7 @@ void execute(){
         log_info(info_logger, "PID: <%d> - Ejecutando: <IO_FS_READ> - <%s> - <%s> - <%s> - <%s> - <%s>", PCB_Actual->id, interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
 
 		//Esta instrucción solicita al Kernel que mediante la interfaz seleccionada, se lea desde el archivo a partir del valor del Registro Puntero Archivo la cantidad de bytes indicada por Registro Tamaño y se escriban en la Memoria a partir de la dirección lógica indicada en el Registro Dirección.
-        IO_FS_READ(interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
+        ioFsRead(interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
     }
 
     else if (strcmp(nombre_instruccion_actual, "EXIT") == 0) {

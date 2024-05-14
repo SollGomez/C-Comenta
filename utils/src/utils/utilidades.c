@@ -134,7 +134,7 @@ Instruccion* recibirInstruccion(int conexion){
 	return instruccion;
 }
 
-void liberarInstruccion(Instruccion * instruccion){
+void liberarInstruccion(Instruccion * instruccion) {
     if(instruccion->cantidadParametros==1)
         free(instruccion->param1);
 
@@ -164,15 +164,6 @@ void liberarInstruccion(Instruccion * instruccion){
     free(instruccion->id);
     free(instruccion);
 }
-
-void* recibir_stream(int* size, uint32_t cliente_socket) { //En realidad devuelve el stream, no el t_buffer
-    recv(cliente_socket, size, sizeof(int), MSG_WAITALL);
-    void *buffer = malloc(*size);
-    recv(cliente_socket, buffer, *size, MSG_WAITALL);
-    return buffer;
-}
-
-
 
 bool agregarUint32_tsAPaquete(t_list* listaInts, t_paquete* paquete)
 {
@@ -310,9 +301,11 @@ PCB* recibir_contextoEjecucion(int conexion) {
     return PcbRecv;
 }
 
-void liberarPcbCpu(PCB* pcb){
+void liberarPcbCpu(PCB* pcb) {
     free(pcb->registros);
     free(pcb);
+}
+
 t_list* recibirListaUint32_t(int socket_cliente){
     int tamanio;
     int desplazamiento = 0;
@@ -332,27 +325,12 @@ t_list* recibirListaUint32_t(int socket_cliente){
     return listaInts;
 }
 
-
-
-void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger)
-{
-    t_paquete * paquete= crear_paquete(orden, logger);
-    paquete->buffer->size = sizeof(uint32_t);
-    void* stream = malloc(paquete->buffer->size);
-    int offset = 0;
-    memcpy(stream + offset, &valor, sizeof(uint32_t));
-    paquete->buffer->stream = stream;
-    enviar_paquete(paquete,socket);
-    log_info(logger, "se envio el paquete");
-    eliminar_paquete(paquete);
-}
-
 uint32_t recibirValor_uint32(int socket) {
 
     t_paquete *paquete = malloc(sizeof (t_paquete));
     paquete->buffer = malloc(sizeof(t_buffer));
     paquete->buffer->size = 0;
-    paquete->buffer->stream =recibir_stream(&paquete->buffer->size, socket);
+    paquete->buffer->stream = recibir_stream(&paquete->buffer->size, socket);
     uint32_t valor = -1;
     memcpy(&valor, paquete->buffer->stream, sizeof(uint32_t));
     eliminar_paquete(paquete);
@@ -377,6 +355,8 @@ void recibirOrden(int socket){
     int tamanio;
     void* stream = recibir_stream(&tamanio, socket);
     free (stream);
+}
+
 void simularRetardoSinMensaje(int retardo){
     usleep(retardo*1000);
 }
@@ -504,8 +484,7 @@ void enviarOrden(op_code_cliente orden, int socket, t_log *logger) {
     free(offset);
 }
 
-void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger)
-{
+void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger) {
     t_paquete * paquete= crear_paquete(orden, logger);
     paquete->buffer->size = sizeof(uint32_t);
     void* stream = malloc(paquete->buffer->size);
@@ -644,6 +623,7 @@ PCB* recibir_contextoEjecucion_y_uint32_y_uint32(int conexion, uint32_t* direcci
     free(buffer);
 
     return PcbRecv;
+}
 
 bool enviarEnteroYString(uint32_t entero,char* string, int socket_cliente, t_log* logger, op_code_cliente codigo)
 
@@ -686,8 +666,7 @@ bool agregarEnteroYStringAPaquete(uint32_t entero, char* string, t_paquete* paqu
 
 
 
-char* recibirEnteroYString(int socket_cliente,uint32_t* entero)
-{
+char* recibirEnteroYString(int socket_cliente,uint32_t* entero) {
     int tamanio;
     int desplazamiento = 0;
     void *buffer = recibir_stream(&tamanio, socket_cliente);
@@ -703,6 +682,7 @@ char* recibirEnteroYString(int socket_cliente,uint32_t* entero)
 
     free(buffer);
     return string;
+}
 
 char* recibirEnteroEnteroChar(int socket_cliente, uint32_t* entero1, uint32_t* entero2){
 	uint32_t tamanioBuffer;

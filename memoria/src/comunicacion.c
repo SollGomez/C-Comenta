@@ -117,7 +117,6 @@ void cualInterfaz(int tipoInterfaz){
 
  						log_error(logger, "Terminando servidor.CPU");
  						return NULL;
- 					// break;//sacar
  				default:
  					log_warning(logger,"Operacion desconocida. No quieras meter la pata");
  					break;

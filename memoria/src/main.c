@@ -1,12 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <utils/shared.h>
+#include <utils/estructurasCompartidas.h>
 #include "main.h"
 #include <signal.h>
 
 t_log* info_logger;
 char *PUERTO;
 t_config *config;
+t_list* tablaGeneral;
+char* PATH_INSTRUCCIONES;
+t_list *instruccionesDeProcesos;
+
 
 
 int main(int argc, char* argv[]) {
@@ -21,11 +25,20 @@ int main(int argc, char* argv[]) {
     pthread_t tid;
     
     config = crearConfig(argv[1]);
+	PATH_INSTRUCCIONES = config_get_string_value(config, "PATH_INSTRUCCIONES");
+	RETARDO_RESPUESTA = config_get_int_value(config, "RETARDO_RESPUESTA");
 	PUERTO = config_get_string_value(config, "PUERTO_ESCUCHA");
 
+	tablaGeneral = list_create();
+	instruccionesDeProcesos = list_create();
+
+	iniciarMemoria();
+
+	
     pthread_create(&tid, NULL, recibir, NULL);
 	pthread_join(tid, NULL);
 
+	//config_destroy(config);
 
     return 0;
 }

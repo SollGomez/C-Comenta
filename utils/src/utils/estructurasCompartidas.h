@@ -61,19 +61,10 @@ typedef enum {
 } EstadoProceso;
 
 typedef struct {
-    char registro_AX[5];
-    char registro_BX[5];
-    char registro_CX[5];
-    char registro_DX[5];
-} RegistrosCPU;
-
-typedef struct {
     uint32_t id;
-    uint32_t prioridad;
     uint32_t program_counter;
-    EstadoProceso estado;
+    uint32_t quantum;
     RegistrosCPU* registros;
-    t_list* archivos_abiertos;
     t_list* listaInstrucciones;
     TablaDePaginas* tablaPaginas;
     t_list* recursosTomados;

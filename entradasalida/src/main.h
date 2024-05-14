@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <utils/shared.h>
+#include <utils/estructurasCompartidas.h>
 #include <comunicacion.h>
 #include <stdbool.h>
 #include <comunicacion.h>
