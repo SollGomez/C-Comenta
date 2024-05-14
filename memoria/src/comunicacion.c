@@ -131,11 +131,11 @@ void *recibirIO(int interfaz_fd){
 
 //  		t_list *lista = list_create();
   		switch (cod_op) {
- 			case ACCESO_PEDIDO_LECTURA:
+ 			case IO_STDIN_READ_DONE:
 // 				realizarPedidoEscrituraFs(filesystem_fd);
  				break;
 
- 			case ACCESO_PEDIDO_ESCRITURA:
+ 			case IO_STDOUT_WRITE_LEER_DIRECCION_EN_MEMORIA:
 // 				realizarPedidoLecturaFs(filesystem_fd);
  				break;
 

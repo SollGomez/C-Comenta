@@ -42,6 +42,6 @@ void manejarInterfazStdin(uint32_t direccionFisicaAEscribir) {
     input = readline(">");
 
     log_trace(trace_logger, "El texto ingresado fue: %s", input);
-    //enviarEnteroYString(direccionFisicaAEscribir, input, memoria_fd, info_logger, IO_STDIN_READ_DONE);
+    enviarEnteroYString(direccionFisicaAEscribir, input, memoria_fd, info_logger, IO_STDIN_READ_DONE);
 
 }
