@@ -4,9 +4,12 @@
 #include <stdbool.h>
 #include "comunicacion.h"
 #include "cicloInstruccion.h"
+#include "ejecucionInstrucciones.h"
+#include "mmu.h"
 #include "pthread.h"
 #include <commons/collections/queue.h>
 #include <commons/config.h>
+#include <utils/shared.h>
 
 extern t_config* config;
 extern t_log* info_logger;

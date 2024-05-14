@@ -37,30 +37,6 @@ int conectarModulo(char *modulo){
 
 	memoria_fd= crear_conexion(loggerCpuMem, "Conecto a Cpu a memoria",ip, puerto);
 
-	// t_list* lista;
-
-	// if (memoria_fd) {
-	// 	enviarOrden(HANDSHAKE_CPU, memoria_fd, info_logger);
-	// 	op_code_cliente cod = recibir_operacion(memoria_fd);
-	// 	if(cod == HANDSHAKE_CPU){
-	// 		lista = recibir_paquete(memoria_fd);
-	// 		log_info(info_logger, "Me llego el tamaño de pagina:\n");
-	// 		//list_iterate(lista, (void*) iterator);
-	// 		tam_pagina=atoi((char*)list_get(lista, 0));
-	// 		log_info(info_logger,"HANDSHAKE con Memoria acontecido || Tam_pagina=%d", tam_pagina);
-	// 		list_clean(lista);
-	// 		list_destroy(lista);
-	// 	}
-	// 	else{
-	// 		printf("%d", cod);
-	// 		log_error(error_logger,"FALLO en el recibo del HANDSHAKE de Memoria");
-	// 	}
-
-	// }
-	//paquete(memoria_fd, logger);
-//	log_destroy(logger);
-//	terminar_programa(memoria_fd, logger);
-
 	return memoria_fd;
 }
 
@@ -74,7 +50,6 @@ void recibirConexion(char *puerto) {
 
 	kernel_fd = esperar_cliente(cpu_dispatch_fd);
 
-	t_list* lista;
 	pid=-1;
 
 	while(1) {
@@ -83,25 +58,25 @@ void recibirConexion(char *puerto) {
 
 		switch (cod_op) {
 
-		//  case CONTEXTOEJECUCION: {
+		 case CONTEXTOEJECUCION: {
 
-		// 	 PCB_Actual = recibir_contextoEjecucion(kernel_fd);
+			PCB_Actual = recibir_contextoEjecucion(kernel_fd);
 
-		// 	if (PCB_Actual->id == pid) {
-		// 		ciclo_de_instruccion();
-		// 		liberarPcbCpu(PCB_Actual);
+			if (PCB_Actual->id == pid) {
+				ciclo_de_instruccion();
+				liberarPcbCpu(PCB_Actual);
 
-		// 		break;
-		// 	} else {
-		// 		pid = PCB_Actual->id;
-		// 		copiar_registroPCB_a_los_registrosCPU(PCB_Actual->registros);
-		// 		ciclo_de_instruccion();
-		// 		liberarPcbCpu(PCB_Actual);
+				break;
+			} else {
+				pid = PCB_Actual->id;
+				copiar_registroPCB_a_los_registrosCPU(PCB_Actual->registros);
+				ciclo_de_instruccion();
+				liberarPcbCpu(PCB_Actual);
 
-		// 		break;
-		// 	}
+				break;
+			}
 
-		// }
+		}
 			case -1:
 				log_error(logger, "Cliente desconectado de %s...", "SERVER CPU");
 				return;
@@ -128,23 +103,23 @@ void recibirConexionInterrupt(char *puerto) {    //habría q hacer un while que 
 	while(1) {
 			int cod_op = recibir_operacion(kernel_interrupt_fd);
 			switch (cod_op) {
-				// case INTERRUPCIONCPU:
-				// 	uint32_t pidInterrupt = recibirValor_uint32(kernel_interrupt_fd);
-				// 	if(pid==pidInterrupt)
-				// 		interrupciones=1;
-				// 	log_info(logger,"Interrupcion detectada");
-				// 	break;
-				// case DESALOJOCPU:
-				// 	uint32_t pidInterrupt2 = recibirValor_uint32(kernel_interrupt_fd);
-				// 	if(pid==pidInterrupt2){
-				// 		copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
-				// 		t_paquete* paquete = crear_paquete(EXIT, info_logger);
-				// 		agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
-				// 		enviar_paquete(paquete, kernel_fd);
-				// 		eliminar_paquete(paquete);
-				// 		cicloInstrucciones = false;
-				// 	}
-				// 	break;
+				case INTERRUPCIONCPU:
+					uint32_t pidInterrupt = recibirValor_uint32(kernel_interrupt_fd);
+					if(pid==pidInterrupt)
+						interrupciones=1;
+					log_info(info_logger,"Interrupcion detectada");
+					break;
+				case DESALOJOCPU:
+					uint32_t pidInterrupt2 = recibirValor_uint32(kernel_interrupt_fd);
+					if(pid==pidInterrupt2){
+						copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+						t_paquete* paquete = crear_paquete(EXIT, info_logger);
+						agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+						enviar_paquete(paquete, kernel_fd);
+						eliminar_paquete(paquete);
+						cicloInstrucciones = false;
+					}
+					break;
 				case -1:
 					log_error(loggerI, "el cliente se desconecto.");
 

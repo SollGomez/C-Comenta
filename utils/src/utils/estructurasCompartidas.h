@@ -7,6 +7,7 @@
 #include "utilsServer.h"
 #include <fcntl.h>
 
+
 typedef struct {
 	uint8_t idLength;
     char* id;
@@ -19,6 +20,8 @@ typedef struct {
     char* param3;
     uint8_t param4Length;
     char* param4;
+    uint8_t param5Length;
+    char* param5;
 } Instruccion;
 
 typedef struct {
@@ -51,6 +54,7 @@ typedef struct {
     uint32_t program_counter;
     uint32_t quantum;
     RegistrosCPU* registros;
+    t_list* archivos_abiertos;
     t_list* listaInstrucciones;
     TablaDePaginas* tablaPaginas;
     t_list* recursosTomados;
@@ -58,6 +62,39 @@ typedef struct {
     uint32_t size;
     char* nombreRecurso;
 } PCB;
+
+typedef struct {
+    char* nombreArchivo;
+    pthread_mutex_t mutex;
+    uint32_t modo;
+    t_list* cola;
+    t_list* colaWrite;
+} t_archivo;
+
+typedef struct {
+    t_archivo* archivo;
+    uint32_t ptro;
+}t_archivoLocal;
+
+typedef struct {
+    t_archivo* archivo;
+    PCB* pcb;
+} t_archivoPeticion;
+
+typedef struct {
+    uint32_t nombreArchivoLength;
+    char* nombreArchivo;
+    uint32_t nuevoTamanio;
+}t_archivoTruncate;
+
+typedef struct {
+    uint32_t nombreArchivoLength;
+    char* nombreArchivo;
+    uint32_t posPuntero;
+    uint32_t direcFisica;
+    uint32_t cantidadBytes;
+    uint32_t pid;
+}t_archivoRW;
 
 
 #endif

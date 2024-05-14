@@ -1,5 +1,13 @@
 {
     "files.associations": {
-        "config.h": "c"
+        "config.h": "c",
+        "planificadores.h": "c",
+        "shared.h": "c",
+        "utilsclient.h": "c",
+        "comunicacion.h": "c",
+        "estructurascompartidas.h": "c",
+        "main.h": "c",
+        "type_traits": "c",
+        "pcb.h": "c"
     }
 }

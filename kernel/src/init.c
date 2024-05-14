@@ -6,9 +6,9 @@ int GRADO_MAX_MULTIPROGRAMACION;
 char *ALGORITMO_PLANIFICACION;
 int QUANTUM;
 
-int procesosTotales_MP=0;
-int contadorPeticionesFs=0;
-int idProcesoGlobal=0;
+int procesosTotales_MP = 0;
+int contadorPeticionesFs = 0;
+int idProcesoGlobal = 0;
 
 bool planificacionFlag=true;
 
@@ -22,6 +22,7 @@ t_list* estadoBlockRecursos;
 t_queue* colaReady_FIFO;
 t_list* listaRecursos;
 t_list* colaReady;
+t_list* colaReadyVRR;
 
 t_list* tablaGlobal_ArchivosAbiertos;
 t_list* listaPeticionesArchivos;
@@ -77,7 +78,6 @@ void iniciarNecesidades(){
     sem_init(&sem_procesosExit,0,0);
     sem_init(&sem_cpuLibre,0,1);
 
-    //log_info(logger, "%s\n", config_get_string_value(config,"PUERTO_ESCUCHA"));
 	pthread_t tid[7];
    
 	pthread_create(&tid[0], NULL, conectarMemoria, "MEMORIA");
@@ -91,11 +91,11 @@ void iniciarNecesidades(){
     
 	
 
-    // pthread_create(&hilo_planificador_LP, NULL, (void*)planificadorLargoPlazo, NULL);
-    // pthread_create(&hilo_planificador_corto, NULL, (void*)planificadorCortoPlazo, NULL);
-    // pthread_create(&hilo_liberador_procesos, NULL, (void*)liberar_procesos, NULL);
+    pthread_create(&hilo_planificador_LP, NULL, (void*)planificadorLargoPlazo, NULL);
+    pthread_create(&hilo_planificador_corto, NULL, (void*)planificadorCortoPlazo, NULL);
+    pthread_create(&hilo_liberador_procesos, NULL, (void*)liberar_procesos, NULL);
 
-	// pthread_create(&tid[4], NULL, iniciarConsola, NULL);
+    pthread_create(&tid[4], NULL, iniciarConsola, NULL);
 	// pthread_create(&tid[5], NULL, escucharFilesystemRef, NULL);
 	// pthread_create(&tid[6], NULL, escucharCPURef, NULL);
 
@@ -103,6 +103,9 @@ void iniciarNecesidades(){
 	INSTANCIAS_RECURSOS = config_get_array_value(config, "INSTANCIAS_RECURSOS");
 	GRADO_MAX_MULTIPROGRAMACION = config_get_int_value(config, "GRADO_MULTIPROGRAMACION");
 	ALGORITMO_PLANIFICACION = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
+    if(!strcmp(ALGORITMO_PLANIFICACION, "VRR"))
+        colaReadyVRR = list_create();
+
 	QUANTUM = config_get_int_value(config, "QUANTUM");
 
     int dim = tamanioArray(RECURSOS);
@@ -112,14 +115,14 @@ void iniciarNecesidades(){
     pthread_mutex_init(&planificacionLargo, NULL);
     pthread_mutex_init(&planificacionCorto, NULL);
 
-    //cargarRecursos();
+    cargarRecursos();
 
-	// pthread_join(tid[4], NULL);
+    pthread_join(tid[4], NULL);
 	// pthread_join(tid[5], NULL);
 	// pthread_join(tid[6], NULL);
-	// pthread_join(hilo_planificador_LP, NULL);
-	// pthread_join(hilo_planificador_corto,NULL);
-	// pthread_join(hilo_liberador_procesos,NULL);
+    pthread_join(hilo_planificador_LP, NULL);
+    pthread_join(hilo_planificador_corto,NULL);
+    pthread_join(hilo_liberador_procesos,NULL);
     pthread_join(tid[1], NULL);
 }
 
@@ -130,22 +133,22 @@ int tamanioArray(char** array){
     return n;
 }
 
-// int cargarRecursos(){
-//     listaRecursos = list_create();
-//     int dim = tamanioArray(RECURSOS);
-//     char** recursos = RECURSOS;
-//     char** instancias = INSTANCIAS_RECURSOS;
-//     for(int i = 0 ; i < dim ; i++){
-//         Recurso* recurso = malloc(sizeof(Recurso));
-//         recurso->nombreRecurso = recursos[i];
-//         recurso->instanciasRecurso = atoi(instancias[i]);
-//         recurso->indiceSemaforo = i;
-//         recurso->cola = list_create();
-//         list_add(listaRecursos,recurso);
-//     }
-//     estadoBlockRecursos = listaRecursos;
-//     return true;
-// }
+int cargarRecursos(){
+    listaRecursos = list_create();
+    int dim = tamanioArray(RECURSOS);
+    char** recursos = RECURSOS;
+    char** instancias = INSTANCIAS_RECURSOS;
+    for(int i = 0 ; i < dim ; i++){
+        Recurso* recurso = malloc(sizeof(Recurso));
+        recurso->nombreRecurso = recursos[i];
+        recurso->instanciasRecurso = atoi(instancias[i]);
+        recurso->indiceSemaforo = i;
+        recurso->cola = list_create();
+        list_add(listaRecursos,recurso);
+    }
+    estadoBlockRecursos = listaRecursos;
+    return true;
+}
 
 void iniciarSemaforoDinamico(pthread_mutex_t* semaforo, int dim){
     for (int i = 0; i <dim ; ++i)
