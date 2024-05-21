@@ -97,7 +97,7 @@ void iniciarNecesidades(){
 
     pthread_create(&tid[4], NULL, iniciarConsola, NULL);
 	// pthread_create(&tid[5], NULL, escucharFilesystemRef, NULL);
-	// pthread_create(&tid[6], NULL, escucharCPURef, NULL);
+	pthread_create(&tid[6], NULL, escucharCPURef, NULL);
 
 	RECURSOS = config_get_array_value(config, "RECURSOS");
 	INSTANCIAS_RECURSOS = config_get_array_value(config, "INSTANCIAS_RECURSOS");
@@ -119,7 +119,7 @@ void iniciarNecesidades(){
 
     pthread_join(tid[4], NULL);
 	// pthread_join(tid[5], NULL);
-	// pthread_join(tid[6], NULL);
+	pthread_join(tid[6], NULL);
     pthread_join(hilo_planificador_LP, NULL);
     pthread_join(hilo_planificador_corto,NULL);
     pthread_join(hilo_liberador_procesos,NULL);

@@ -26,6 +26,11 @@ void *escucharConexionesIO(void *parametro){
 	return NULL;
 }
 
+void *escucharCPURef(void *parametro){
+	escucharCPU();
+	return NULL;
+}
+
 void *conectarCPU(void *parametro){
 	conectarModuloCPU(parametro);
 	return NULL;

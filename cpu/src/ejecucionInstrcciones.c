@@ -9,9 +9,9 @@ void SET(char* registro, char* valor){
 void SUM(char* value1, char* value2) {
     int suma=0;
     log_info(info_logger, "llega");
-	suma+=atoi(obtener_valor_registroCPU(value1));
-    log_info(info_logger, "llega1 %d %s", suma, obtener_valor_registroCPU(value2));
-	suma+=atoi(obtener_valor_registroCPU(value2));
+	suma+=obtener_valor_registroCPU(value1);
+    log_info(info_logger, "llega1 %d %d", suma, obtener_valor_registroCPU(value2));
+	suma+=obtener_valor_registroCPU(value2);
     log_info(info_logger, "llega2 %d", suma);
 
 	char buffer[20];
@@ -22,8 +22,8 @@ void SUM(char* value1, char* value2) {
 
 void SUB(char* value1, char* value2) {
 	int resta=0;
-	resta+=atoi(obtener_valor_registroCPU(value1));
-	resta-=atoi(obtener_valor_registroCPU(value2));
+	resta+=obtener_valor_registroCPU(value1);
+	resta-=obtener_valor_registroCPU(value2);
     log_info(info_logger, "llega2 %d", resta);
 
 	char buffer[20];
@@ -33,7 +33,7 @@ void SUB(char* value1, char* value2) {
 }
 
 void JNZ(char* registro, char* numeroInstruccion){
-	if(atoi(obtener_valor_registroCPU(registro)))
+	if(obtener_valor_registroCPU(registro))
 		PCB_Actual->program_counter=atoi(numeroInstruccion);
 	else
 		PCB_Actual->program_counter++;
@@ -160,113 +160,71 @@ void ejecutar_EXIT(){
 }
 
 void cambiar_valor_del_registroCPU(char* registro, char* valor) {
+    if (strcmp(registro, "PC") == 0)
+        PCB_Actual->program_counter = atoi(valor);
+
     if (strcmp(registro, "AX") == 0)
-        memcpy(registroCPU_AX, valor, 1);
+        registroCPU_AX = atoi(valor);
 
     if (strcmp(registro, "BX") == 0)
-        memcpy(registroCPU_BX, valor, 1);
+        registroCPU_BX = atoi(valor);
 
     if (strcmp(registro, "CX") == 0)
-        memcpy(registroCPU_CX, valor,1);
+        registroCPU_CX = atoi(valor);
 
     if (strcmp(registro, "DX") == 0)
-        memcpy(registroCPU_DX, valor, 1);
+        registroCPU_DX = atoi(valor);
 
     if (strcmp(registro, "EAX") == 0)
-        memcpy(registroCPU_AX, valor, 4);
+        registroCPU_EAX = atoi(valor);
 
     if (strcmp(registro, "EBX") == 0)
-        memcpy(registroCPU_BX, valor, 4);
+        registroCPU_EBX = atoi(valor);
 
     if (strcmp(registro, "ECX") == 0)
-        memcpy(registroCPU_CX, valor,4);
+        registroCPU_ECX = atoi(valor);
 
     if (strcmp(registro, "EDX") == 0)
-        memcpy(registroCPU_DX, valor, 4);
+        registroCPU_EDX = atoi(valor);
 
     if (strcmp(registro, "SI") == 0)
-        memcpy(registroCPU_DX, valor, 4);
+        registroCPU_SI = atoi(valor);
     
     if (strcmp(registro, "DI") == 0)
-        memcpy(registroCPU_DX, valor, 4);
+        registroCPU_DI = atoi(valor);
 }
 
-char* obtener_valor_registroCPU(char* registro) {
-		// if (!strncmp(instruccion,"EJECUTAR_SCRIPT", strlen("EJECUTAR_SCRIPT")))
-	    // 	ejecutar_script(instruccion);
+int obtener_valor_registroCPU(char* registro) {
 
     if (!strncmp(registro, "AX", strlen("AX"))){
-
-        char* valor = (char *) malloc (1 + 1);
-        strcpy (valor,"p");
-        memcpy(valor,registroCPU_AX,1);
-
-        return valor;
+        return registroCPU_AX;
     }
     if (!strncmp(registro, "BX", strlen("BX"))) {
-
-        char* valor = (char *) malloc (1 + 1);
-        strcpy (valor,"p");
-        memcpy(valor,registroCPU_BX, 1);
-
-        return valor;
+        return registroCPU_BX;
      }
     if (!strncmp(registro, "CX", strlen("CX"))) {
-
-        char* valor = (char *) malloc (1 + 1);
-        strcpy (valor,"p");
-        memcpy(valor, registroCPU_CX, 1);
-
-        return valor;
+        return registroCPU_CX;
      }
     if (!strncmp(registro, "DX", strlen("DX"))) {
-        char* valor = (char *) malloc (1 + 1);
-        strcpy (valor,"p");
-        memcpy(valor, registroCPU_DX, 1);
-
-        return valor;
+        return registroCPU_DX;
      }
     if (!strncmp(registro, "EAX", strlen("EAX"))) {
-        char* valor = (char *) malloc (4 + 1);
-        strcpy (valor,"pppp");
-        memcpy(valor, registroCPU_EAX, 4);
-
-        return valor;
+        return registroCPU_EAX;
      }
     if (!strncmp(registro, "EBX", strlen("EBX"))) {
-        char* valor = (char *) malloc (4 + 1);
-        strcpy (valor,"pppp");
-        memcpy(valor, registroCPU_EBX, 4);
-
-        return valor;
+        return registroCPU_EBX;
      }
     if (!strncmp(registro, "ECX", strlen("ECX"))) {
-        char* valor = (char *) malloc (4 + 1);
-        strcpy (valor,"pppp");
-        memcpy(valor, registroCPU_ECX, 4);
-
-        return valor;
+        return registroCPU_ECX;
      }
     if (!strncmp(registro, "EDX", strlen("EDX"))) {
-        char* valor = (char *) malloc (4 + 1);
-        strcpy (valor,"pppp");
-        memcpy(valor, registroCPU_EDX, 4);
-
-        return valor;
+        return registroCPU_EDX;
      }
     if (!strncmp(registro, "SI", strlen("SI"))) {
-        char* valor = (char *) malloc (4 + 1);
-        strcpy (valor,"pppp");
-        memcpy(valor, registroCPU_SI, 4);
-
-        return valor;
+        return registroCPU_SI;
      }
     if (!strncmp(registro, "DI", strlen("DI"))) {
-        char* valor = (char *) malloc (4 + 1);
-        strcpy (valor,"pppp");
-        memcpy(valor, registroCPU_DI, 4);
-
-        return valor;
+        return registroCPU_DI;
      }
 
 }
