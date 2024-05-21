@@ -247,8 +247,8 @@ void execute(){
         ioFsRead(interfaz, nombreArchivo, registroDireccion, registroTamanio, registroPunteroArchivo);
     }
 
-    else if (strcmp(nombre_instruccion_actual, "EXIT") == 0) {
-        log_info(info_logger, "PID: <%d> - Ejecutando: <EXIT> -", PCB_Actual->id);
+    else if (!strncmp(nombre_instruccion_actual, "EXIT", strlen("EXIT"))) {
+        log_info(info_logger, "PID: <%d> - Ejecutando: <EXIT>", PCB_Actual->id);
 
         ejecutar_EXIT();
     } else {
