@@ -327,13 +327,22 @@ void escucharCPU (void) {
 			case IO_GEN_SLEEP_OPC: {
 				uint32_t tiempoSleep;
 				uint32_t interfaz;
-				PCB* pcbRecibida = recibir_contextoEjecucion_y_uint32_y_uint32(cpuDispatch_fd, interfaz, tiempoSleep);
-				actualizarPcbEjecucion(pcbRecibida);
-				PCB* pcbActualizada = obtenerPcbExec();
-				t_paquete* paquete = crear_paquete(IO_GEN_SLEEP_OPC, info_logger);
-				agregar_a_paquete2(paquete, &tiempoSleep, sizeof(uint32_t));
-				enviar_paquete(paquete, vectorIO[interfaz]);//recibir con recibirValor_uint32
-				eliminar_paquete(paquete);
+				uint32_t pid_recibido;
+				t_list* lista = recibirListaUint32_t(cpu_fd);
+				interfaz = *(uint32_t*)list_get(lista,0);
+				tiempoSleep = *(uint32_t*)list_get(lista,1);
+				pid_recibido = *(uint32_t*)list_get(lista,2);
+				
+				
+				t_list* listaInts = list_create();
+
+				list_add(listaInts, &pid_recibido);
+				list_add(listaInts, &tiempoSleep);
+
+				enviarListaUint32_t(listaInts,vectorIO[interfaz], info_logger, IO_GEN_SLEEP_OPC);
+
+				list_clean(listaInts);
+				list_destroy(listaInts);
 
 				break;
 			}

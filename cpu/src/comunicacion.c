@@ -7,6 +7,7 @@ int pid;
 int kernel_fd;
 int kernel_interrupt_fd;
 int memoria_fd;
+int tam_pagina;
 
 int conectarModulo(char *modulo){
 
@@ -36,6 +37,25 @@ int conectarModulo(char *modulo){
 
 
 	memoria_fd= crear_conexion(loggerCpuMem, "Conecto a Cpu a memoria",ip, puerto);
+
+	if (memoria_fd) {
+		t_list* lista;
+		enviarOrden(HANDSHAKE_CPU, memoria_fd, info_logger);
+		op_code_cliente cod = recibir_operacion(memoria_fd);
+		if(cod == HANDSHAKE_CPU){
+			lista = recibir_paquete(memoria_fd);
+			log_info(info_logger, "Me llego el tamaño de pagina:\n");
+			tam_pagina=atoi((char*)list_get(lista, 0));
+			log_info(info_logger,"HANDSHAKE con Memoria acontecido || Tam_pagina=%d", tam_pagina);
+			list_clean(lista);
+			list_destroy(lista);
+		}
+		else{
+			printf("%d", cod);
+			log_error(error_logger,"FALLO en el recibo del HANDSHAKE de Memoria");
+		}
+
+	}
 
 	return memoria_fd;
 }

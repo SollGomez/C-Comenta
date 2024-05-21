@@ -72,11 +72,11 @@ void* ejecutar_script_operaciones (void* parametros) {
 	char instruccion[100];
 	
 	
-if(fptr == NULL)
-	printf("\nNO ENCONTRE EL ARCHIVO");
+	if(fptr == NULL)
+		printf("\nNO ENCONTRE EL ARCHIVO");
 
-if(fptr != NULL)
-	printf("\n encontre el archivo %s", fptr);
+	if(fptr != NULL)
+		printf("\n encontre el archivo %s", fptr);
 
 	while (fgets(instruccion, sizeof(instruccion), fptr)) {
 		if (!strncmp(instruccion,"EJECUTAR_SCRIPT", strlen("EJECUTAR_SCRIPT")))

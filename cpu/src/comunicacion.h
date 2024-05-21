@@ -11,6 +11,7 @@ extern PCB* PCB_Actual;
 extern int kernel_fd;
 extern int kernel_interrupt_fd;
 extern int memoria_fd;
+extern int tam_pagina;
 
 int conectarModulo(char *);
 t_log* iniciar_logger(char*);
