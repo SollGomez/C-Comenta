@@ -22,14 +22,6 @@ int recibirConexion (char* puerto) {
 		cualInterfaz(tipoInterfaz);
 		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, vectorIO[tipoInterfaz]);
 
-		uint32_t pid = 10;
-		uint32_t unidadesTrabajo = 8;
-		t_list* listaDatosDePrueba = list_create();
-		list_add(listaDatosDePrueba, &pid);
-		list_add(listaDatosDePrueba, &unidadesTrabajo);
-		//enviarValor_uint32(8, vectorIO[tipoInterfaz], IO_GEN_SLEEP, logger);
-		enviarListaUint32_t(listaDatosDePrueba, vectorIO[tipoInterfaz], logger, IO_STDIN_READ);
-
 
 	}
 
@@ -324,22 +316,28 @@ void escucharCPU (void) {
 				break;
 			}
 
-			case IO_GEN_SLEEP_OPC: {
+			case IO_GEN_SLEEP: {
 				uint32_t tiempoSleep;
 				uint32_t interfaz;
-				uint32_t pid_recibido;
-				t_list* lista = recibirListaUint32_t(cpu_fd);
-				interfaz = *(uint32_t*)list_get(lista,0);
-				tiempoSleep = *(uint32_t*)list_get(lista,1);
-				pid_recibido = *(uint32_t*)list_get(lista,2);
-				
+				PCB* pcbRecibida = recibir_contextoEjecucion_y_uint32_y_uint32(cpuDispatch_fd, &interfaz, &tiempoSleep);
+				actualizarPcbEjecucion(pcbRecibida);
+				PCB* pcbActualizada = obtenerPcbExec();
 				
 				t_list* listaInts = list_create();
 
-				list_add(listaInts, &pid_recibido);
+				list_add(listaInts, &pcbActualizada->id);
 				list_add(listaInts, &tiempoSleep);
 
-				enviarListaUint32_t(listaInts,vectorIO[interfaz], info_logger, IO_GEN_SLEEP_OPC);
+				enviarListaUint32_t(listaInts,vectorIO[interfaz], info_logger, IO_GEN_SLEEP);
+
+				moverProceso_ExecBloq(pcbActualizada);
+				SleepCpu *aux = malloc(sizeof(SleepCpu));
+				aux->pcb = pcbActualizada;
+				aux->segundosSleep = tiempoSleep;
+				log_info(info_logger,"PID: <%d> - Bloqueado por <SLEEP>", pcbActualizada->id);
+				pthread_t atenderSleep;
+				pthread_create(&atenderSleep,NULL,esperaTiempo,(void*)aux);
+				pthread_detach(atenderSleep);
 
 				list_clean(listaInts);
 				list_destroy(listaInts);
@@ -434,4 +432,16 @@ void bloquearProcesoPorRecurso(Recurso* recurso){
 	pthread_mutex_unlock(&semaforos_io[recurso->indiceSemaforo]);
 
     log_info(info_logger,"PID: <%d> - Estado Anterior: <EXEC> - Estado Actual: <BLOCKED_RECURSO[%s]>", pcbABlockedRecurso->id, recurso->nombreRecurso);
+}
+
+void* esperaTiempo(void* aux1){
+
+	SleepCpu* aux2 = (SleepCpu *) aux1;
+
+
+
+
+    sleep(aux2->segundosSleep);
+    moverProceso_BloqReady(aux2->pcb);
+    free(aux2);
 }

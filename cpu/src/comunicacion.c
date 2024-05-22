@@ -81,6 +81,7 @@ void recibirConexion(char *puerto) {
 		 case CONTEXTOEJECUCION: {
 
 			PCB_Actual = recibir_contextoEjecucion(kernel_fd);
+			sem_wait(&bin_ciclo);
 
 			if (PCB_Actual->id == pid) {
 				ciclo_de_instruccion();

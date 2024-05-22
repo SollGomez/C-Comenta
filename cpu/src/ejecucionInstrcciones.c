@@ -8,11 +8,8 @@ void SET(char* registro, char* valor){
 
 void SUM(char* value1, char* value2) {
     int suma=0;
-    log_info(info_logger, "llega");
 	suma+=obtener_valor_registroCPU(value1);
-    log_info(info_logger, "llega1 %d %d", suma, obtener_valor_registroCPU(value2));
 	suma+=obtener_valor_registroCPU(value2);
-    log_info(info_logger, "llega2 %d", suma);
 
 	char buffer[20];
 	sprintf(buffer, "%d", suma);
@@ -24,7 +21,6 @@ void SUB(char* value1, char* value2) {
 	int resta=0;
 	resta+=obtener_valor_registroCPU(value1);
 	resta-=obtener_valor_registroCPU(value2);
-    log_info(info_logger, "llega2 %d", resta);
 
 	char buffer[20];
 	sprintf(buffer, "%d", resta);
@@ -113,18 +109,13 @@ void ioGenSleep(char* interfaz, char* unidadesDeTrabajo){
 
     copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
     PCB_Actual->program_counter++;
-    
-    
-    t_list* listaInts = list_create();
-
-	list_add(listaInts, &numeroInterfaz);
-	list_add(listaInts, &tiempoEspera);
-    list_add(listaInts, &PCB_Actual->id);
-
-	enviarListaUint32_t(listaInts,kernel_fd, info_logger, IO_GEN_SLEEP_OPC);
-
-    list_clean(listaInts);
-	list_destroy(listaInts);
+    t_paquete* paquete = crear_paquete(IO_GEN_SLEEP, info_logger);
+    agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+    agregar_a_paquete2(paquete, &numeroInterfaz, sizeof(uint32_t)); //Diseñar para Kernel recibir contexto ejecución y uint y uint
+    agregar_a_paquete2(paquete, &tiempoEspera, sizeof(uint32_t));
+    enviar_paquete(paquete, kernel_fd);
+    eliminar_paquete(paquete);
+    cicloInstrucciones = false;
 }
 
 void ioStdinRead(char* interfaz, char* registroDireccion, char* registroTamanio){

@@ -11,7 +11,6 @@ void planificadorCortoPlazo();
 void liberar_procesos();
 void liberarPcb(PCB* pcb);
 void aumentarGradoMP();
-void* esperarRR(void*);
 void moverProceso_readyExec();
 void moverProceso_ExecBloq(PCB *);
 void moverProceso_BloqReady(PCB* );

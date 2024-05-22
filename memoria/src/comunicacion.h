@@ -45,7 +45,7 @@ t_log* iniciar_logger(char*);
 
 // int conectarModulo(char *);
 // void leer_consola(t_log*);
-// void PaqueteHand(int, t_log*);
+void PaqueteHand(int, t_log*);
 // void terminar_programa(int, t_log*);
 // void iterator(char* value);
 // void limpiarYEliminarListaAuxiliarPeroSinEliminarContenido(t_list*);

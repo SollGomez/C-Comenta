@@ -71,11 +71,11 @@ void cualInterfaz(int tipoInterfaz){
  			int cod_op = recibir_operacion(cpu_fd);
  			t_list *lista;
  			switch (cod_op) {
-				// case HANDSHAKE_CPU:
-				// 	recibirOrden(cpu_fd);
-				// 	log_info(logger,"HANDSHAKE con CPU acontecido");
-				// 	PaqueteHand(cpu_fd, logger);
-				// 	break;
+				case HANDSHAKE_CPU:
+					recibirOrden(cpu_fd);
+					log_info(logger,"HANDSHAKE con CPU acontecido");
+					PaqueteHand(cpu_fd, logger);
+					break;
 				case SOLICITUDMARCO:
 					lista = recibirListaUint32_t(cpu_fd);
 					uint32_t marco = obtenerMarcoDePagina(*(uint32_t*)list_get(lista,0), *(uint32_t*)list_get(lista,1));
@@ -104,8 +104,8 @@ void cualInterfaz(int tipoInterfaz){
 					log_info(logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
 					instruccion = retornarInstruccionACPU(*(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1)); // pid y pc
 					usleep(RETARDO_RESPUESTA*1000); //ver si cambiar a sleep
-					log_info(info_logger, "instruccion: %s %s %s %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2
-																			, instruccion->param3, instruccion->param4, instruccion->param5);
+					// log_info(info_logger, "instruccion: %s %s %s %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2
+					// 														, instruccion->param3, instruccion->param4, instruccion->param5);
 					agregar_instruccion_a_paquete(paquete, instruccion);
 					enviar_paquete(paquete, cpu_fd);
 					eliminar_paquete(paquete);
@@ -209,17 +209,17 @@ t_log* iniciar_logger(char *nombre){
 // 	free(leido);
 // }
 
-// void PaqueteHand(int conexion, t_log* logger){
-// 	t_paquete* paquete = crear_paquete(HANDSHAKE_CPU,logger);
+void PaqueteHand(int conexion, t_log* logger){
+	t_paquete* paquete = crear_paquete(HANDSHAKE_CPU,logger);
 
-// 	char buffer[20];
-// 	sprintf(buffer, "%d", TAM_PAGINA);
+	char buffer[20];
+	sprintf(buffer, "%d", TAM_PAGINA);
 
-// 	agregar_a_paquete(paquete, buffer, strlen(buffer)+1);
+	agregar_a_paquete(paquete, buffer, strlen(buffer)+1);
 
-// 	enviar_paquete(paquete, conexion);
-// 	free(paquete);
-// }
+	enviar_paquete(paquete, conexion);
+	free(paquete);
+}
 
 // void iterator(char* value) {
 // 	log_info(logger,"%s", value);

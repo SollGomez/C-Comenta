@@ -28,13 +28,10 @@ void cualInterfaz() {
 void manejarInterfazGenerica(uint32_t unidadesDeTrabajo) {
     
     
-    for (int i = 0; i < unidadesDeTrabajo; i++) {
-
-        // sleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO);               //DESPUES VER SI ES USLEEP O SLEEP
-        usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 100000);
-        printf("UNIDAD: %d\n", i);
-    }
-
+    
+        sleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO+4);               //DESPUES VER SI ES USLEEP O SLEEP
+        // usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 100000);
+        printf("SLEEP TERMINADO\n");
 }
 
 void manejarInterfazStdin(uint32_t direccionFisicaAEscribir) {

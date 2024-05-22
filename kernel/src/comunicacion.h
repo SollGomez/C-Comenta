@@ -36,5 +36,13 @@ void manejoDeRecursos(char* orden, char* recursoSolicitado);
 void waitRecursoPcb(Recurso* recurso, PCB* unaPcb);
 void signalRecursoPcb (Recurso* recurso, PCB* unaPcb);
 void bloquearProcesoPorRecurso(Recurso* recurso);
+void* esperaTiempo(void* aux1);
+
+typedef struct{
+
+	PCB* pcb;
+	uint32_t segundosSleep;
+
+}SleepCpu;
 
 #endif

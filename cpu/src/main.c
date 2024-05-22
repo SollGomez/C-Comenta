@@ -8,6 +8,7 @@ t_log* error_logger;
 char *PUERTO_DISPATCH;
 char *PUERTO_INTERRUPT;
 t_config *config;
+sem_t bin_ciclo;
 
 int main(int argc, char* argv[]) {
     //decir_hola("CPU");
@@ -22,6 +23,8 @@ int main(int argc, char* argv[]) {
 	error_logger = log_create("error_logger.log","Cpu", true, LOG_LEVEL_ERROR);
 	PUERTO_DISPATCH = config_get_string_value(config, "PUERTO_ESCUCHA_DISPATCH");
 	PUERTO_INTERRUPT = config_get_string_value(config, "PUERTO_ESCUCHA_INTERRUPT");
+
+	sem_init(&bin_ciclo,0,1);
 
     pthread_t tid[3];
 	pthread_create(&tid[1], NULL, conectarMemoria, NULL);

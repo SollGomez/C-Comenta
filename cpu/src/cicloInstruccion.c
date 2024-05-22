@@ -273,6 +273,8 @@ void checkInsterrupt(){
 		cicloInstrucciones = false;
 		log_info(info_logger, "PID: <%d> - Error Interrupcion", PCB_Actual->id);
 	}
+	if(!cicloInstrucciones)
+		sem_post(&bin_ciclo);
 }
 
 void copiar_registroPCB_a_los_registrosCPU (RegistrosCPU* registro) {
