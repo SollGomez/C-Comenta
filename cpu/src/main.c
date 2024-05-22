@@ -5,8 +5,11 @@
 
 t_log* info_logger;
 t_log* error_logger;
-char *PUERTO_DISPATCH;
-char *PUERTO_INTERRUPT;
+char* PUERTO_DISPATCH;
+char* PUERTO_INTERRUPT;
+char* ALGORITMO_TLB;
+int CANTIDAD_ENTRADAS_TLB;
+t_list* TLB;
 t_config *config;
 sem_t bin_ciclo;
 
@@ -23,6 +26,10 @@ int main(int argc, char* argv[]) {
 	error_logger = log_create("error_logger.log","Cpu", true, LOG_LEVEL_ERROR);
 	PUERTO_DISPATCH = config_get_string_value(config, "PUERTO_ESCUCHA_DISPATCH");
 	PUERTO_INTERRUPT = config_get_string_value(config, "PUERTO_ESCUCHA_INTERRUPT");
+	
+	ALGORITMO_TLB = config_get_string_value(config, "ALGORITMO_TLB");
+	CANTIDAD_ENTRADAS_TLB = atoi(config_get_string_value(config, "CANTIDAD_ENTRADAS_TLB"));
+	TLB = list_create();
 
 	sem_init(&bin_ciclo,0,1);
 
