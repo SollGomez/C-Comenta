@@ -203,11 +203,6 @@ Instruccion* retornarInstruccionACPU(uint32_t pid,uint32_t pc){
 	}
     
 	Proceso* proceso = list_find(instruccionesDeProcesos, coincidePid);
-    if(pid==1)
-        log_info(info_logger, "antes de list_get");
 	Instruccion* instruccion = list_get(proceso->instrucciones, pc);
-    if(pid==1){
-        log_info(info_logger, "id instruccion: %s", instruccion->id);
-    }
 	return instruccion;
 }

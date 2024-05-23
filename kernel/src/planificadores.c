@@ -16,7 +16,7 @@ void planificadorLargoPlazo() {
             PCB* pcbAReady = queue_peek(colaNew);
             pthread_mutex_unlock(&mutex_colaNew);
             aumentarGradoMP();
-
+            
             enviar_uint32_y_uint32_y_char(pcbAReady->nombreRecurso,pcbAReady->id, pcbAReady->size, memoria_fd, INICIALIZAR_PROCESO_MEMORIA, info_logger);
             int cod_op = recibir_operacion(memoria_fd);
 

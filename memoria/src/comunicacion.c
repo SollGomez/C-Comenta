@@ -344,7 +344,6 @@ void inicializarProceso(int cliente_socket){
 
 void finalizarProceso(int cliente_socket){
 	log_info(info_logger,"Tamaño de tablaGeneral al llegar a finalizarProceso: %d\n", list_size(tablaGeneral));
-    pthread_mutex_lock(&mutex_tablasPaginas);
     pthread_mutex_lock(&mutex_espacioContiguo);
     uint32_t pid = recibirValor_uint32(cliente_socket);
 	TablaDePaginas* tabla = obtenerTablaPorPID(pid);
@@ -368,9 +367,9 @@ void finalizarProceso(int cliente_socket){
 	list_remove_by_condition(instruccionesDeProcesos, buscarPorPID);
 	free(programa);
 
+
     if(tabla!=NULL)
     	liberarTablaDePaginas(pid);
-    pthread_mutex_unlock(&mutex_tablasPaginas);
     pthread_mutex_unlock(&mutex_espacioContiguo);
     enviarOrden(FINALIZAR_PROCESO_MEMORIA, cliente_socket, info_logger);
     log_info(info_logger, "Proceso finalizado con éxito");

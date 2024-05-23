@@ -56,8 +56,8 @@ void crearTablaPaginasProceso(uint32_t pid, uint32_t size){
 	}
 	pthread_mutex_lock(&mutex_tablasPaginas);
     list_add(tablaGeneral, nuevaTabla);
-    log_info(info_logger,"Tamaño de tablaGeneral después de iniciar proceso: %d\n", list_size(tablaGeneral));
     pthread_mutex_unlock(&mutex_tablasPaginas);
+    log_info(info_logger,"Tamaño de tablaGeneral después de iniciar proceso: %d\n", list_size(tablaGeneral));
     log_info(info_logger, "PID: <%d> - Tamaño: <%d>", pid, cantPaginas);
 }
 
