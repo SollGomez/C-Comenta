@@ -2,6 +2,7 @@
 
 # Prerequisites
 *.d
+*.log
 
 # Object files
 *.o
