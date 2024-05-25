@@ -6,6 +6,7 @@
 #include <utils/utilidades.h>
 #include "pthread.h"
 #include "main.h"
+#include "init.h"
 
 extern t_config* config;
 
@@ -37,6 +38,7 @@ void waitRecursoPcb(Recurso* recurso, PCB* unaPcb);
 void signalRecursoPcb (Recurso* recurso, PCB* unaPcb);
 void bloquearProcesoPorRecurso(Recurso* recurso);
 void* esperaTiempo(void* aux1);
+PCB* buscarProcesoBloq(uint32_t pid);
 
 typedef struct{
 

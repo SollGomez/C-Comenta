@@ -168,10 +168,48 @@ void* recibirIO (int interfaz_fd) {
 
 		t_list *lista = list_create();
 	    switch (cod_op) {
-		// 	case ACCESO_PEDIDO_LECTURA:
-		// 		realizarPedidoEscrituraFs(filesystem_fd);
-
-		// 		break;
+			case IO_STDIN_READ:{
+				uint32_t pid = recibirValor_uint32(interfaz_fd);
+				PCB* pcbBuscado = buscarProcesoBloq(pid);
+				moverProceso_BloqReady(pcbBuscado);
+				break;
+			}
+			case IO_STDOUT_WRITE:{
+				uint32_t pid = recibirValor_uint32(interfaz_fd);
+				PCB* pcbBuscado = buscarProcesoBloq(pid);
+				moverProceso_BloqReady(pcbBuscado);
+				break;
+			}
+			case IO_FS_CREATE:{
+				uint32_t pid = recibirValor_uint32(interfaz_fd);
+				PCB* pcbBuscado = buscarProcesoBloq(pid);
+				moverProceso_BloqReady(pcbBuscado);
+				break;
+			}
+			case IO_FS_DELETE:{
+				uint32_t pid = recibirValor_uint32(interfaz_fd);
+				PCB* pcbBuscado = buscarProcesoBloq(pid);
+				moverProceso_BloqReady(pcbBuscado);
+				break;
+			}
+			case IO_FS_TRUNCATE:{
+				uint32_t pid = recibirValor_uint32(interfaz_fd);
+				PCB* pcbBuscado = buscarProcesoBloq(pid);
+				moverProceso_BloqReady(pcbBuscado);
+				break;
+			}
+			case IO_FS_WRITE:{
+				uint32_t pid = recibirValor_uint32(interfaz_fd);
+				PCB* pcbBuscado = buscarProcesoBloq(pid);
+				moverProceso_BloqReady(pcbBuscado);
+				break;
+			}
+			case IO_FS_READ: {
+				uint32_t pid = recibirValor_uint32(interfaz_fd);
+				PCB* pcbBuscado = buscarProcesoBloq(pid);
+				moverProceso_BloqReady(pcbBuscado);
+				break;
+			}
 		// 	case ACCESO_PEDIDO_ESCRITURA:
 		// 		realizarPedidoLecturaFs(filesystem_fd);
 
@@ -344,6 +382,105 @@ void escucharCPU (void) {
 
 				break;
 			}
+			case IO_STDIN_READ: {	
+				uint32_t direccion_fisica;
+				uint32_t interfaz;
+				uint32_t tamanio;
+				PCB* pcbRecibida = recibir_contextoEjecucion_y_uint32_y_uint32_y_uint32(cpuDispatch_fd, &interfaz, &direccion_fisica, &tamanio);
+				actualizarPcbEjecucion(pcbRecibida);
+				PCB* pcbActualizada = obtenerPcbExec();
+
+				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
+
+				t_list* listaInts = list_create();
+
+				list_add(listaInts, &pcbActualizada->id);
+				list_add(listaInts, &direccion_fisica);
+				list_add(listaInts, &tamanio);
+
+				enviarListaUint32_t(listaInts,vectorIO[interfaz], info_logger, IO_STDIN_READ);
+				list_clean(listaInts);
+				list_destroy(listaInts);
+			}
+			case IO_STDOUT_WRITE: {	//FALTA VER QUE PASA CON EL TAMAÑO
+				uint32_t direccion_fisica;
+				uint32_t interfaz;
+				uint32_t tamanio;
+				PCB* pcbRecibida = recibir_contextoEjecucion_y_uint32_y_uint32_y_uint32(cpuDispatch_fd, &interfaz, &direccion_fisica, &tamanio);
+				actualizarPcbEjecucion(pcbRecibida);
+				PCB* pcbActualizada = obtenerPcbExec();
+				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
+
+				t_list* listaInts = list_create();
+
+				list_add(listaInts, &pcbActualizada->id);
+				list_add(listaInts, &direccion_fisica);
+				list_add(listaInts, &tamanio);
+
+				enviarListaUint32_t(listaInts,vectorIO[interfaz], info_logger, IO_STDOUT_WRITE);
+				list_clean(listaInts);
+				list_destroy(listaInts);
+			}
+			case IO_FS_CREATE: {
+				uint32_t interfaz;
+				PCB* pcbRecibida = recibir_contextoEjecucion_y_char_y_uint32(cpuDispatch_fd, &interfaz);
+				char* nombreArchivo=pcbRecibida->nombreRecurso;
+				actualizarPcbEjecucion(pcbRecibida);
+				PCB* pcbActualizada = obtenerPcbExec();
+				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
+
+				enviarEnteroYString(pcbActualizada->id, nombreArchivo, vectorIO[interfaz], info_logger, IO_FS_CREATE);
+
+			}
+			case IO_FS_DELETE: {
+				uint32_t interfaz;
+				PCB* pcbRecibida = recibir_contextoEjecucion_y_char_y_uint32(cpuDispatch_fd, &interfaz);
+				char* nombreArchivo=pcbRecibida->nombreRecurso;
+				actualizarPcbEjecucion(pcbRecibida);
+				PCB* pcbActualizada = obtenerPcbExec();
+				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
+
+				enviarEnteroYString(pcbActualizada->id, nombreArchivo, vectorIO[interfaz], info_logger, IO_FS_DELETE);
+
+			}
+			case IO_FS_TRUNCATE: {
+				uint32_t interfaz;
+				uint32_t tamanio;
+				PCB* pcbRecibida = recibir_contextoEjecucion_y_char_y_uint32_y_uint32(cpuDispatch_fd, &interfaz, &tamanio);
+				char* nombreArchivo = pcbRecibida->nombreRecurso;
+				actualizarPcbEjecucion(pcbRecibida);
+				PCB* pcbActualizada = obtenerPcbExec();
+				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
+
+				enviar_uint32_y_uint32_y_char(nombreArchivo, &pcbActualizada->id, &tamanio, vectorIO[interfaz], IO_FS_TRUNCATE, info_logger); //NO ESTOY SEGURO SI VAN LOS "&"
+
+			}
+			case IO_FS_WRITE: {
+				uint32_t interfaz;
+				uint32_t tamanio;
+				uint32_t punteroArchivo;
+				uint32_t direccion_fisica;
+				PCB* pcbRecibida = recibir_contextoEjecucion_y_char_y_uint32_y_uint32_y_uint32_y_uint32(cpuDispatch_fd, &interfaz, &tamanio, &punteroArchivo, &direccion_fisica);
+				char* nombreArchivo = pcbRecibida->nombreRecurso;
+				actualizarPcbEjecucion(pcbRecibida);
+				PCB* pcbActualizada = obtenerPcbExec();
+				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
+
+				enviar_uint32_y_uint32_y_uint32_y_uint32_y_char(nombreArchivo, &pcbActualizada->id, &tamanio, &punteroArchivo, &direccion_fisica, vectorIO[interfaz], IO_FS_WRITE, info_logger);
+			}
+			case IO_FS_READ: {
+				uint32_t interfaz;
+				uint32_t tamanio;
+				uint32_t punteroArchivo;
+				uint32_t direccion_fisica;
+				PCB* pcbRecibida = recibir_contextoEjecucion_y_char_y_uint32_y_uint32_y_uint32_y_uint32(cpuDispatch_fd, &interfaz, &tamanio, &punteroArchivo, &direccion_fisica);
+				char* nombreArchivo = pcbRecibida->nombreRecurso;
+				actualizarPcbEjecucion(pcbRecibida);
+				PCB* pcbActualizada = obtenerPcbExec();
+				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
+
+				enviar_uint32_y_uint32_y_uint32_y_uint32_y_char(nombreArchivo, &pcbActualizada->id, &tamanio, &punteroArchivo, &direccion_fisica, vectorIO[interfaz], IO_FS_READ, info_logger);
+			}
 			case -1:
 				log_error(info_logger, "Cliente desconectado de %s...", "CPU");
 				return;
@@ -444,4 +581,12 @@ void* esperaTiempo(void* aux1){
     sleep(aux2->segundosSleep);
     moverProceso_BloqReady(aux2->pcb);
     free(aux2);
+}
+PCB* buscarProcesoBloq(uint32_t pid){
+	for(int i=0 ; i<list_size(colaBloq) ; i++){
+		PCB* pcbBuscado = list_get(colaBloq, i);
+		if(pcbBuscado->id == pid)
+			return pcbBuscado;
+	}
+	log_error(info_logger, "No se encontró el proceso bloqueado");
 }
