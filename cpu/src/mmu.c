@@ -26,8 +26,6 @@ int traducir_direccion_logica(int direccion_logica) {
 
 			agregarEntradaTLB(PCB_Actual->id, num_pagina, marco);
 
-			log_info(info_logger, "PID: <%d> - OBTENER MARCO - Página: <%d> - Marco: <%d>\n", PCB_Actual->id, num_pagina, marco);
-
 		}
 		else{
 			printf("%d", cod);
@@ -41,6 +39,8 @@ int traducir_direccion_logica(int direccion_logica) {
 	}
 	
 	int direccion_fisica = marco * tam_pagina + desplazamiento_pagina;
+
+	log_info(info_logger, "PID: <%d> - OBTENER MARCO - Página: <%d> - Marco: <%d>\n", PCB_Actual->id, num_pagina, marco);
 
 	log_info(info_logger, "direccion fisica = marco * tam_pagina + desplazamiento: %d", direccion_fisica);
 
