@@ -36,11 +36,56 @@ void JNZ(char* registro, char* numeroInstruccion){
 }
 
 void resize(char* tamanio){
+    uint32_t tam = atoi(tamanio);
+    t_list* listaInts = list_create();
 
+    list_add(listaInts, &PCB_Actual->id);
+	list_add(listaInts, &tam);
+
+    enviarListaUint32_t(listaInts,memoria_fd, info_logger, RESIZE);
+    PCB_Actual->program_counter++;
+
+    int cod_op = recibir_operacion(memoria_fd);
+
+		switch (cod_op) {
+		case RESIZE:{
+            uint32_t resultado = recibirValor_uint32(memoria_fd);
+            if(resultado == 1){
+                log_info(info_logger, "Se agrandó correctamente el tamaño a %d", tam);
+            }
+            if(resultado == -1){
+                copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+                t_paquete* paquete = crear_paquete(OUT_OF_MEMORY, info_logger);
+                agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+                enviar_paquete(paquete, kernel_fd);
+                eliminar_paquete(paquete);
+                cicloInstrucciones = false;
+            }
+
+            break;
+        }
+        default:
+                log_error(error_logger, "No se recibio el valor resize correctamente, cerrando el programa");
+                exit(1);  //TODO: Hay que cerrar como se debe
+        }
+
+    list_clean(listaInts);
+	list_destroy(listaInts);
 }
 
 void COPY_STRING(char* tamanio){
-    memcpy(registroCPU_DI, registroCPU_SI, atoi(tamanio));
+    uint32_t tam = atoi(tamanio);
+    uint32_t direccionLogicaOrigen = registroCPU_SI;
+    uint32_t direccionLogicaDestino = registroCPU_DI;
+    uint32_t direccionFisicaOrigen = traducir_direccion_logica(direccionLogicaOrigen);
+    uint32_t direccionFisicaDestino = traducir_direccion_logica(direccionLogicaDestino);
+
+    char* valor;
+    valor = leer_valor_de_memoria(direccionFisicaOrigen, tam);
+    escribir_valor_en_memoria(direccionFisicaDestino, tam, valor);
+    free(valor);
+    
+
     PCB_Actual->program_counter++;
 }
 
@@ -100,17 +145,8 @@ void ejecutar_MOV_OUT(int direccion_logica, char* registro) {
 }
 
 void ioGenSleep(char* interfaz, char* unidadesDeTrabajo){
-    uint32_t numeroInterfaz = 0;
+    uint32_t numeroInterfaz = obtenerInterfaz(interfaz);
     uint32_t tiempoEspera = atoi(unidadesDeTrabajo);
-
-    if(!strcmp(interfaz,"STDOUT"))
-        numeroInterfaz=0;
-    if(!strcmp(interfaz,"STDIN"))
-        numeroInterfaz=1;
-    if(!strcmp(interfaz,"DIAL_FS"))
-        numeroInterfaz=2;
-    if(!strcmp(interfaz,"GENERICA"))
-        numeroInterfaz=3;
 
     copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
     PCB_Actual->program_counter++;
@@ -124,31 +160,140 @@ void ioGenSleep(char* interfaz, char* unidadesDeTrabajo){
 }
 
 void ioStdinRead(char* interfaz, char* registroDireccion, char* registroTamanio){
+    uint32_t numeroInterfaz = obtenerInterfaz(interfaz); 
+    uint32_t tamanio = obtener_valor_registroCPU(registroTamanio); //COMO LO MANDO CON TODO LO DEMAS, TENER EN CUENTA QUE BAUTI NO ESTA USANDO EL TAMAÑO
+    uint32_t direccionLogica = obtener_valor_registroCPU(registroDireccion);
+    uint32_t direccion_fisica = traducir_direccion_logica(direccionLogica); //ENVIAR A KERNEL
 
+    copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+    PCB_Actual->program_counter++;
+    t_paquete* paquete = crear_paquete(IO_STDIN_READ, info_logger);
+    agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+    agregar_a_paquete2(paquete, &numeroInterfaz, sizeof(uint32_t)); 
+    agregar_a_paquete2(paquete, &direccion_fisica, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &tamanio, sizeof(uint32_t));
+    enviar_paquete(paquete, kernel_fd);
+    eliminar_paquete(paquete);
+    cicloInstrucciones = false;
 }
 
 void ioStdOutWrite(char* interfaz, char* registroDireccion, char* registroTamanio){
+    uint32_t numeroInterfaz = obtenerInterfaz(interfaz);
+    uint32_t tamanio = obtener_valor_registroCPU(registroTamanio); //COMO LO MANDO CON TODO LO DEMAS, TENER EN CUENTA QUE BAUTI NO ESTA USANDO EL TAMAÑO
+    uint32_t direccionLogica = obtener_valor_registroCPU(registroDireccion);
+    uint32_t direccion_fisica = traducir_direccion_logica(direccionLogica); //ENVIAR A KERNEL
 
+    copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+    PCB_Actual->program_counter++;
+    t_paquete* paquete = crear_paquete(IO_STDOUT_WRITE, info_logger);
+    agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+    agregar_a_paquete2(paquete, &numeroInterfaz, sizeof(uint32_t)); 
+    agregar_a_paquete2(paquete, &direccion_fisica, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &tamanio, sizeof(uint32_t));
+    enviar_paquete(paquete, kernel_fd);
+    eliminar_paquete(paquete);
+    cicloInstrucciones = false;
 }
 
 void ioFsCreate(char* interfaz, char* nombreArchivo){
+    uint32_t numeroInterfaz = obtenerInterfaz(interfaz);
 
+    copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+    PCB_Actual->program_counter++;
+    t_paquete* paquete = crear_paquete(IO_FS_CREATE, info_logger);
+    agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+    uint32_t largo_nombre = strlen(nombreArchivo) + 1;
+	agregar_a_paquete2(paquete, &largo_nombre, sizeof(uint32_t));
+	agregar_a_paquete2(paquete, nombreArchivo, largo_nombre);
+    agregar_a_paquete2(paquete, &numeroInterfaz, sizeof(uint32_t));
+    enviar_paquete(paquete, kernel_fd);
+    eliminar_paquete(paquete);
+
+    cicloInstrucciones = false;
 }
 
 void ioFsDelete(char* interfaz, char* nombreArchivo){
+    uint32_t numeroInterfaz = obtenerInterfaz(interfaz);
 
+    copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+    PCB_Actual->program_counter++;
+    t_paquete* paquete = crear_paquete(IO_FS_DELETE, info_logger);
+    agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+    uint32_t largo_nombre = strlen(nombreArchivo) + 1;
+	agregar_a_paquete2(paquete, &largo_nombre, sizeof(uint32_t));
+	agregar_a_paquete2(paquete, nombreArchivo, largo_nombre);
+    agregar_a_paquete2(paquete, &numeroInterfaz, sizeof(uint32_t));
+    enviar_paquete(paquete, kernel_fd);
+    eliminar_paquete(paquete);
+
+    cicloInstrucciones = false;
 }
 
 void ioFsTruncate(char* interfaz, char* nombreArchivo, char* registroTamanio){
+    uint32_t numeroInterfaz = obtenerInterfaz(interfaz);
+    uint32_t tamanio = obtener_valor_registroCPU(registroTamanio);
 
+    copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+    PCB_Actual->program_counter++;
+    t_paquete* paquete = crear_paquete(IO_FS_TRUNCATE, info_logger);
+    agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+    uint32_t largo_nombre = strlen(nombreArchivo) + 1;
+	agregar_a_paquete2(paquete, &largo_nombre, sizeof(uint32_t));
+	agregar_a_paquete2(paquete, nombreArchivo, largo_nombre);
+    agregar_a_paquete2(paquete, &numeroInterfaz, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &tamanio, sizeof(uint32_t));
+    enviar_paquete(paquete, kernel_fd);
+    eliminar_paquete(paquete);
+
+    cicloInstrucciones = false;
 }
 
 void ioFsWrite(char* interfaz, char* nombreArchivo, char* registroDireccion, char* registroTamanio, char* registroPunteroArchivo){
+    uint32_t numeroInterfaz = obtenerInterfaz(interfaz);
+    uint32_t tamanio = obtener_valor_registroCPU(registroTamanio);
+    uint32_t punteroArchivo = obtener_valor_registroCPU(registroPunteroArchivo);
+    uint32_t direccionLogica = obtener_valor_registroCPU(registroDireccion);
+    uint32_t direccion_fisica = traducir_direccion_logica(direccionLogica);
 
+    copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+    PCB_Actual->program_counter++;
+    t_paquete* paquete = crear_paquete(IO_FS_WRITE, info_logger);
+    agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+    uint32_t largo_nombre = strlen(nombreArchivo) + 1;
+	agregar_a_paquete2(paquete, &largo_nombre, sizeof(uint32_t));
+	agregar_a_paquete2(paquete, nombreArchivo, largo_nombre);
+    agregar_a_paquete2(paquete, &numeroInterfaz, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &tamanio, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &punteroArchivo, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &direccion_fisica, sizeof(uint32_t));
+    enviar_paquete(paquete, kernel_fd);
+    eliminar_paquete(paquete);
+
+    cicloInstrucciones = false;
 }
 
 void ioFsRead(char* interfaz, char* nombreArchivo, char* registroDireccion, char* registroTamanio, char* registroPunteroArchivo){
+    uint32_t numeroInterfaz = obtenerInterfaz(interfaz);
+    uint32_t tamanio = obtener_valor_registroCPU(registroTamanio);
+    uint32_t punteroArchivo = obtener_valor_registroCPU(registroPunteroArchivo);
+    uint32_t direccionLogica = obtener_valor_registroCPU(registroDireccion);
+    uint32_t direccion_fisica = traducir_direccion_logica(direccionLogica);
 
+    copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
+    PCB_Actual->program_counter++;
+    t_paquete* paquete = crear_paquete(IO_FS_READ, info_logger);
+    agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
+    uint32_t largo_nombre = strlen(nombreArchivo) + 1;
+	agregar_a_paquete2(paquete, &largo_nombre, sizeof(uint32_t));
+	agregar_a_paquete2(paquete, nombreArchivo, largo_nombre);
+    agregar_a_paquete2(paquete, &numeroInterfaz, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &tamanio, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &punteroArchivo, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &direccion_fisica, sizeof(uint32_t));
+    enviar_paquete(paquete, kernel_fd);
+    eliminar_paquete(paquete);
+
+    cicloInstrucciones = false;
 }
 
 void ejecutar_EXIT(){
@@ -321,4 +466,19 @@ int obtener_valor_registroCPU(char* registro) {
         return registroCPU_DI;
      }
 
+}
+
+uint32_t obtenerInterfaz(char* interfaz){
+    uint32_t numeroInterfaz = 0;
+
+    if(!strcmp(interfaz,"STDOUT"))
+        numeroInterfaz=0;
+    if(!strcmp(interfaz,"STDIN"))
+        numeroInterfaz=1;
+    if(!strcmp(interfaz,"DIAL_FS"))
+        numeroInterfaz=2;
+    if(!strcmp(interfaz,"GENERICA"))
+        numeroInterfaz=3;
+
+    return numeroInterfaz;
 }

@@ -35,5 +35,6 @@ int calcular_bytes_segun_registro(char* registro);
 
 void cambiar_valor_del_registroCPU(char* registro, char* valor);
 int obtener_valor_registroCPU(char* registro);
+uint32_t obtenerInterfaz(char* interfaz);
 
 #endif

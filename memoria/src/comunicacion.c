@@ -95,6 +95,8 @@ void cualInterfaz(int tipoInterfaz){
 				case RESIZE:
 				 	lista = recibirListaUint32_t(cpu_fd);
 				 	uint32_t resultado = resizeProceso(*(uint32_t*)list_get(lista,0), *(uint32_t*)list_get(lista,1)); //pid tamanio
+					enviarValor_uint32(resultado, cpu_fd, RESIZE, info_logger);
+
 					break;
 
 				case SOLICITUDINSTRUCCION:
