@@ -7,3 +7,5 @@
 void cualInterfaz();
 void manejarInterfazGenerica(uint32_t unidadesDeTrabajo);
 void manejarInterfazStdin(uint32_t direccionFisica);
+void crearArchivo(char* nombreArchivo);
+uint32_t buscarBloqueLibre();

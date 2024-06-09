@@ -10,21 +10,25 @@ int main(int argc, char* argv[]) {
 	crearListas();
 	crearSemaforos();
 	iniciarAtencionPeticiones();
+	crearEstructurasFs();
 
 
-	pthread_t kernel;
-	pthread_t memoria;
+	crearArchivo("pruebaLoca.txt");
 
-    pthread_create(&kernel, NULL, iniciarKernel, NULL);
 
-	if(cfg_entradaSalida->TIPO_INTERFAZ_INT != 3) {
-		pthread_create(&memoria, NULL, iniciarMemoria, NULL);
-		pthread_join(memoria, NULL);
-	}
+	// pthread_t kernel;
+	// pthread_t memoria;
 
-	pthread_join(kernel, NULL);
+    // pthread_create(&kernel, NULL, iniciarKernel, NULL);
 
-	cerrarPrograma();
+	// if(cfg_entradaSalida->TIPO_INTERFAZ_INT != 3) {
+	// 	pthread_create(&memoria, NULL, iniciarMemoria, NULL);
+	// 	pthread_join(memoria, NULL);
+	// }
+
+	// pthread_join(kernel, NULL);
+
+	// cerrarPrograma();
     return 0;
 }
 

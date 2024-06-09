@@ -8,6 +8,9 @@ t_config* configuracionEntradasalida;
 bool logsCreados = false;
 bool configCreada = false;
 t_config_entradaSalida* cfg_entradaSalida;
+archBloques* archivoBloques;
+uint32_t* bitmap;
+t_list* listaArchivos;
 
 void crearSemaforos() {
     pthread_mutex_init(&mutex_recvKernel, NULL);
@@ -21,6 +24,65 @@ void crearSemaforos() {
 void crearListas() {
    lista_peticiones_pendientes = list_create();
 }
+
+void crearEstructurasFs() {
+
+    crearBitmap();
+
+    crearArchivoBloques();
+
+    listaArchivos = list_create();
+}
+
+void crearBitmap() {
+
+   int cantidadDeBloques =  cfg_entradaSalida->BLOCK_COUNT;
+    bitmap = (uint32_t *)malloc(cantidadDeBloques * sizeof(uint32_t));
+
+    for(int i=0; i<cantidadDeBloques; i++){
+        bitmap[i] = 0;
+    }
+    log_trace(trace_logger, "Bitmap creado");
+}
+
+
+
+void crearArchivoBloques() {
+    
+    archivoBloques = malloc(sizeof(archBloques));
+    int blockCount = cfg_entradaSalida->BLOCK_COUNT;
+    int blockSize = cfg_entradaSalida->BLOCK_SIZE;
+    archivoBloques->tamanio = blockCount*blockSize;
+
+    char* path = string_new();
+    string_append(&path, cfg_entradaSalida->PATH_BASE_DIALFS);
+    string_append(&path, "/bloques.dat");
+    
+
+    log_info(info_logger, "%s", path);
+    
+    archivoBloques->fd = open(path, O_CREAT| O_RDWR,  S_IRUSR|S_IWUSR);
+    if (archivoBloques->fd == -1){
+        log_trace(trace_logger,"Error al abrir/crear el archivo de bloques");
+        return;
+    }
+
+    ftruncate(archivoBloques->fd, archivoBloques->tamanio);
+    archivoBloques->direccionArchivo = mmap(NULL, archivoBloques->tamanio, PROT_READ | PROT_WRITE, MAP_SHARED, archivoBloques->fd , 0);
+
+    if(archivoBloques->direccionArchivo == MAP_FAILED) {
+	       log_trace(trace_logger, "Error al mapear el archivo en memoria");
+	       close(archivoBloques->fd);
+	       return;
+	    }
+
+    msync(archivoBloques->direccionArchivo, archivoBloques->tamanio, MS_SYNC);
+
+    log_trace(trace_logger, "Archivo de Bloques creado");
+    close(archivoBloques->fd);
+}
+
+
 
 int init_loggers_config(char* path){
 
