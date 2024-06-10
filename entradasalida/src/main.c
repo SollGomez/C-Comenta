@@ -7,11 +7,7 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
     cargar_configuracion();
-	crearListas();
-	crearSemaforos();
-	iniciarAtencionPeticiones();
 	crearEstructurasFs();
-
 
 	crearArchivo("pruebaLoca.txt");
 

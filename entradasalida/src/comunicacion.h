@@ -20,16 +20,6 @@ typedef enum {
     //Por ahora hasta ahí
 }t_operacion_io;
 
-typedef struct 
-{
-    t_operacion_io operacion;
-    uint32_t unidadesDeTrabajo;
-    uint32_t pid;
-    uint32_t direccionFisica;
-
-}t_peticion;
-
-
 
 
 
@@ -42,18 +32,17 @@ int conectarMemoria(char *modulo);
 t_log* iniciar_logger(char*);
 void paquete(int, t_log*);
 void terminar_programa(int, t_log*);
-void iterator(char* value);
 void* recibirKernel();
 void *recibirMemoria();
 void* solicitudIO_GEN_SLEEP (void* cliente_socket); //Genera una solicitud para que haga el usleep de las u. de trabajo
 void* solicitudIO_STDIN_READ(void* cliente_socket); //Genera una solicitud para que pueda ingresar texto x teclado y luego mandarselo a memoria
 void* devolucionIO_STDOUT_WRITE(void* memoria_fd); //Muestra el texto que memoria leyo a partir de su dir. fisica
 void* solicitudIO_STDOUT_WRITE(void* cliente_socket); //Le manda a memoria la dir. fisica a leer y memoria la devuelve en devolucionIO_STDOUT_WRITE
-void agregarPeticionAPendientes(t_peticion* peticion_io_gen_sleep);
-void iniciarAtencionPeticiones();
-t_peticion* sacoPeticionDePendientes();
-void atenderPeticiones();
-void manejarPeticion(t_peticion* peticion);
+void* solicitudIO_FS_CREATE (void* cliente_socket);
+void* solicitudIO_FS_DELETE (void* cliente_socket);
+void* solicitudIO_FS_TRUNCATE (void* cliente_socket);
+void* solicitudIO_FS_WRITE (void* cliente_socket);
+void* solicitudIO_FS_READ (void* cliente_socket);
 
 void* iniciarMemoria();
 void* iniciarKernel();

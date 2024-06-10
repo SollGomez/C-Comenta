@@ -12,18 +12,6 @@ archBloques* archivoBloques;
 uint32_t* bitmap;
 t_list* listaArchivos;
 
-void crearSemaforos() {
-    pthread_mutex_init(&mutex_recvKernel, NULL);
-    pthread_mutex_init(&mutex_recvMemoria, NULL);
-    
-    pthread_mutex_init(&mutex_peticiones_pendientes, NULL);
-
-    sem_init(&sem_contador_peticiones, 0, 0);
-}
-
-void crearListas() {
-   lista_peticiones_pendientes = list_create();
-}
 
 void crearEstructurasFs() {
 
@@ -174,8 +162,8 @@ void logTruncarArchivo(uint32_t pid, char* nombreArchivo){
     log_info(info_logger, "PID: <%d> - Truncar Archivo: <%s>", pid, nombreArchivo);
 }
 
-void logEliminarArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamArchivoTruncado){
-    log_info(info_logger, "PID: <%d> - Eliminar Archivo: <%s> - Tamaño <%d>", pid, nombreArchivo, tamArchivoTruncado);
+void logEliminarArchivo(uint32_t pid, char* nombreArchivo){
+    log_info(info_logger, "PID: <%d> - Eliminar Archivo: <%s> - Tamaño <%d>", pid, nombreArchivo);
 }
 
 void logLeerArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir, uint32_t punteroArchivo){

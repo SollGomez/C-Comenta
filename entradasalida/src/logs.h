@@ -12,14 +12,6 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-extern pthread_mutex_t mutex_recvKernel;
-extern pthread_mutex_t mutex_recvMemoria;
-extern pthread_mutex_t mutex_peticiones_pendientes;
-
-extern t_list* lista_peticiones_pendientes;
-
-extern sem_t sem_contador_peticiones;
-
 typedef struct 
 {
     char* TIPO_INTERFAZ;
@@ -60,9 +52,13 @@ void crearBitmap();
 void crearEstructurasFs();
 
 t_config_entradaSalida *cfg_entradaSalida_start();
-void crearSemaforos();
-void crearListas();
 void logOperacion(uint32_t pid, char* operacionARealizar);
+void logCrearArchivo(uint32_t pid, char* nombreArchivo);
+void logTruncarArchivo(uint32_t pid, char* nombreArchivo);
+void logEliminarArchivo(uint32_t pid, char* nombreArchivo);
+void logLeerArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir, uint32_t punteroArchivo);
+void logEscribirArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir, uint32_t punteroArchivo);
+
 
 extern uint32_t* bitmap;
 extern archBloques* archivoBloques;

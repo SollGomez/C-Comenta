@@ -4,12 +4,6 @@ int contadorDispositivosIO = 0;
 int memoria_fd;
 int kernel_fd;
 
-t_list* lista_peticiones_pendientes;
-pthread_mutex_t mutex_recvKernel;
-pthread_mutex_t mutex_recvMemoria;
-pthread_mutex_t mutex_peticiones_pendientes;
-sem_t sem_contador_peticiones;
-
 void* iniciarMemoria () {
 	conectarMemoria("MEMORIA");
 	return NULL;
@@ -153,8 +147,6 @@ void terminar_programa(int conexion, t_log* logger){
 void *recibirMemoria() {
 
 	while(1) {
-
-		pthread_mutex_lock(&mutex_recvMemoria);
 		int cod_op = recibir_operacion(memoria_fd);
 
 		switch (cod_op)
@@ -162,7 +154,6 @@ void *recibirMemoria() {
 		case IO_STDOUT_WRITE_LECTURA_EXITOSA:
 			
 			devolucionIO_STDOUT_WRITE(&memoria_fd);
-			pthread_mutex_unlock(&mutex_recvMemoria);
 			break;
 
 		case -1:
@@ -172,7 +163,6 @@ void *recibirMemoria() {
 		
 		default:
 			log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-			pthread_mutex_unlock(&mutex_recvKernel);
 			break;
 		
 		}
@@ -187,7 +177,6 @@ void *recibirKernel() {
 		case 0:  					//STDOUT
 			while(1) {
 
-			pthread_mutex_lock(&mutex_recvKernel);
 			int cod_op = recibir_operacion(kernel_fd);
 
 			switch (cod_op)
@@ -195,7 +184,6 @@ void *recibirKernel() {
 			case IO_STDOUT_WRITE:
 				
 				solicitudIO_STDOUT_WRITE(&kernel_fd);
-				pthread_mutex_unlock(&mutex_recvKernel);
 				break;
 
 			case -1:
@@ -205,7 +193,6 @@ void *recibirKernel() {
 			
 			default:
 				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-				pthread_mutex_unlock(&mutex_recvKernel);
 				break;
 			}
 		}
@@ -213,7 +200,6 @@ void *recibirKernel() {
 		case 1:  						//STDIN
 			while(1) {
 
-			pthread_mutex_lock(&mutex_recvKernel);
 			int cod_op = recibir_operacion(kernel_fd);
 
 			switch (cod_op)
@@ -221,7 +207,6 @@ void *recibirKernel() {
 			case IO_STDIN_READ:
 				
 				solicitudIO_STDIN_READ(&kernel_fd);
-				pthread_mutex_unlock(&mutex_recvKernel);
 				break;
 			
 			case -1:
@@ -231,7 +216,6 @@ void *recibirKernel() {
 			
 			default:
 				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-				pthread_mutex_unlock(&mutex_recvKernel);
 				break;
 			}
 		}
@@ -239,34 +223,28 @@ void *recibirKernel() {
 		case 2: 					 	//DIALFS
 			while(1) {
 
-			pthread_mutex_lock(&mutex_recvKernel);
 			int cod_op = recibir_operacion(kernel_fd);
 
 			switch (cod_op)
 			{
 			case IO_FS_CREATE:
 
-				pthread_mutex_unlock(&mutex_recvKernel);
 				break;
 
 			case IO_FS_DELETE:
 		
-				pthread_mutex_unlock(&mutex_recvKernel);
 				break;
 
 			case IO_FS_READ:
 				
-				pthread_mutex_unlock(&mutex_recvKernel);
 				break;
 
 			case IO_FS_TRUNCATE:
 		
-				pthread_mutex_unlock(&mutex_recvKernel);
 				break;
 
 			case IO_FS_WRITE:
 
-				pthread_mutex_unlock(&mutex_recvKernel);
 				break;
 			
 			case -1:
@@ -276,7 +254,6 @@ void *recibirKernel() {
 			
 			default:
 				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-				pthread_mutex_unlock(&mutex_recvKernel);
 				break;
 			}
 		}
@@ -284,8 +261,7 @@ void *recibirKernel() {
 		case 3:  						//GENERICA
 			while(1) {
 
-				pthread_mutex_lock(&mutex_recvKernel);
-				int cod_op = recibir_operacion(kernel_fd);
+					int cod_op = recibir_operacion(kernel_fd);
 
 				switch (cod_op)
 				{
@@ -294,8 +270,7 @@ void *recibirKernel() {
 					pthread_t genSleep;
 					pthread_create(&genSleep, NULL, (void *)solicitudIO_GEN_SLEEP, &kernel_fd);
 					pthread_join(genSleep, NULL);
-					pthread_mutex_unlock(&mutex_recvKernel);
-					break;
+						break;
 				
 				case -1:
 					log_error(info_logger, "El cliente se desconecto");
@@ -304,8 +279,7 @@ void *recibirKernel() {
 				
 				default:
 					log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-					pthread_mutex_unlock(&mutex_recvKernel);
-					break;
+						break;
 				}
 		}
 			break;
@@ -344,6 +318,7 @@ void* solicitudIO_STDOUT_WRITE(void* cliente_socket) {
 	enviarListaUint32_t(listaEnteros, memoria_fd, info_logger, IO_STDOUT_WRITE_LEER_DIRECCION_EN_MEMORIA);
 
 	log_info(info_logger, "PID: <%d> Direccion fisica enviada a memoria", pid);
+	logOperacion(pid, "IO_STDOUT_WRITE");
 
 	return NULL;
 }
@@ -352,15 +327,13 @@ void *solicitudIO_STDIN_READ(void* cliente_socket) {
 
 	int conexion = *((int*) cliente_socket);
 
-	t_peticion* peticion_io_stdin_read = malloc(sizeof(t_peticion));
-	peticion_io_stdin_read->operacion = EJECUTAR_IO_STDIN_READ;
 	t_list* listaEnteros = list_create();
 	listaEnteros = recibirListaUint32_t(conexion);
-	peticion_io_stdin_read->pid = *(uint32_t*)list_get(listaEnteros, 0); 
-	peticion_io_stdin_read->direccionFisica = *(uint32_t*)list_get(listaEnteros, 1);
+	uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0); 
+	uint32_t direccionFisica = *(uint32_t*)list_get(listaEnteros, 1);
 
-	agregarPeticionAPendientes(peticion_io_stdin_read);
-	sem_post(&sem_contador_peticiones); 
+	logOperacion(pid, "IO_STDIN_READ");
+	manejarInterfazStdin(direccionFisica);
 
 	return NULL;
 }
@@ -368,107 +341,49 @@ void *solicitudIO_STDIN_READ(void* cliente_socket) {
 void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 
 	int conexion = *((int*) cliente_socket);
-
 	
-	t_peticion* peticion_io_gen_sleep = malloc(sizeof(t_peticion));
-	peticion_io_gen_sleep->operacion = EJECUTAR_IO_GEN_SLEEP;
 	t_list* listaEnteros = list_create();
-
 	listaEnteros = recibirListaUint32_t(conexion);
 
-	peticion_io_gen_sleep->pid = *(uint32_t*)list_get(listaEnteros, 0);
+	uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0);
+	uint32_t unidadesDeTrabajo = *(uint32_t*)list_get(listaEnteros, 1);
 
-	peticion_io_gen_sleep->unidadesDeTrabajo = *(uint32_t*)list_get(listaEnteros, 1);
+	logOperacion(pid, "IO_GEN_SLEEP");
+	manejarInterfazGenerica(unidadesDeTrabajo);
 
-	agregarPeticionAPendientes(peticion_io_gen_sleep);
-	sem_post(&sem_contador_peticiones);
 	return NULL;
 }
 
-void agregarPeticionAPendientes(t_peticion* peticion) {
+void* solicitudIO_FS_CREATE (void* cliente_socket) {
+	char* nombreArch;
+	uint32_t pid;
+	strcpy(nombreArch, recibirEnteroYString(cliente_socket, &pid));
 
-	pthread_mutex_lock(&mutex_peticiones_pendientes);
+	crearArchivo(nombreArch);
+	logCrearArchivo(pid, nombreArch);
 
-	list_add(lista_peticiones_pendientes, peticion);
-
-	pthread_mutex_unlock(&mutex_peticiones_pendientes);
-
-	return;
+	return NULL;
 }
 
-void iniciarAtencionPeticiones() {
-	pthread_t hilo_peticiones;
-	log_trace(trace_logger, "Inicio atención de peticiones");
+void* solicitudIO_FS_DELETE (void* cliente_socket) {
+	char* nombreArch;
+	uint32_t pid;
+	strcpy(nombreArch, recibirEnteroYString(cliente_socket, &pid));
 
-	pthread_create(&hilo_peticiones, NULL, (void *) atenderPeticiones, NULL);
-	pthread_detach(hilo_peticiones);
-
-}
-
-void atenderPeticiones() {
-
-	while(1) {
-		sem_wait(&sem_contador_peticiones);
-
-		log_trace(trace_logger, "Hay una peticion pendiente");
-
-		t_peticion* peticion = sacoPeticionDePendientes();
-
-		manejarPeticion(peticion);
-	}
-
-	return;
-}
-
-t_peticion* sacoPeticionDePendientes() {
-	pthread_mutex_lock(&mutex_peticiones_pendientes);
-	t_peticion* peticion = list_remove(lista_peticiones_pendientes, 0);
-	pthread_mutex_unlock(&mutex_peticiones_pendientes);
-	return peticion;
-}
-
-void manejarPeticion(t_peticion* peticion) {
-	t_operacion_io codOpIO = peticion->operacion;
-
-
-	switch (codOpIO)
-	{
-	case EJECUTAR_IO_GEN_SLEEP:
-		logOperacion(peticion->pid, "IO_GEN_SLEEP");
-		manejarInterfazGenerica(peticion->unidadesDeTrabajo);
-		break;
-	case EJECUTAR_IO_STDOUT_WRITE:
-		logOperacion(peticion->pid, "IO_STDOUT_WRITE");
-			
-		break;
-	case EJECUTAR_IO_STDIN_READ:
-		logOperacion(peticion->pid, "IO_STDIN_READ");
-		manejarInterfazStdin(peticion->direccionFisica);
-		break;
-	case EJECUTAR_IO_FS_CREATE:
-		
-		break;
-	case EJECUTAR_IO_FS_DELETE:
-		
-		break;
-	case EJECUTAR_IO_FS_READ:
-		
-		break;
-	case EJECUTAR_IO_FS_TRUNCATE:
-		
-		break;
-	case EJECUTAR_IO_FS_WRITE:
-
-		break;						
+	eliminarArchivo(nombreArch);
+	logEliminarArchivo(pid, nombreArch);
 	
-	default:
-		log_error(info_logger, "Codigo de operacion desconocido: %d ", codOpIO);
-		return;
-		
-	}
-
-	free(peticion);
-
-	return;
+	return NULL;
 }
 
+void* solicitudIO_FS_TRUNCATE (void* cliente_socket) {
+	
+}
+
+void* solicitudIO_FS_WRITE (void* cliente_socket) {
+	
+}
+
+void* solicitudIO_FS_READ (void* cliente_socket) {
+	
+}

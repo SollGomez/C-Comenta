@@ -93,6 +93,20 @@ void crearArchivo(char* nombreArchivo) {
 
 }
 
+void eliminarArchivo(char* nombreArchivo) {
+    char* base = string_new();
+    string_append(&base, cfg_entradaSalida->PATH_BASE_DIALFS);
+    string_append(&base, "/");
+    string_append(&base, nombreArchivo); // se da por hecho que esta el .txt
+    //string_append(base, ".txt");
+
+    if (remove(base) == 0) {
+        log_info(info_logger, "El archivo %s ha sido borrado exitosamente.\n", base);
+    } else {
+        log_info(info_logger, "Error al borrar el archivo");
+    }
+}
+
 uint32_t buscarBloqueLibre() {
 
     for(uint32_t i=0; i<cfg_entradaSalida->BLOCK_COUNT; i++) {
