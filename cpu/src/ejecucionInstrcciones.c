@@ -8,8 +8,8 @@ void SET(char* registro, char* valor){
 
 void SUM(char* value1, char* value2) {
     int suma=0;
-	suma+=atoi(obtener_valor_registroCPU(value1));
-	suma+=atoi(obtener_valor_registroCPU(value2));
+	suma+=obtener_valor_registroCPU(value1);
+	suma+=obtener_valor_registroCPU(value2);
 
 	char buffer[20];
 	sprintf(buffer, "%d", suma);
@@ -19,8 +19,8 @@ void SUM(char* value1, char* value2) {
 
 void SUB(char* value1, char* value2) {
 	int resta=0;
-	resta+=atoi(obtener_valor_registroCPU(value1));
-	resta-=atoi(obtener_valor_registroCPU(value2));
+	resta+=obtener_valor_registroCPU(value1);
+	resta-=obtener_valor_registroCPU(value2);
 
 	char buffer[20];
 	sprintf(buffer, "%d", resta);
@@ -29,7 +29,7 @@ void SUB(char* value1, char* value2) {
 }
 
 void JNZ(char* registro, char* numeroInstruccion){
-	if(atoi(obtener_valor_registroCPU(registro)))
+	if(obtener_valor_registroCPU(registro))
 		PCB_Actual->program_counter=atoi(numeroInstruccion);
 	else
 		PCB_Actual->program_counter++;
@@ -109,13 +109,13 @@ void ioGenSleep(char* interfaz, char* unidadesDeTrabajo){
 
     copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
     PCB_Actual->program_counter++;
-    t_paquete* paquete = crear_paquete(IO_GEN_SLEEP_OPC, info_logger);
+    t_paquete* paquete = crear_paquete(IO_GEN_SLEEP, info_logger);
     agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
     agregar_a_paquete2(paquete, &numeroInterfaz, sizeof(uint32_t)); //Diseñar para Kernel recibir contexto ejecución y uint y uint
     agregar_a_paquete2(paquete, &tiempoEspera, sizeof(uint32_t));
     enviar_paquete(paquete, kernel_fd);
     eliminar_paquete(paquete);
-    //cicloInstrucciones = false;
+    cicloInstrucciones = false;
 }
 
 void ioStdinRead(char* interfaz, char* registroDireccion, char* registroTamanio){
@@ -156,112 +156,71 @@ void ejecutar_EXIT(){
 }
 
 void cambiar_valor_del_registroCPU(char* registro, char* valor) {
+    if (strcmp(registro, "PC") == 0)
+        PCB_Actual->program_counter = atoi(valor);
+
     if (strcmp(registro, "AX") == 0)
-        memcpy(registroCPU_AX, valor, 1);
+        registroCPU_AX = atoi(valor);
 
     if (strcmp(registro, "BX") == 0)
-        memcpy(registroCPU_BX, valor, 1);
+        registroCPU_BX = atoi(valor);
 
     if (strcmp(registro, "CX") == 0)
-        memcpy(registroCPU_CX, valor,1);
+        registroCPU_CX = atoi(valor);
 
     if (strcmp(registro, "DX") == 0)
-        memcpy(registroCPU_DX, valor, 1);
+        registroCPU_DX = atoi(valor);
 
     if (strcmp(registro, "EAX") == 0)
-        memcpy(registroCPU_AX, valor, 4);
+        registroCPU_EAX = atoi(valor);
 
     if (strcmp(registro, "EBX") == 0)
-        memcpy(registroCPU_BX, valor, 4);
+        registroCPU_EBX = atoi(valor);
 
     if (strcmp(registro, "ECX") == 0)
-        memcpy(registroCPU_CX, valor,4);
+        registroCPU_ECX = atoi(valor);
 
     if (strcmp(registro, "EDX") == 0)
-        memcpy(registroCPU_DX, valor, 4);
+        registroCPU_EDX = atoi(valor);
 
     if (strcmp(registro, "SI") == 0)
-        memcpy(registroCPU_DX, valor, 4);
+        registroCPU_SI = atoi(valor);
     
     if (strcmp(registro, "DI") == 0)
-        memcpy(registroCPU_DX, valor, 4);
+        registroCPU_DI = atoi(valor);
 }
 
-char* obtener_valor_registroCPU(char* registro) {
+int obtener_valor_registroCPU(char* registro) {
 
-
-    if (strcmp(registro, "AX") == 0){
-
-         char* valor = (char *) malloc (1 + 1);
-         strcpy (valor,"p");
-         memcpy(valor,registroCPU_AX,1);
-
-        return valor;
+    if (!strncmp(registro, "AX", strlen("AX"))){
+        return registroCPU_AX;
     }
-    if (strcmp(registro, "BX") == 0) {
-
-         char* valor = (char *) malloc (1 + 1);
-         strcpy (valor,"p");
-        memcpy(valor,registroCPU_BX, 1);
-
-        return valor;
+    if (!strncmp(registro, "BX", strlen("BX"))) {
+        return registroCPU_BX;
      }
-    if (strcmp(registro, "CX") == 0) {
-
-        char* valor = (char *) malloc (1 + 1);
-        strcpy (valor,"p");
-        memcpy(valor, registroCPU_CX, 1);
-
-        return valor;
+    if (!strncmp(registro, "CX", strlen("CX"))) {
+        return registroCPU_CX;
      }
-    if (strcmp(registro, "DX") == 0) {
-        char* valor = (char *) malloc (1 + 1);
-        strcpy (valor,"p");
-        memcpy(valor, registroCPU_DX, 1);
-
-        return valor;
+    if (!strncmp(registro, "DX", strlen("DX"))) {
+        return registroCPU_DX;
      }
-    if (strcmp(registro, "EAX") == 0) {
-        char* valor = (char *) malloc (4 + 1);
-        strcpy (valor,"pppp");
-        memcpy(valor, registroCPU_EAX, 4);
-
-        return valor;
+    if (!strncmp(registro, "EAX", strlen("EAX"))) {
+        return registroCPU_EAX;
      }
-    if (strcmp(registro, "EBX") == 0) {
-        char* valor = (char *) malloc (4 + 1);
-        strcpy (valor,"pppp");
-        memcpy(valor, registroCPU_EBX, 4);
-
-        return valor;
+    if (!strncmp(registro, "EBX", strlen("EBX"))) {
+        return registroCPU_EBX;
      }
-    if (strcmp(registro, "ECX") == 0) {
-        char* valor = (char *) malloc (4 + 1);
-        strcpy (valor,"pppp");
-        memcpy(valor, registroCPU_ECX, 4);
-
-        return valor;
+    if (!strncmp(registro, "ECX", strlen("ECX"))) {
+        return registroCPU_ECX;
      }
-    if (strcmp(registro, "EDX") == 0) {
-        char* valor = (char *) malloc (4 + 1);
-        strcpy (valor,"pppp");
-        memcpy(valor, registroCPU_EDX, 4);
-
-        return valor;
+    if (!strncmp(registro, "EDX", strlen("EDX"))) {
+        return registroCPU_EDX;
      }
-    if (strcmp(registro, "SI") == 0) {
-        char* valor = (char *) malloc (4 + 1);
-        strcpy (valor,"pppp");
-        memcpy(valor, registroCPU_SI, 4);
-
-        return valor;
+    if (!strncmp(registro, "SI", strlen("SI"))) {
+        return registroCPU_SI;
      }
-    if (strcmp(registro, "DI") == 0) {
-        char* valor = (char *) malloc (4 + 1);
-        strcpy (valor,"pppp");
-        memcpy(valor, registroCPU_DI, 4);
-
-        return valor;
+    if (!strncmp(registro, "DI", strlen("DI"))) {
+        return registroCPU_DI;
      }
 
 }

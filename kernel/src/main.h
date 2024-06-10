@@ -18,6 +18,7 @@ void * conectarCPU(void *);
 void *conectarCPUInterrupt(void *);
 void * conectarMemoria(void *);
 void *escucharConexionesIO(void *);
+void *escucharCPURef(void *parametro);
 t_config *crearConfig(char* configPath);
 
 #endif /* MAIN_H_ */

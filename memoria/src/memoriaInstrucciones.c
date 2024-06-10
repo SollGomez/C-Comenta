@@ -201,9 +201,8 @@ Instruccion* retornarInstruccionACPU(uint32_t pid,uint32_t pc){
 	bool coincidePid(void* proceso){
 		return ((Proceso*)proceso)->pid == pid;
 	}
-
+    
 	Proceso* proceso = list_find(instruccionesDeProcesos, coincidePid);
 	Instruccion* instruccion = list_get(proceso->instrucciones, pc);
-
 	return instruccion;
 }

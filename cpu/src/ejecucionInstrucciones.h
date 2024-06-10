@@ -28,6 +28,6 @@ void ioFsRead(char* interfaz, char* nombreArchivo, char* registroDireccion, char
 void ejecutar_EXIT();
 
 void cambiar_valor_del_registroCPU(char* registro, char* valor);
-char* obtener_valor_registroCPU(char* registro);
+int obtener_valor_registroCPU(char* registro);
 
 #endif

@@ -6,16 +6,16 @@
 extern bool cicloInstrucciones;
 extern int interrupciones;
 
-extern char registroCPU_AX[1];
-extern char registroCPU_BX[1];
-extern char registroCPU_CX[1];
-extern char registroCPU_DX[1];
-extern char registroCPU_EAX[4];
-extern char registroCPU_EBX[4];
-extern char registroCPU_ECX[4];
-extern char registroCPU_EDX[4];
-extern char registroCPU_SI[4];
-extern char registroCPU_DI[4];
+extern uint8_t registroCPU_AX;
+extern uint8_t registroCPU_BX;
+extern uint8_t registroCPU_CX;
+extern uint8_t registroCPU_DX;
+extern uint32_t registroCPU_EAX;
+extern uint32_t registroCPU_EBX;
+extern uint32_t registroCPU_ECX;
+extern uint32_t registroCPU_EDX;
+extern uint32_t registroCPU_SI;
+extern uint32_t registroCPU_DI;
 
 void ciclo_de_instruccion();
 void fetch();

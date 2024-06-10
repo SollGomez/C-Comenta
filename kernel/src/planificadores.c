@@ -16,7 +16,7 @@ void planificadorLargoPlazo() {
             PCB* pcbAReady = queue_peek(colaNew);
             pthread_mutex_unlock(&mutex_colaNew);
             aumentarGradoMP();
-
+            
             enviar_uint32_y_uint32_y_char(pcbAReady->nombreRecurso,pcbAReady->id, pcbAReady->size, memoria_fd, INICIALIZAR_PROCESO_MEMORIA, info_logger);
             int cod_op = recibir_operacion(memoria_fd);
 
@@ -110,11 +110,14 @@ void* esperarRR (void* pcbReady) {
 
 		pcb->tiempoEjecutando++;
 		if (pcb->tiempoEjecutando >= QUANTUM) {
-			if (list_size(colaExec)) {
-				PCB* pcb = obtenerPcbExec();
-				enviarValor_uint32(pcb->id, cpuInterrupt_fd, INTERRUPCIONCPU, info_logger);
-				log_info(info_logger, "PID: <%d> - Desalojado por fin de Quantum", pcb->id);
-			}
+            if(list_size(colaExec)){
+                PCB* pcbExec = obtenerPcbExec();
+                if (list_size(colaExec) && pcb->id == pcbExec->id) {
+                    enviarValor_uint32(pcbExec->id, cpuInterrupt_fd, INTERRUPCIONCPU, info_logger);
+                    log_info(info_logger, "PID: <%d> - Desalojado por fin de Quantum", pcbExec->id);
+                }
+            }
+            pcb->tiempoEjecutando = 0;
 			return NULL;
 		}
 	}
@@ -147,7 +150,6 @@ void* esperarVRR (void* pcbReady) {
 void moverProceso_readyExec(){
         pthread_mutex_lock(&mutex_ColaReady);
         pthread_mutex_lock(&mutex_colaExec);
-
         PCB *pcbReady = list_remove(colaReady,0);
         list_add(colaExec,pcbReady);
 

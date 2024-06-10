@@ -8,7 +8,7 @@ pthread_mutex_t mutexFS;
 espacioContiguoMemoria espacioUsuario;
 
 uint32_t buscarMarcoLibre() {
-    for (uint32_t i = 0; i < CANT_MARCOS; ++i) {
+    for (uint32_t i = 0; i < CANT_MARCOS; i++) {
         if (marcosAsignados[i] == 0)
             return i;
     }
@@ -40,6 +40,7 @@ void crearTablaPaginasProceso(uint32_t pid, uint32_t size){
 
 	  int cantPaginas = size / TAM_PAGINA;
 	  nuevaTabla->pid = pid;
+     
 	    nuevaTabla->paginas = list_create();
 	for(int i = 0; i < cantPaginas ; i++){
 		Pagina* nuevaPagina = malloc(sizeof(Pagina));
@@ -48,14 +49,15 @@ void crearTablaPaginasProceso(uint32_t pid, uint32_t size){
 	        exit(EXIT_FAILURE);
 	    }
 		nuevaPagina->marco = buscarMarcoLibre();
-        //printf("MARCO ELEGIDO PARA LA PAGINA %d: %d\n", i, nuevaPagina->marco);
+        log_info(info_logger, "MARCO ELEGIDO PARA LA PAGINA %d: %d\n", i, nuevaPagina->marco);
+         log_info(info_logger, "LA CANT DE PAG ES %d", cantPaginas);
         list_add(nuevaTabla->paginas, nuevaPagina);
 		marcarMarcoOcupado(nuevaPagina->marco);
 	}
 	pthread_mutex_lock(&mutex_tablasPaginas);
     list_add(tablaGeneral, nuevaTabla);
-    log_info(info_logger,"Tamaño de tablaGeneral después de iniciar proceso: %d\n", list_size(tablaGeneral));
     pthread_mutex_unlock(&mutex_tablasPaginas);
+    log_info(info_logger,"Tamaño de tablaGeneral después de iniciar proceso: %d\n", list_size(tablaGeneral));
     log_info(info_logger, "PID: <%d> - Tamaño: <%d>", pid, cantPaginas);
 }
 

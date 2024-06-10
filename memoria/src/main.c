@@ -14,7 +14,7 @@ t_list *instruccionesDeProcesos;
 
 
 int main(int argc, char* argv[]) {
-    decir_hola("Memoria");
+    //decir_hola("Memoria");
 
 	if (signal(SIGINT, sigint_handler) == SIG_ERR) {
         perror("Error al configurar el manejador de señal");

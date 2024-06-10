@@ -45,7 +45,7 @@ t_log* iniciar_logger(char*);
 
 // int conectarModulo(char *);
 // void leer_consola(t_log*);
-// void PaqueteHand(int, t_log*);
+void PaqueteHand(int, t_log*);
 // void terminar_programa(int, t_log*);
 // void iterator(char* value);
 // void limpiarYEliminarListaAuxiliarPeroSinEliminarContenido(t_list*);
@@ -53,8 +53,8 @@ t_log* iniciar_logger(char*);
 // bool agregarTablasAPaquete(t_list*, t_paquete*);
 // int finalizarProcesoConPid(uint32_t);
 // void liberarModuloSwap(t_list*);
-// void realizarPedidoEscrituraFs(int cliente_socket);
-// void realizarPedidoLecturaFs(int cliente_socket);
+void realizarPedidoEscrituraInterfaz(int cliente_socket);
+void realizarPedidoLecturaInterfaz(int cliente_socket);
 
 
 #endif

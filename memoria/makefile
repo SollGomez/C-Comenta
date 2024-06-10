@@ -54,7 +54,7 @@ start: debug
 
 .PHONY: memcheck
 memcheck: debug
-	valgrind --leak-check=full $(MEMCHECK_FLAGS) ./$(BIN) $(ARGS)
+	valgrind --leak-check=full $(MEMCHECK_FLAGS) ./$(BIN) memoria.config
 
 .PHONY: helgrind
 helgrind: debug

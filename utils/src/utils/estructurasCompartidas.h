@@ -31,16 +31,16 @@ typedef struct {
 } Recurso;
 
 typedef struct {
-    char registro_AX[2];
-    char registro_BX[2];
-    char registro_CX[2];
-    char registro_DX[2];
-    char registro_EAX[5];
-    char registro_EBX[5];
-    char registro_ECX[5];
-    char registro_EDX[5];
-    char registro_SI[5];
-    char registro_DI[5];
+    uint8_t registro_AX;
+    uint8_t registro_BX;
+    uint8_t registro_CX;
+    uint8_t registro_DX;
+    uint32_t registro_EAX;
+    uint32_t registro_EBX;
+    uint32_t registro_ECX;
+    uint32_t registro_EDX;
+    uint32_t registro_SI;
+    uint32_t registro_DI;
 } RegistrosCPU;
 
 typedef struct{
