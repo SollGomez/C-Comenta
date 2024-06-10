@@ -59,9 +59,9 @@ void logEliminarArchivo(uint32_t pid, char* nombreArchivo);
 void logLeerArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir, uint32_t punteroArchivo);
 void logEscribirArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir, uint32_t punteroArchivo);
 
-
-extern uint32_t* bitmap;
+extern t_bitarray* bitmap;
 extern archBloques* archivoBloques;
 extern t_list* listaArchivos;
+extern void* bitarraycontent;
 
 #endif /* LOGS_H_ */

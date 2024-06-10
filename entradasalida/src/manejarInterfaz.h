@@ -9,4 +9,8 @@ void manejarInterfazGenerica(uint32_t unidadesDeTrabajo);
 void manejarInterfazStdin(uint32_t direccionFisica);
 void crearArchivo(char* nombreArchivo);
 void eliminarArchivo(char* nombreArchivo);
-uint32_t buscarBloqueLibre();
+void truncarArchivo (char* nombreArchivo, uint32_t tamanio);
+uint32_t obtener_bloque_libre (t_bitarray* bitmap);
+
+void truncarArchivo (char* nombreArchivo, uint32_t tamanio);
+void achicarArchivo(char* nombreArchivo, uint32_t tamanio);

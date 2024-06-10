@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
 	crearEstructurasFs();
 
 	crearArchivo("pruebaLoca.txt");
-
+	
 
 	// pthread_t kernel;
 	// pthread_t memoria;

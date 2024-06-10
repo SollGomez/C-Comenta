@@ -45,7 +45,6 @@ void manejarInterfazStdin(uint32_t direccionFisicaAEscribir) {
 
 
 // FileSystem
-
 void crearArchivo(char* nombreArchivo) {
 
     char* base = string_new();
@@ -72,7 +71,7 @@ void crearArchivo(char* nombreArchivo) {
     t_config* configAux = config_create(base);
 
     
-    archivoCreado->bloqueInicial = buscarBloqueLibre();
+    archivoCreado->bloqueInicial = obtener_bloque_libre(bitmap);
     if(archivoCreado->bloqueInicial == -1) {
         return;
     }
@@ -90,7 +89,25 @@ void crearArchivo(char* nombreArchivo) {
     list_add(listaArchivos, archivoCreado);
 
     fclose(f);
+}
 
+uint32_t obtener_bloque_libre (t_bitarray* bitmap) {
+
+    for (uint32_t i = 0 ; i < bitarray_get_max_bit(bitmap); i++) {
+            //accesoABitmap(i, bitarray_test_bit(bitmap, i));
+
+        if (!bitarray_test_bit(bitmap, i)) {
+
+            bitarray_set_bit(bitmap, i);
+            //accesoABitmap(i, bitarray_test_bit(bitmap, i));
+
+            return i;
+        }
+    }
+
+    msync(bitmap, cfg_entradaSalida->BLOCK_COUNT, MS_SYNC);
+	log_info(info_logger, "No se obtuvo un bloque libre");
+    return -1;
 }
 
 void eliminarArchivo(char* nombreArchivo) {
@@ -106,17 +123,31 @@ void eliminarArchivo(char* nombreArchivo) {
         log_info(info_logger, "Error al borrar el archivo");
     }
 }
+/*
+void truncarArchivo (char* nombreArchivo, uint32_t tamanio) {
+    char* base = string_new();
+    string_append(&base, cfg_entradaSalida->PATH_BASE_DIALFS);
+    string_append(&base, "/");
+    string_append(&base, nombreArchivo); // se da por hecho que esta el .txt
+    //string_append(base, ".txt");
+    FILE* f = fopen(base, "ab");
 
-uint32_t buscarBloqueLibre() {
+    t_archivo_metadata* archivoATruncar = malloc(sizeof(t_archivo_metadata));
+    archivoATruncar->configArchivo = config_create(base);
+    archivoATruncar->bloqueInicial = config_get_int_value(archivoATruncar->configArchivo, "BLOQUE_INICIAL");
+    archivoATruncar->tamArchivo = config_get_int_value(archivoATruncar->configArchivo, "TAMANIO_ARCHIVO");
 
-    for(uint32_t i=0; i<cfg_entradaSalida->BLOCK_COUNT; i++) {
-        if(bitmap[i] == 0) {
-            bitmap[i] = 1;
-            return i;
-        }
-    }
+    if(archivoATruncar->tamArchivo >= tamanio){
+		achicarArchivo(nombreArchivo, tamanio);
+        //log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Reducir: <%d>", pid, archivoATruncar->tamArchivo, tamanio);
+	}else{
+        //log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Ampliar: <%d>", pid, tamOriginal, tamanio);
+	}
 
-    log_trace(trace_logger, "No hay bloques libres");
+    fclose(f);
 
-    return -1;
+}
+*/
+void achicarArchivo(char* nombreArchivo, uint32_t tamanio) {
+
 }
