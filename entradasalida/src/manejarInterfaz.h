@@ -13,4 +13,6 @@ void truncarArchivo (char* nombreArchivo, uint32_t tamanio);
 uint32_t obtener_bloque_libre (t_bitarray* bitmap);
 
 void truncarArchivo (char* nombreArchivo, uint32_t tamanio);
-void achicarArchivo(char* nombreArchivo, uint32_t tamanio);
+void achicarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar);
+bool tengoEspacioAMiLado(t_archivo_metadata* archivoATruncar, uint32_t tamanioNuevo);
+void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar);

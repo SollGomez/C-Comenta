@@ -54,8 +54,14 @@ void crearArchivo(char* nombreArchivo) {
     //string_append(base, ".txt");
 
     log_info(info_logger, "%s", base);
+    FILE* f = fopen(base, "rb");
+    if(f != NULL) {
+        log_info(info_logger, "El archivo ya existe");
+        fclose(f);
+        return;
+    }
 
-    FILE* f = fopen(base, "wb");
+    f = fopen(base, "wb");
     if(f == NULL) {
         log_info(info_logger, "No se creo el archivo");
     }
@@ -84,10 +90,6 @@ void crearArchivo(char* nombreArchivo) {
 	config_save(configAux);
 
     archivoCreado->configArchivo = configAux;
-
-
-    list_add(listaArchivos, archivoCreado);
-
     fclose(f);
 }
 
@@ -123,8 +125,10 @@ void eliminarArchivo(char* nombreArchivo) {
         log_info(info_logger, "Error al borrar el archivo");
     }
 }
-/*
+
 void truncarArchivo (char* nombreArchivo, uint32_t tamanio) {
+
+    log_trace(trace_logger, "Entre a truncar");
     char* base = string_new();
     string_append(&base, cfg_entradaSalida->PATH_BASE_DIALFS);
     string_append(&base, "/");
@@ -137,17 +141,112 @@ void truncarArchivo (char* nombreArchivo, uint32_t tamanio) {
     archivoATruncar->bloqueInicial = config_get_int_value(archivoATruncar->configArchivo, "BLOQUE_INICIAL");
     archivoATruncar->tamArchivo = config_get_int_value(archivoATruncar->configArchivo, "TAMANIO_ARCHIVO");
 
-    if(archivoATruncar->tamArchivo >= tamanio){
-		achicarArchivo(nombreArchivo, tamanio);
-        //log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Reducir: <%d>", pid, archivoATruncar->tamArchivo, tamanio);
+    if(archivoATruncar->tamArchivo == tamanio)
+        return;
+
+    if(archivoATruncar->tamArchivo > tamanio){
+
+        if(tamanio < 0) {
+            log_info(info_logger, "No puede haber tamanio negativo");
+            return;
+        }
+
+		achicarArchivo(nombreArchivo, tamanio, archivoATruncar);
+        log_trace(trace_logger, "Nuevo tamanio del archivo %s achicado: %d", nombreArchivo, tamanio);
+
 	}else{
-        //log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Ampliar: <%d>", pid, tamOriginal, tamanio);
+        agrandarArchivo(nombreArchivo, tamanio, archivoATruncar);
+        log_trace(trace_logger, "Nuevo tamanio del archivo %s agrandado: %d", nombreArchivo, tamanio);
 	}
 
+    msync(bitmap, cfg_entradaSalida->BLOCK_COUNT, MS_SYNC);
+    char* stringAuxiliar = string_itoa(tamanio);
+    config_set_value(archivoATruncar->configArchivo, "TAMANIO_ARCHIVO", stringAuxiliar);
+    config_save(archivoATruncar->configArchivo);
+
     fclose(f);
+}
+
+void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar) {
+
+   // uint32_t bloquesActuales = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE; 
+
+    uint32_t bloquesASumar = (tamanio - archivoATruncar->tamArchivo) / cfg_entradaSalida->BLOCK_SIZE;
+
+    if (tengoEspacioAMiLado(archivoATruncar, tamanio)) {              // AGRANDAMOS NORMAL
+        
+        uint32_t tamanioActual = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
+        uint32_t posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
+
+        while(bloquesASumar) {
+
+            bitarray_set_bit(bitmap, posicionFinalActual + bloquesASumar);
+            bloquesASumar--;
+        }
+        
+        
+    }
+
+   // hayEspacioContiguo(tamanio / cfg_entradaSalida->BLOCK_SIZE); PARA DESPUES
+    return;
+
+}
+
+bool tengoEspacioAMiLado(t_archivo_metadata* archivoATruncar, uint32_t tamanioNuevo) {
+
+    log_info(info_logger, "Hay espacio a mi lado");
+
+    uint32_t tamanioNuevoEnBloques = tamanioNuevo / cfg_entradaSalida->BLOCK_SIZE;
+
+    uint32_t tamanioActual = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
+
+    uint32_t bloquesASumar = tamanioNuevoEnBloques - tamanioActual;
+
+    uint32_t posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
+
+    uint32_t posicionFinal = posicionFinalActual + bloquesASumar;
+
+    for(uint32_t i = posicionFinalActual + 1; i < posicionFinal; i++) {
+
+        if(bitarray_test_bit(bitmap, i)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void achicarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar) {
+    
+    uint32_t bloquesActuales = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE; 
+
+    uint32_t bloquesARestar = (archivoATruncar->tamArchivo - tamanio) / cfg_entradaSalida->BLOCK_SIZE;
+    
+    log_info(info_logger, "Bloque restado: %d", bloquesActuales);
+
+    while(bloquesARestar) {
+
+        bloquesARestar--;
+        if(bloquesARestar == 0)
+            break;
+
+        bitarray_clean_bit(bitmap, bloquesActuales - 1);
+        bloquesActuales--;
+        
+        
+    }
+
+    return; 
+}
+
+/*
+hayEspacioContiguo(uint32_t blocksRequested) {
+
+    for(int i=0; i<cfg_entradaSalida->BLOCK_COUNT; i++) {
+
+        if(!bitarray_test_bit(bitmap, ))
+
+    }
 
 }
 */
-void achicarArchivo(char* nombreArchivo, uint32_t tamanio) {
-
-}

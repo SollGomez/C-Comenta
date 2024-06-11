@@ -11,16 +11,12 @@ t_config_entradaSalida* cfg_entradaSalida;
 archBloques* archivoBloques;
 void* bitarraycontent;
 t_bitarray* bitmap;
-t_list* listaArchivos;
-
 
 void crearEstructurasFs() {
 
     crearBitmap();
 
     crearArchivoBloques();
-
-    listaArchivos = list_create();
 }
 
 

@@ -61,7 +61,6 @@ void logEscribirArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscr
 
 extern t_bitarray* bitmap;
 extern archBloques* archivoBloques;
-extern t_list* listaArchivos;
 extern void* bitarraycontent;
 
 #endif /* LOGS_H_ */

@@ -10,7 +10,10 @@ int main(int argc, char* argv[]) {
 	crearEstructurasFs();
 
 	crearArchivo("pruebaLoca.txt");
-	
+	//msync(bitmap, cfg_entradaSalida->BLOCK_COUNT, MS_SYNC);
+
+	truncarArchivo("pruebaLoca.txt", 128);
+	truncarArchivo("pruebaLoca.txt", 0);
 
 	// pthread_t kernel;
 	// pthread_t memoria;
