@@ -367,7 +367,8 @@ void finalizarProceso(int cliente_socket){
 	}
 
 	list_remove_by_condition(instruccionesDeProcesos, buscarPorPID);
-	free(programa);
+
+	//free(programa);
 
 
     if(tabla!=NULL)

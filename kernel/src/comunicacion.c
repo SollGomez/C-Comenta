@@ -344,9 +344,7 @@ void escucharCPU (void) {
 			}
 
 			case EXIT: {
-				log_info(info_logger,"llego antes contexto");
 				PCB* pcbRecibida = recibir_contextoEjecucion(cpuDispatch_fd);
-				log_info(info_logger,"llego despues contexto");
 				actualizarPcbEjecucion(pcbRecibida);
 				PCB* pcbActualizada = obtenerPcbExec();
 				log_info(info_logger,"Finaliza el proceso <%d> - Motivo: <SUCCESS>",pcbActualizada->id);
