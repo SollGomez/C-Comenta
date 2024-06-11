@@ -24,7 +24,7 @@ t_list* listaRecursos;
 t_list* colaReady;
 t_list* colaReadyVRR;
 
-t_list* tablaGlobal_ArchivosAbiertos;
+t_list* tablaGlobal_ArchivosAbiertos; //Archivos hechos
 t_list* listaPeticionesArchivos;
 
 pthread_mutex_t mutex_colaNew;

@@ -94,6 +94,14 @@ int conectarKernel(char *modulo){
 
 	send(kernel_fd, &handshakeEntradasalida, sizeof(int32_t), 0);
 
+	lista_archivos = list_create();
+	int32_t tamanioLista;
+
+	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "poner dialfs") == 0){		// HABLAR CON AXO
+		recv(kernel_fd, &tamanioLista, sizeof(int32_t), MSG_WAITALL);				//sizeof(lista)
+		recv(kernel_fd, lista_archivos, sizeof(tamanioLista), MSG_WAITALL);			//recibo lista de archivos
+	}
+
 	pthread_t tid;
 
 	pthread_create(&tid, NULL, recibirKernel, NULL);
