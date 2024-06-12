@@ -13,8 +13,8 @@ int main(int argc, char* argv[]) {
 	crearArchivo("pruebaLoca2.txt");
 
 	//msync(bitmap, cfg_entradaSalida->BLOCK_COUNT, MS_SYNC);
-
-	truncarArchivo("pruebaLoca.txt", 128);
+	truncarArchivo("pruebaLoca2.txt", 128);	
+	truncarArchivo("pruebaLoca.txt", 192);
 	//truncarArchivo("pruebaLoca.txt", 0);
 
 

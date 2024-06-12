@@ -173,8 +173,15 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
 
     uint32_t bloquesASumar = (tamanio - archivoATruncar->tamArchivo) / cfg_entradaSalida->BLOCK_SIZE;
     uint32_t tamanioActual = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
-    uint32_t posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
-
+    uint32_t posicionFinalActual;
+     
+    if(!tamanioActual) {
+        posicionFinalActual = archivoATruncar->bloqueInicial;
+    }else {
+        posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
+    }
+    
+    //uint32_t posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
     //ROMPE :( revisar
     if (tengoEspacioAMiLado(archivoATruncar, tamanio)) {              // AGRANDAMOS NORMAL
         log_info(info_logger, "Tengo espacio a mi lado");
@@ -197,7 +204,7 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
         }
 
         char* stringAuxiliar = string_itoa(posInicialNueva);
-        config_set_value(archivoATruncar->configArchivo, "POSICION_INICIAL", stringAuxiliar);
+        config_set_value(archivoATruncar->configArchivo, "BLOQUE_INICIAL", stringAuxiliar);
         config_save(archivoATruncar->configArchivo);
 
         uint32_t posicionFinal = posInicialNueva + bloquesASumar;
@@ -223,7 +230,13 @@ bool tengoEspacioAMiLado(t_archivo_metadata* archivoATruncar, uint32_t tamanioNu
 
     uint32_t bloquesASumar = tamanioNuevoEnBloques - tamanioActual;
 
-    uint32_t posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
+    uint32_t posicionFinalActual;
+     
+    if(!tamanioActual) {
+        posicionFinalActual = archivoATruncar->bloqueInicial;
+    }else {
+        posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
+    }
 
     uint32_t posicionFinal = posicionFinalActual + bloquesASumar;
 
@@ -259,17 +272,24 @@ void achicarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* a
 }
 
 uint32_t hayEspacioContiguo(uint32_t blocksRequested) {
-
+    bool esElPrimero = true;
     uint32_t bloquesLibres = 0;
-
+    uint32_t bloqueInicialNuevo = 0;
+    log_info(info_logger, "blocks requested: %d", blocksRequested);
     for(int i=0; i<bitarray_get_max_bit(bitmap); i++) {
 
         if(!bitarray_test_bit(bitmap, i)){
+            if(esElPrimero) {
+                bloqueInicialNuevo = i;
+            }
+            esElPrimero = false;
             bloquesLibres ++;
+            log_info(info_logger, "bloques pasados: %d", i);
             if(bloquesLibres == blocksRequested)
-                return i;
+                return bloqueInicialNuevo;
 
         }else{
+            esElPrimero = true;
             bloquesLibres = 0;
         }
     }
