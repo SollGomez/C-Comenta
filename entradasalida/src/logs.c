@@ -27,7 +27,7 @@ void crearBitmap() {
     string_append(&path, cfg_entradaSalida->PATH_BASE_DIALFS);
     string_append(&path, "/bitmap.dat");
 
-    int tamanio_bitmap = cfg_entradaSalida->BLOCK_COUNT;
+    int tamanio_bitmap = cfg_entradaSalida->BLOCK_COUNT / 8;
 
     int fd = open(path, O_RDWR|O_CREAT,  S_IRUSR|S_IWUSR);
 	if (fd == -1){
@@ -51,7 +51,7 @@ void crearBitmap() {
     // }
 
     msync(bitmap, tamanio_bitmap, MS_SYNC);
-    log_trace(trace_logger, "Bitmap Creado");
+    log_trace(trace_logger, "Bitmap Creado :)");
     return;
 }
 

@@ -107,7 +107,7 @@ uint32_t obtener_bloque_libre (t_bitarray* bitmap) {
         }
     }
 
-    msync(bitmap, cfg_entradaSalida->BLOCK_COUNT, MS_SYNC);
+    msync(bitmap, cfg_entradaSalida->BLOCK_COUNT/8, MS_SYNC);
 	log_info(info_logger, "No se obtuvo un bloque libre");
     return -1;
 }
@@ -159,7 +159,7 @@ void truncarArchivo (char* nombreArchivo, uint32_t tamanio) {
         log_trace(trace_logger, "Nuevo tamanio del archivo %s agrandado: %d", nombreArchivo, tamanio);
 	}
 
-    msync(bitmap, cfg_entradaSalida->BLOCK_COUNT, MS_SYNC);
+    //msync(bitmap, cfg_entradaSalida->BLOCK_COUNT/8, MS_SYNC);
     char* stringAuxiliar = string_itoa(tamanio);
     config_set_value(archivoATruncar->configArchivo, "TAMANIO_ARCHIVO", stringAuxiliar);
     config_save(archivoATruncar->configArchivo);
@@ -172,29 +172,50 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
    // uint32_t bloquesActuales = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE; 
 
     uint32_t bloquesASumar = (tamanio - archivoATruncar->tamArchivo) / cfg_entradaSalida->BLOCK_SIZE;
+    uint32_t tamanioActual = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
+    uint32_t posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
 
+    //ROMPE :( revisar
     if (tengoEspacioAMiLado(archivoATruncar, tamanio)) {              // AGRANDAMOS NORMAL
-        
-        uint32_t tamanioActual = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
-        uint32_t posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
-
+        log_info(info_logger, "Tengo espacio a mi lado");
         while(bloquesASumar) {
 
             bitarray_set_bit(bitmap, posicionFinalActual + bloquesASumar);
             bloquesASumar--;
         }
-        
-        
+        return;
     }
 
-   // hayEspacioContiguo(tamanio / cfg_entradaSalida->BLOCK_SIZE); PARA DESPUES
+    uint32_t posInicialNueva = hayEspacioContiguo(tamanio / cfg_entradaSalida->BLOCK_SIZE);
+
+    if(posInicialNueva != -1){
+        log_info(info_logger, "Hay espacio sin compactar, posicion inicial nueva del achivo %s: %d", nombreArchivo, posInicialNueva);
+
+        for(int i=archivoATruncar->bloqueInicial; i<posicionFinalActual; i++){
+            log_info(info_logger, "entre al for con inicial %d y final %d", archivoATruncar->bloqueInicial, posicionFinalActual);
+            bitarray_clean_bit(bitmap, i);
+        }
+
+        char* stringAuxiliar = string_itoa(posInicialNueva);
+        config_set_value(archivoATruncar->configArchivo, "POSICION_INICIAL", stringAuxiliar);
+        config_save(archivoATruncar->configArchivo);
+
+        uint32_t posicionFinal = posInicialNueva + bloquesASumar;
+
+        for(int i=posInicialNueva; i<posicionFinal; i++){
+            bitarray_set_bit(bitmap, i);
+        }
+        return;
+    }
+
+    //TODO COMPACTACION :'(
+    
+    
     return;
 
 }
 
 bool tengoEspacioAMiLado(t_archivo_metadata* archivoATruncar, uint32_t tamanioNuevo) {
-
-    log_info(info_logger, "Hay espacio a mi lado");
 
     uint32_t tamanioNuevoEnBloques = tamanioNuevo / cfg_entradaSalida->BLOCK_SIZE;
 
@@ -232,21 +253,25 @@ void achicarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* a
 
         bitarray_clean_bit(bitmap, bloquesActuales - 1);
         bloquesActuales--;
-        
-        
     }
 
     return; 
 }
 
-/*
-hayEspacioContiguo(uint32_t blocksRequested) {
+uint32_t hayEspacioContiguo(uint32_t blocksRequested) {
 
-    for(int i=0; i<cfg_entradaSalida->BLOCK_COUNT; i++) {
+    uint32_t bloquesLibres = 0;
 
-        if(!bitarray_test_bit(bitmap, ))
+    for(int i=0; i<bitarray_get_max_bit(bitmap); i++) {
 
+        if(!bitarray_test_bit(bitmap, i)){
+            bloquesLibres ++;
+            if(bloquesLibres == blocksRequested)
+                return i;
+
+        }else{
+            bloquesLibres = 0;
+        }
     }
-
+    return -1;
 }
-*/
