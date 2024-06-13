@@ -17,3 +17,5 @@ void achicarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* a
 bool tengoEspacioAMiLado(t_archivo_metadata* archivoATruncar, uint32_t tamanioNuevo);
 void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar);
 uint32_t hayEspacioContiguo(uint32_t blocksRequested);
+void escribirArchivo(char* nombreArchivo, void* datos, uint32_t direccionAEscribir, uint32_t tamanio);
+void* leerArchivo(char* nombreArchivo, uint32_t direccionALeer, uint32_t tamanioALeer);

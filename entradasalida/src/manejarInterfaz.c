@@ -295,3 +295,57 @@ uint32_t hayEspacioContiguo(uint32_t blocksRequested) {
     }
     return -1;
 }
+
+void escribirArchivo(char* nombreArchivo, void* datos, uint32_t direccionAEscribir, uint32_t tamanioAEscribir) {
+    //uint32_t offset = direccionAEscribir % cfg_entradaSalida->BLOCK_SIZE;
+    //log_info(info_logger, "Offset: %d", offset);
+    //uint32_t numeroDeBloque = encontrarNumeroBloque(direccionAEscribir); //no se usa porque damos por hecho que la dir es pasada en bytes    
+
+    log_info(info_logger, "Escribo esta data: %s", datos);
+
+    char* pathArchivoBloques = string_new();
+
+    string_append(&pathArchivoBloques, cfg_entradaSalida->PATH_BASE_DIALFS);
+
+    string_append(&pathArchivoBloques, "/bloques.dat");
+
+    archivoBloques->fd = open(pathArchivoBloques, O_CREAT| O_RDWR,  S_IRUSR|S_IWUSR);
+
+    archivoBloques->direccionArchivo = mmap(NULL,archivoBloques->tamanio, PROT_READ | PROT_WRITE, MAP_SHARED, archivoBloques->fd , 0);
+
+    memcpy(archivoBloques->direccionArchivo + direccionAEscribir, datos, tamanioAEscribir);
+    
+    msync(archivoBloques->direccionArchivo, archivoBloques->tamanio, MS_SYNC);
+
+    close(archivoBloques->fd);
+    
+}
+
+//no se usa porque damos por hecho que la dir es pasada en bytes
+uint32_t encontrarNumeroBloque(uint32_t direccion) {
+    return direccion / cfg_entradaSalida->BLOCK_SIZE;
+}
+
+void* leerArchivo(char* nombreArchivo, uint32_t direccionALeer, uint32_t tamanioALeer) {
+
+    void* datos = malloc(tamanioALeer);
+
+    char* pathArchivoBloques = string_new();
+
+    string_append(&pathArchivoBloques, cfg_entradaSalida->PATH_BASE_DIALFS);
+
+    string_append(&pathArchivoBloques, "/bloques.dat");
+
+    archivoBloques->fd = open(pathArchivoBloques, O_CREAT| O_RDWR,  S_IRUSR|S_IWUSR);
+
+    archivoBloques->direccionArchivo = mmap(NULL,archivoBloques->tamanio, PROT_READ | PROT_WRITE, MAP_SHARED, archivoBloques->fd , 0);
+
+    //msync(archivoBloques->archivo, archivoBloques->tamanio, MS_SYNC);
+    memcpy(datos, archivoBloques->direccionArchivo + direccionALeer, tamanioALeer);
+
+    log_info(info_logger, "La data que lei es: %s", datos);
+
+    close(archivoBloques->fd);
+
+    return datos;
+}

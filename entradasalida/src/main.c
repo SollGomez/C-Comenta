@@ -17,6 +17,9 @@ int main(int argc, char* argv[]) {
 	truncarArchivo("pruebaLoca.txt", 192);
 	//truncarArchivo("pruebaLoca.txt", 0);
 
+	escribirArchivo("hola ", "HOLA COMO ESTAS", 128, 16);
+	leerArchivo("dasdsadasdas", 128, 16);
+
 
 	// pthread_t kernel;
 	// pthread_t memoria;
