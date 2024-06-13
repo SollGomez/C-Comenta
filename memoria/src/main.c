@@ -5,6 +5,8 @@
 #include <signal.h>
 
 t_log* info_logger;
+t_log* trace_logger;
+t_log* warning_logger;
 char *PUERTO;
 t_config *config;
 t_list* tablaGeneral;
@@ -22,6 +24,9 @@ int main(int argc, char* argv[]) {
     }
     
     info_logger = log_create("info_logger.log","Memory", true, LOG_LEVEL_INFO);
+	trace_logger = log_create("trace_logger.log", "Memory", true, LOG_LEVEL_TRACE);
+	warning_logger = log_create("warning_logger.log", "Memory", true, LOG_LEVEL_WARNING);
+	
     pthread_t tid;
     
     config = crearConfig(argv[1]);
