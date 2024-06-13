@@ -196,7 +196,17 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
     uint32_t posInicialNueva = hayEspacioContiguo(tamanio / cfg_entradaSalida->BLOCK_SIZE);
 
     if(posInicialNueva != -1){
+
         log_info(info_logger, "Hay espacio sin compactar, posicion inicial nueva del achivo %s: %d", nombreArchivo, posInicialNueva);
+
+        uint32_t dirASacarDatos = archivoATruncar->bloqueInicial * cfg_entradaSalida->BLOCK_SIZE;
+        uint32_t direccionAPonerDatos = posInicialNueva * cfg_entradaSalida->BLOCK_SIZE;
+
+        void* datos = leerArchivo(nombreArchivo, dirASacarDatos, archivoATruncar->tamArchivo);
+
+        log_info(info_logger, "Estoy pasando cositas: %s", datos);
+
+        escribirArchivo(nombreArchivo, datos, direccionAPonerDatos, archivoATruncar->tamArchivo);
 
         for(int i=archivoATruncar->bloqueInicial; i<posicionFinalActual; i++){
             log_info(info_logger, "entre al for con inicial %d y final %d", archivoATruncar->bloqueInicial, posicionFinalActual);
@@ -293,6 +303,7 @@ uint32_t hayEspacioContiguo(uint32_t blocksRequested) {
             bloquesLibres = 0;
         }
     }
+
     return -1;
 }
 
@@ -301,12 +312,10 @@ void escribirArchivo(char* nombreArchivo, void* datos, uint32_t direccionAEscrib
     //log_info(info_logger, "Offset: %d", offset);
     //uint32_t numeroDeBloque = encontrarNumeroBloque(direccionAEscribir); //no se usa porque damos por hecho que la dir es pasada en bytes    
 
-    log_info(info_logger, "Escribo esta data: %s", datos);
+    log_info(info_logger, "Escribo esta data: %s del tam %d", datos, tamanioAEscribir);
 
     char* pathArchivoBloques = string_new();
-
     string_append(&pathArchivoBloques, cfg_entradaSalida->PATH_BASE_DIALFS);
-
     string_append(&pathArchivoBloques, "/bloques.dat");
 
     archivoBloques->fd = open(pathArchivoBloques, O_CREAT| O_RDWR,  S_IRUSR|S_IWUSR);
@@ -318,7 +327,7 @@ void escribirArchivo(char* nombreArchivo, void* datos, uint32_t direccionAEscrib
     msync(archivoBloques->direccionArchivo, archivoBloques->tamanio, MS_SYNC);
 
     close(archivoBloques->fd);
-    
+   // free(archivoBloques->fd);
 }
 
 //no se usa porque damos por hecho que la dir es pasada en bytes
@@ -331,9 +340,7 @@ void* leerArchivo(char* nombreArchivo, uint32_t direccionALeer, uint32_t tamanio
     void* datos = malloc(tamanioALeer);
 
     char* pathArchivoBloques = string_new();
-
     string_append(&pathArchivoBloques, cfg_entradaSalida->PATH_BASE_DIALFS);
-
     string_append(&pathArchivoBloques, "/bloques.dat");
 
     archivoBloques->fd = open(pathArchivoBloques, O_CREAT| O_RDWR,  S_IRUSR|S_IWUSR);
@@ -346,6 +353,5 @@ void* leerArchivo(char* nombreArchivo, uint32_t direccionALeer, uint32_t tamanio
     log_info(info_logger, "La data que lei es: %s", datos);
 
     close(archivoBloques->fd);
-
     return datos;
 }
