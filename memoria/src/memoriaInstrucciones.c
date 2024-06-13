@@ -17,9 +17,9 @@ pthread_mutex_t mutex_tablasPaginas;
 pthread_mutex_t mutex_idPagina;
 pthread_mutex_t mutex_espacioDisponible;
 
-t_log* trace_logger;
+//t_log* trace_logger;
 t_log* debug_logger;
-t_log* warning_logger;
+//t_log* warning_logger;
 t_log* error_logger;
 Pagina* pagina0;
 t_list* tablasPaginas;
@@ -101,11 +101,11 @@ void liberarTablaDePaginas(uint32_t pid){
             pthread_mutex_unlock(&mutex_tablasPaginas);
             free(tabla->paginas);
             free(tabla);
-            log_info(info_logger, "Tabla con PID <%d> eliminada de tablaGeneral", pid);
+            log_trace(trace_logger, "Tabla con PID <%d> eliminada de tablaGeneral", pid);
             return;
         }
     }
-    log_info(info_logger, "No se encontró una tabla con PID <%d> en tablaGeneral", pid);
+    log_trace(trace_logger, "No se encontró una tabla con PID <%d> en tablaGeneral", pid);
 }
 
 //REVISAR
@@ -118,7 +118,7 @@ Pagina* obtenerPaginaConMarco(uint32_t marco){
                 return pagina;
         }
     }
-    printf("El marco solicitado está vacío");
+    log_trace(trace_logger, "El marco solicitado está vacío");
     return NULL;
 }
 
@@ -130,8 +130,8 @@ bool crearEstructurasAdministrativas(){
 }
 
 bool iniciarMemoria(){
-    bool estructurasAdministrativas = crearEstructurasAdministrativas();//Crea y comprueba que se hayan inicializado todas las estructuras administrativas
-    return estructurasAdministrativas;//Retorna si se pudieron crear las estructuras administrativas
+    bool estructurasAdministrativas = crearEstructurasAdministrativas();
+    return estructurasAdministrativas;
 }
 
 // Guarda en una lista de procesos pid y lista de instrucciones
@@ -141,14 +141,14 @@ void GuardarInstrucsDeProceso(uint32_t pid, char* file_name){
 
     t_list* listaInstrucciones = list_create();
     char* path = string_new();
-    string_append(&path, PATH_INSTRUCCIONES);
+    string_append(&path, "/home/utnso/scripts-pruebas"); // PATH_INSTRUCCIONES
 	string_append(&path, "/");
 	string_append(&path, file_name);
 
     FILE* archivoPseudocodigo;
 	archivoPseudocodigo = fopen(path, "rb");
 	if(archivoPseudocodigo == NULL){
-        log_info(info_logger, "No se pudo abrir el archivo");
+        log_error(error_logger, "No se pudo abrir el archivo");
         exit(EXIT_FAILURE);
     }
     char linea[60];
@@ -156,10 +156,12 @@ void GuardarInstrucsDeProceso(uint32_t pid, char* file_name){
         fgets(linea, sizeof(linea), archivoPseudocodigo);
         list_add(listaInstrucciones, FormatearInstruccion(linea));
     }
-    
+    log_trace(trace_logger, "Guardo %d instrucciones del proceso %d", list_size(listaInstrucciones), pid);
+
     fclose(archivoPseudocodigo);
     newProceso->instrucciones = listaInstrucciones;
     list_add(instruccionesDeProcesos, newProceso);
+    
 }
 
 //Pasa una linea de pseudocodigo a nuestro formato Instruccion

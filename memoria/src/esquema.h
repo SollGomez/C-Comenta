@@ -15,11 +15,11 @@ typedef struct{
 } espacioContiguoMemoria;
 
 uint32_t buscarMarcoLibre(); //Devuelve el primer marco libre que encuentra
-void marcarMarcoOcupado(int); //Marca como ocupado el marco que le pasemos
-void marcarMarcoLibre(int); //Marca como libre el marco que le pasemos
-void crearTablaPaginasProceso(uint32_t, uint32_t); //Crea la tabla de paginas de un proceso y la agrega a la TablaGeneral
-void finalizacionDeProceso(uint32_t); //Marca como libres los marcos del proceso
-TablaDePaginas* obtenerTablaPorPID(uint32_t); //Devuelve la tabla cuyo PID sea el pedido
+void marcarMarcoOcupado(int numeroMarco);
+void marcarMarcoLibre(int numeroMarco);
+void crearTablaPaginasProceso(uint32_t pid, uint32_t size); //Crea la tabla de paginas de un proceso y la agrega a la TablaGeneral
+void finalizacionDeProceso(uint32_t pid); //Marca como libres los marcos del proceso
+TablaDePaginas* obtenerTablaPorPID(uint32_t pid);
 void liberarTablaDePaginas(uint32_t); //Elimina la tabla del proceso de la TablaGeneral
 uint32_t obtenerMarcoDePagina(uint32_t, uint32_t); //Devuelve el numero de marco de la pagina solicitada
 

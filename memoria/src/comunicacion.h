@@ -35,8 +35,8 @@ void cualInterfaz(int tipoInterfaz);
 
 void inicializarProceso(int);
 void GuardarNombreArchiv(uint32_t pid, char* file_name);
-void realizarPedidoLectura(int);
-void realizarPedidoEscritura(int);
+void realizarPedidoLectura(int cliente_socket);     //Vale para io y cpu. Les manda LECTURA_REALIZADA
+void realizarPedidoEscritura(int cliente_socket);   //Vale para io y cpu. Les manda ESCRITURA_REALIZADA
 
 void finalizarProceso(int);
 t_log* iniciar_logger(char*);
@@ -47,12 +47,6 @@ t_log* iniciar_logger(char*);
 // void leer_consola(t_log*);
 void PaqueteHand(int, t_log*);
 // void terminar_programa(int, t_log*);
-// void iterator(char* value);
-// void limpiarYEliminarListaAuxiliarPeroSinEliminarContenido(t_list*);
-// bool enviarTablasPaginas(t_list*, int, t_log*,op_code_cliente);
-// bool agregarTablasAPaquete(t_list*, t_paquete*);
-// int finalizarProcesoConPid(uint32_t);
-// void liberarModuloSwap(t_list*);
 void realizarPedidoEscrituraInterfaz(int cliente_socket);
 void realizarPedidoLecturaInterfaz(int cliente_socket);
 
