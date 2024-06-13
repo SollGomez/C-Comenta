@@ -226,10 +226,108 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
     }
 
     //TODO COMPACTACION :'(
-    
+    compactar(nombreArchivo, archivoATruncar);
     
     return;
 
+}
+
+void compactar(char* nombreArchivo, t_archivo_metadata* archivoATruncar) {
+    log_trace(trace_logger, "Voy a compactar :)"); //CAMBIAR
+    
+    uint32_t tamanioActual = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
+    uint32_t posicionFinalActual;
+     
+    if(!tamanioActual) {
+        posicionFinalActual = archivoATruncar->bloqueInicial;
+    }else {
+        posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
+    }
+
+    while(posicionFinalActual != tamanioActual){
+        bitarray_clean_bit(bitmap, posicionFinalActual);
+        posicionFinalActual--;
+    }
+
+    uint32_t dondeLeer = archivoATruncar->bloqueInicial * cfg_entradaSalida->BLOCK_SIZE;
+    void* datosAux = leerArchivo(nombreArchivo, dondeLeer, archivoATruncar->tamArchivo);                    //NO OLVIDAR DE ESCRIBIR
+    
+
+    //HACER MULTIPLE :)
+    uint32_t bitDisponible = primerBitDisponible();
+    uint32_t bitOcupado = primerBitOcupado();
+    uint32_t tamArchivoAMover;
+    uint32_t bloquesArchivoAMover;
+
+    if(bitOcupado != 0) {
+
+        for(uint32_t i=0; i<list_size(listaDeArchivos); i++){
+            char* path = string_new();
+            string_append(&path, cfg_entradaSalida->PATH_BASE_DIALFS);
+            string_append(&path, "/");
+            string_append(&path, list_get(listaDeArchivos, i));
+
+            t_config* config = config_create(path);
+            uint32_t posicion = config_get_int_value(config, "BLOQUE_INICIAL");
+
+            if(posicion == bitOcupado)  {
+                
+                tamArchivoAMover = config_get_int_value(config, "TAMANIO_ARCHIVO");
+                bloquesArchivoAMover = tamArchivoAMover / cfg_entradaSalida->BLOCK_SIZE;
+                
+                uint32_t posFinalActual = bitOcupado + bloquesArchivoAMover - 1;
+                
+                uint32_t nuevoBit = bitDisponible;
+                for(uint32_t i=bitOcupado; i<posFinalActual; i++) {
+                    
+                    bitarray_clean_bit(bitmap, i);
+                    bitarray_set_bit(bitmap, nuevoBit);
+                    nuevoBit ++;
+                }
+                msync(bitmap, cfg_entradaSalida->BLOCK_COUNT/8, MS_SYNC);
+
+                char* bitAux= string_itoa(bitDisponible);
+                config_set_value(config, "BLOQUE_INICIAL", bitAux);
+                config_save(config);
+
+
+                uint32_t dirASacarDatos = bitOcupado * cfg_entradaSalida->BLOCK_SIZE;
+                uint32_t direccionAPonerDatos = bitDisponible * cfg_entradaSalida->BLOCK_SIZE;
+
+                void* datosAMover = leerArchivo(nombreArchivo, dirASacarDatos, tamArchivoAMover);
+                log_info(info_logger, "Estoy pasando cositas: %s", datosAMover);
+                escribirArchivo(nombreArchivo, datosAMover, direccionAPonerDatos, tamArchivoAMover);
+
+            }
+
+        }
+    }
+
+    //ESCRIBIR EL AUXILIAR
+    // for(uint32_t i=0; i<bitarray_get_max_bit(bitmap); i++) {
+        
+    //     if(!bitarray_test_bit(bitmap, i))
+    //         bitarray_set_bit(bitmap, i);
+    // }
+    // msync(bitmap, cfg_entradaSalida->BLOCK_COUNT/8, MS_SYNC);
+
+}
+
+//Asumimos que siempre hay espacio disponible y ocupado
+uint32_t primerBitDisponible() {
+
+    for(uint32_t i=0; i<bitarray_get_max_bit(bitmap); i++) {
+        if(!bitarray_test_bit(bitmap, i))
+            return i;
+    }
+}
+
+uint32_t primerBitOcupado() {
+
+    for(uint32_t i=0; i<bitarray_get_max_bit(bitmap); i++) {
+        if(bitarray_test_bit(bitmap, i))
+            return i;
+    }
 }
 
 bool tengoEspacioAMiLado(t_archivo_metadata* archivoATruncar, uint32_t tamanioNuevo) {
