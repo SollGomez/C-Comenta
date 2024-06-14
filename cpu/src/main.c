@@ -13,6 +13,8 @@ t_list* TLB;
 t_config *config;
 sem_t bin_ciclo;
 
+
+
 int main(int argc, char* argv[]) {
     //decir_hola("CPU");
     

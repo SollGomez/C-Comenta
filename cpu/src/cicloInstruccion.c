@@ -4,6 +4,7 @@ bool cicloInstrucciones=true;
 char* nombre_instruccion_actual;
 Instruccion* instruccion;
 int interrupciones;
+int desalojo;
 
 
 uint8_t registroCPU_AX;
@@ -17,10 +18,12 @@ uint32_t registroCPU_EDX;
 uint32_t registroCPU_SI;
 uint32_t registroCPU_DI;
 
+
 void ciclo_de_instruccion(){
     
     cicloInstrucciones=true;
     interrupciones=0;
+	desalojo=0;
 
     while(cicloInstrucciones){
 
@@ -36,24 +39,28 @@ void ciclo_de_instruccion(){
 }
 
 void fetch(){
-    t_list* listaInts = list_create();
+		t_list* listaInts = list_create();
 
-	log_info(info_logger, "PID: <%d> - FETCH - Program Counter: <%d>", PCB_Actual->id, PCB_Actual->program_counter);
-	
-	list_add(listaInts, &PCB_Actual->id);
-	list_add(listaInts, &PCB_Actual->program_counter);
+		log_info(info_logger, "PID: <%d> - FETCH - Program Counter: <%d>", PCB_Actual->id, PCB_Actual->program_counter);
+		
+		list_add(listaInts, &PCB_Actual->id);
+		list_add(listaInts, &PCB_Actual->program_counter);
 
+		enviarListaUint32_t(listaInts,memoria_fd, info_logger, SOLICITUDINSTRUCCION);
 
-	enviarListaUint32_t(listaInts,memoria_fd, info_logger, SOLICITUDINSTRUCCION);
+		list_clean(listaInts);
+		list_destroy(listaInts);
 
-	list_clean(listaInts);
-	list_destroy(listaInts);
 }
 
 void decode(){
-    
-	op_code_cliente cod = recibir_operacion(memoria_fd);
-
+	op_code_cliente cod;
+    if(cicloInstrucciones){
+		cod = recibir_operacion(memoria_fd);
+	}
+	else{
+		cod = -1;
+	}
 	if(cod == SOLICITUDINSTRUCCION){        //en memoria mandar enviar instruccion
 		instruccion = recibirInstruccion(memoria_fd);
 
@@ -62,8 +69,10 @@ void decode(){
 
 	}
 	else{
-		log_error(error_logger,"FALLO en el recibo de la instruccion");
-		cicloInstrucciones=0; //si hay pageFault tmbn tiene que devolver -1
+		if(cicloInstrucciones){
+			log_error(error_logger,"FALLO en el recibo de la instruccion");
+		}
+		cicloInstrucciones=0;
 	}
 }
 
@@ -252,10 +261,13 @@ void execute(){
 
         ejecutar_EXIT();
     } else {
-        log_info(info_logger, "PID: <%d> - NO EXISTE LA INSTRUCCION %s", PCB_Actual->id, nombre_instruccion_actual); // log_error() ?
+		if(cicloInstrucciones){
+        	log_info(info_logger, "PID: <%d> - NO EXISTE LA INSTRUCCION %s", PCB_Actual->id, nombre_instruccion_actual); // log_error() ?
+		}
 
     }
-    liberarInstruccion(instruccion);
+	if(cicloInstrucciones)
+		liberarInstruccion(instruccion);
 }
 
 void checkInsterrupt(){
@@ -273,6 +285,10 @@ void checkInsterrupt(){
 		cicloInstrucciones = false;
 		log_info(info_logger, "PID: <%d> - Error Interrupcion", PCB_Actual->id);
 	}
+
+	if(desalojo)
+		ejecutar_EXIT();
+
 	if(!cicloInstrucciones)
 		sem_post(&bin_ciclo);
 }

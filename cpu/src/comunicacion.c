@@ -1,4 +1,5 @@
 #include <comunicacion.h>
+#include "cicloInstruccion.h"
 
 t_log *loggerCpuMem;
 
@@ -79,7 +80,6 @@ void recibirConexion(char *puerto) {
 		switch (cod_op) {
 
 		 case CONTEXTOEJECUCION: {
-
 			PCB_Actual = recibir_contextoEjecucion(kernel_fd);
 			sem_wait(&bin_ciclo);
 
@@ -133,12 +133,7 @@ void recibirConexionInterrupt(char *puerto) {    //habría q hacer un while que 
 				case DESALOJOCPU:
 					uint32_t pidInterrupt2 = recibirValor_uint32(kernel_interrupt_fd);
 					if(pid==pidInterrupt2){
-						copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
-						t_paquete* paquete = crear_paquete(EXIT, info_logger);
-						agregar_ContextoEjecucion_a_paquete(paquete, PCB_Actual);
-						enviar_paquete(paquete, kernel_fd);
-						eliminar_paquete(paquete);
-						cicloInstrucciones = false;
+						desalojo = 1;
 					}
 					break;
 				case -1:

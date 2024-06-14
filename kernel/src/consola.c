@@ -193,8 +193,11 @@ void* finalizarProceso (void* pid) {
 			log_info(info_logger, "PID: [%d] - Estado Anterior: READYVRR - Estado Actual: EXIT", pcbBuscado->id);
 			break;
 		default:
-			log_info(info_logger,"No se encontro el proceso %d en ninguna lista", idProceso);
-			return NULL;
+			if(numCola != 3){
+				log_info(info_logger,"No se encontro el proceso %d en ninguna lista", idProceso);
+				return NULL;
+			}
+			break;
 	}
 
 	if (numCola != 3) {
@@ -213,6 +216,7 @@ void* finalizarProceso (void* pid) {
 		pthread_mutex_unlock(&semaforo);
 	} else {
 		enviarValor_uint32(pcbBuscado->id, cpuInterrupt_fd, DESALOJOCPU, info_logger);
+		pthread_mutex_unlock(&semaforo);
 	}
 
 	return NULL;

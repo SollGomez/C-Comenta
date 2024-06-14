@@ -5,6 +5,7 @@
 
 extern bool cicloInstrucciones;
 extern int interrupciones;
+extern int desalojo;
 
 extern uint8_t registroCPU_AX;
 extern uint8_t registroCPU_BX;

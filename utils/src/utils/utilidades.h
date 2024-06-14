@@ -23,6 +23,7 @@ void* recibir_stream(int* size, uint32_t cliente_socket);
 PCB* recibir_contextoEjecucion_y_char(int conexion);
 PCB* recibir_contextoEjecucion_y_uint32(int conexion, uint32_t* direccion);
 PCB* recibir_contextoEjecucion_y_uint32_y_uint32(int conexion, uint32_t* direccion, uint32_t* direccion2);
+PCB* recibir_contextoEjecucion_y_uint32_y_uint32_y_uint32(int conexion, uint32_t* direccion, uint32_t* direccion2, uint32_t* direccion3);
 
 void* recibir_stream(int* size, uint32_t cliente_socket);
 
@@ -39,5 +40,10 @@ bool agregarIntsYDatosAPaquete(t_list* listaInts, t_datos* datos, t_paquete* paq
 bool enviarListaIntsYDatos(t_list* listaInts,t_datos* datos, int socket_cliente, t_log* logger, op_code_cliente codigo);
 t_list* recibirListaIntsYDatos(int socket_cliente,t_datos* datos);
 char* recibirEnteroEnteroChar(int socket_cliente, uint32_t* entero1, uint32_t* entero2);
+PCB* recibir_contextoEjecucion_y_char_y_uint32(int conexion, uint32_t* numero);
+PCB* recibir_contextoEjecucion_y_char_y_uint32_y_uint32(int conexion, uint32_t* numero1, uint32_t* numero2);
+PCB* recibir_contextoEjecucion_y_char_y_uint32_y_uint32_y_uint32_y_uint32(int conexion, uint32_t* numero1, uint32_t* numero2, uint32_t* numero3, uint32_t* numero4);
+void enviar_uint32_y_uint32_y_uint32_y_uint32_y_char(char* path, uint32_t valor1, uint32_t valor2, uint32_t valor3, uint32_t valor4, int socket, op_code_cliente orden, t_log *logger);
+char* recibirEnteroEnteroEnteroEnteroChar(int socket_cliente, uint32_t* entero1, uint32_t* entero2, uint32_t* entero3, uint32_t* entero4);
 
 #endif

@@ -637,6 +637,59 @@ PCB* recibir_contextoEjecucion_y_uint32_y_uint32(int conexion, uint32_t* direcci
     return PcbRecv;
 }
 
+PCB* recibir_contextoEjecucion_y_uint32_y_uint32_y_uint32(int conexion, uint32_t* direccion, uint32_t* direccion2, uint32_t* direccion3) {
+    uint32_t tamanioBuffer;
+    uint32_t desplazamiento = 0;
+    void *buffer = recibir_buffer(&tamanioBuffer, conexion);
+
+    PCB *PcbRecv = malloc(sizeof(PCB));
+    RegistrosCPU *registros = malloc(sizeof(RegistrosCPU));
+
+    memcpy(&(PcbRecv->id), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    memcpy(&(PcbRecv->program_counter), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    memcpy(&(registros->registro_AX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    memcpy(&(registros->registro_BX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    memcpy(&(registros->registro_CX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    memcpy(&(registros->registro_DX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+
+	//Una vez obtenidos los tamaños, obtenemos los registros
+    memcpy(&(registros->registro_EAX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_EBX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_ECX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_EDX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+	memcpy(&(registros->registro_SI), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_DI), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    PcbRecv->registros = registros;
+
+	memcpy(direccion, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    memcpy(direccion2, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    memcpy(direccion3, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    free(buffer);
+
+    return PcbRecv;
+}
+
 bool enviarEnteroYString(uint32_t entero,char* string, int socket_cliente, t_log* logger, op_code_cliente codigo)
 
 {
@@ -705,6 +758,199 @@ char* recibirEnteroEnteroChar(int socket_cliente, uint32_t* entero1, uint32_t* e
 	desplazamiento += sizeof(uint32_t);
 
 	memcpy(entero2, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+	uint32_t tamanioPalabra=0;
+	memcpy(&tamanioPalabra, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+	char* palabraRecibida = malloc(tamanioPalabra + 1);
+	memcpy(palabraRecibida, buffer + desplazamiento, tamanioPalabra + 1);
+	desplazamiento += tamanioPalabra + 1;
+
+	return palabraRecibida;
+}
+
+PCB* recibir_contextoEjecucion_y_char_y_uint32(int conexion, uint32_t* numero) {
+    uint32_t tamanioBuffer;
+    uint32_t desplazamiento = 0;
+    void *buffer = recibir_buffer(&tamanioBuffer, conexion);
+
+    PCB *PcbRecv = malloc(sizeof(PCB));
+    RegistrosCPU *registros = malloc(sizeof(RegistrosCPU));
+
+    memcpy(&(PcbRecv->id), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    memcpy(&(PcbRecv->program_counter), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    uint32_t tamanioAx = 0;
+
+    memcpy(&tamanioAx, buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    memcpy(&(registros->registro_AX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_BX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_CX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_DX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+
+    PcbRecv->registros = registros;
+
+    uint32_t tamanioPalabra=0;
+	memcpy(&tamanioPalabra, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+	PcbRecv->nombreRecurso= malloc(tamanioPalabra);
+	memcpy(PcbRecv->nombreRecurso, buffer + desplazamiento, tamanioPalabra);
+	desplazamiento += tamanioPalabra;
+
+	memcpy(numero, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    free(buffer);
+
+    return PcbRecv;
+}
+
+PCB* recibir_contextoEjecucion_y_char_y_uint32_y_uint32(int conexion, uint32_t* numero1, uint32_t* numero2) {
+    uint32_t tamanioBuffer;
+    uint32_t desplazamiento = 0;
+    void *buffer = recibir_buffer(&tamanioBuffer, conexion);
+
+    PCB *PcbRecv = malloc(sizeof(PCB));
+    RegistrosCPU *registros = malloc(sizeof(RegistrosCPU));
+
+    memcpy(&(PcbRecv->id), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    memcpy(&(PcbRecv->program_counter), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    uint32_t tamanioAx = 0;
+
+    memcpy(&tamanioAx, buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    memcpy(&(registros->registro_AX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_BX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_CX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_DX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+
+    PcbRecv->registros = registros;
+
+    uint32_t tamanioPalabra=0;
+	memcpy(&tamanioPalabra, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+	PcbRecv->nombreRecurso= malloc(tamanioPalabra);
+	memcpy(PcbRecv->nombreRecurso, buffer + desplazamiento, tamanioPalabra);
+	desplazamiento += tamanioPalabra;
+
+	memcpy(numero1, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    memcpy(numero2, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    free(buffer);
+
+    return PcbRecv;
+}
+
+PCB* recibir_contextoEjecucion_y_char_y_uint32_y_uint32_y_uint32_y_uint32(int conexion, uint32_t* numero1, uint32_t* numero2, uint32_t* numero3, uint32_t* numero4) {
+    uint32_t tamanioBuffer;
+    uint32_t desplazamiento = 0;
+    void *buffer = recibir_buffer(&tamanioBuffer, conexion);
+
+    PCB *PcbRecv = malloc(sizeof(PCB));
+    RegistrosCPU *registros = malloc(sizeof(RegistrosCPU));
+
+    memcpy(&(PcbRecv->id), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    memcpy(&(PcbRecv->program_counter), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    uint32_t tamanioAx = 0;
+
+    memcpy(&tamanioAx, buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+
+    memcpy(&(registros->registro_AX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_BX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_CX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_DX), buffer + desplazamiento, tamanioAx);
+    desplazamiento += tamanioAx;
+
+    PcbRecv->registros = registros;
+
+    uint32_t tamanioPalabra=0;
+	memcpy(&tamanioPalabra, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+	PcbRecv->nombreRecurso= malloc(tamanioPalabra);
+	memcpy(PcbRecv->nombreRecurso, buffer + desplazamiento, tamanioPalabra);
+	desplazamiento += tamanioPalabra;
+
+	memcpy(numero1, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    memcpy(numero2, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    memcpy(numero3, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    memcpy(numero4, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    free(buffer);
+
+    return PcbRecv;
+}
+
+void enviar_uint32_y_uint32_y_uint32_y_uint32_y_char(char* path, uint32_t valor1, uint32_t valor2, uint32_t valor3, uint32_t valor4, int socket, op_code_cliente orden, t_log *logger){
+    t_paquete * paquete= crear_paquete(orden, logger);
+    agregar_a_paquete2(paquete, &valor1, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &valor2, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &valor3, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &valor4, sizeof(uint32_t));
+
+    uint32_t largo_nombre = strlen(path) + 1;
+	agregar_a_paquete2(paquete, &largo_nombre, sizeof(uint32_t));
+	agregar_a_paquete2(paquete, path, largo_nombre);
+
+    enviar_paquete(paquete,socket);
+    eliminar_paquete(paquete);
+}
+
+char* recibirEnteroEnteroEnteroEnteroChar(int socket_cliente, uint32_t* entero1, uint32_t* entero2, uint32_t* entero3, uint32_t* entero4){
+	uint32_t tamanioBuffer;
+	uint32_t desplazamiento = 0;
+	void *buffer = recibir_buffer(&tamanioBuffer, socket_cliente);
+
+	memcpy(entero1, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+	memcpy(entero2, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    memcpy(entero3, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    memcpy(entero4, buffer + desplazamiento, sizeof(uint32_t));
 	desplazamiento += sizeof(uint32_t);
 
 	uint32_t tamanioPalabra=0;

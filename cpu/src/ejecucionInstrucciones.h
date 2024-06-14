@@ -27,7 +27,14 @@ void ioFsRead(char* interfaz, char* nombreArchivo, char* registroDireccion, char
 
 void ejecutar_EXIT();
 
+char* leer_valor_de_memoria(int direccion_fisica, int bytesRegistro);
+char*  recibir_valor_de_memoria();
+void escribir_valor_en_memoria(int direccion_fisica, int cantidad_bytes, char* valor);
+char*  recibir_confirmacion_de_escritura();
+int calcular_bytes_segun_registro(char* registro);
+
 void cambiar_valor_del_registroCPU(char* registro, char* valor);
 int obtener_valor_registroCPU(char* registro);
+uint32_t obtenerInterfaz(char* interfaz);
 
 #endif
