@@ -265,10 +265,18 @@ void moverProceso_BloqrecursoReady(Recurso* recurso){
 		pthread_mutex_lock(&mutex_colaBloq);
 		eliminarElementoLista(pcbLiberada, colaBloq);
 		pthread_mutex_unlock(&mutex_colaBloq);
-
-		pthread_mutex_lock(&mutex_ColaReady);
-		list_add(colaReady,pcbLiberada);
-		pthread_mutex_unlock(&mutex_ColaReady);
+		
+    if (pcbLiberada->quantum) {
+        pthread_mutex_lock(&mutex_colaVRR);
+        list_add(colaReadyVRR, pcbLiberada);
+        pthread_mutex_unlock(&mutex_colaVRR);
+    }
+    else {
+        pthread_mutex_lock(&mutex_ColaReady);
+        list_add(colaReady, pcbLiberada);
+        pthread_mutex_unlock(&mutex_ColaReady);
+    }
+	
 		sem_post(&sem_procesosReady);
 		log_info(info_logger,"PID: <%d> - Estado Anterior: <BLOCKED_RECURSO[%s]> - Estado Actual: <READY>",pcbLiberada->id,recurso->nombreRecurso);
     }

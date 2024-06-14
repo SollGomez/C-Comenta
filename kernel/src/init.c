@@ -32,6 +32,7 @@ pthread_mutex_t mutex_ColaReady;
 pthread_mutex_t mutex_colaExec;
 pthread_mutex_t mutex_colaBloq;
 pthread_mutex_t mutex_colaExit;
+pthread_mutex_t mutex_colaVRR;
 pthread_mutex_t mutex_MP;
 pthread_mutex_t mutex_listaPeticionesArchivos;
 pthread_mutex_t mutex_contadorPeticionesFs;
@@ -58,6 +59,7 @@ void iniciarNecesidades(){
 	listaPeticionesArchivos = list_create();
     colaNew = queue_create();
     colaReady = list_create();
+    colaReadyVRR = list_create();
     colaExec = list_create();
     colaBloq = list_create();
     colaExit = queue_create();
@@ -68,6 +70,7 @@ void iniciarNecesidades(){
     pthread_mutex_init(&mutex_colaExec, NULL);
     pthread_mutex_init(&mutex_colaBloq, NULL);
     pthread_mutex_init(&mutex_colaExit, NULL);
+    pthread_mutex_init(&mutex_colaVRR, NULL);
     pthread_mutex_init(&mutex_MP, NULL);
     pthread_mutex_init(&mutex_contadorPeticionesFs, NULL);
     pthread_mutex_init(&mutex_debug_logger, NULL);

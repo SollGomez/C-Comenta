@@ -186,6 +186,12 @@ void* finalizarProceso (void* pid) {
 			pthread_mutex_unlock(&mutex_colaBloq);
 			log_info(info_logger, "PID: [%d] - Estado Anterior: BLOQUEADO - Estado Actual: EXIT", pcbBuscado->id);
 			break;
+		case 5:
+			pthread_mutex_lock(&mutex_colaVRR);
+			eliminarElementoLista(pcbBuscado, colaReadyVRR);
+			pthread_mutex_unlock(&mutex_colaVRR);
+			log_info(info_logger, "PID: [%d] - Estado Anterior: READYVRR - Estado Actual: EXIT", pcbBuscado->id);
+			break;
 		default:
 			log_info(info_logger,"No se encontro el proceso %d en ninguna lista", idProceso);
 			return NULL;
@@ -238,6 +244,12 @@ PCB* encontrarProceso (uint32_t pid, uint32_t* cola) {
     pcbEncontrado = list_find(colaBloq, coincideProceso);
     if(pcbEncontrado != NULL) {
 		*cola = 4;
+		return pcbEncontrado;
+	}
+
+	pcbEncontrado = list_find(colaReadyVRR, coincideProceso);
+    if(pcbEncontrado != NULL) {
+		*cola = 5;
 		return pcbEncontrado;
 	}
 

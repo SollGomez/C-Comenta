@@ -32,6 +32,7 @@ extern pthread_mutex_t mutex_ColaReady;
 extern pthread_mutex_t mutex_colaExec;
 extern pthread_mutex_t mutex_colaBloq;
 extern pthread_mutex_t mutex_colaExit;
+extern pthread_mutex_t mutex_colaVRR;
 extern pthread_mutex_t mutex_MP;
 extern pthread_mutex_t mutex_listaPeticionesArchivos;
 extern pthread_mutex_t mutex_contadorPeticionesFs;

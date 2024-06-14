@@ -36,21 +36,22 @@ void planificadorLargoPlazo() {
 
 void planificadorCortoPlazo(){
     log_info(info_logger, "Kernel - PLANIFICADOR CORTO PLAZO INICIADO.");
-    while (planificacionFlag){
-    	if (proteccion){
+    while (planificacionFlag) {
+    	if (proteccion) {
 			pthread_mutex_lock(&planificacionCorto);
 			sem_wait(&sem_cpuLibre);
 			sem_wait(&sem_procesosReady);
 			mostrarEstadoColasAux("READY", colaReady);
+            mostrarEstadoColasAux("READY VRR", colaReadyVRR);
 			if (!planificacionFlag)
 				planificadorCortoAvance = 1;
-			if (planificacionFlag && list_size(colaReady))
+			if (planificacionFlag && (list_size(colaReady) || list_size(colaReadyVRR)))
 				moverProceso_readyExec();
-			if (!list_size(colaReady) && !list_size(colaExec))
+			if (!list_size(colaReady) && !list_size(colaExec) && list_size(colaReadyVRR))
 				proteccion = 0;
 			pthread_mutex_unlock(&planificacionCorto);
-    	}else{
-    		if (list_size(colaReady)){
+    	} else {
+    		if (list_size(colaReady) || list_size(colaReadyVRR)) {
     			proteccion = 1;
     			sem_post(&sem_cpuLibre);
     			sem_post(&sem_procesosReady);
@@ -123,38 +124,63 @@ void* esperarRR (void* pcbReady) {
 	}
 }
 
-void* esperarVRR (void* pcbReady) {
+void* esperarVRR(void* pcbReady) {
 	PCB* pcb = (PCB*) pcbReady;
 	pcb->tiempoEjecutando = 0;
+    uint32_t numCola = 0;
 	while (1) {
-		/*if (QUANTUM > 1000) {
-			usleep(1000);
-		} else {
-			usleep(10000);
-		}*/
-
         usleep(QUANTUM);
 
 		pcb->tiempoEjecutando++;
-		if (pcb->tiempoEjecutando >= QUANTUM) {
-			if (list_size(colaExec)) {
-				PCB* pcb = obtenerPcbExec();
-				enviarValor_uint32(pcb->id, cpuInterrupt_fd, INTERRUPCIONCPU, info_logger);
-				log_info(info_logger, "PID: <%d> - Desalojado por fin de Quantum", pcb->id);
-			}
+
+        if (pcb->tiempoEjecutando < QUANTUM) {
+            if(list_size(colaExec)){
+                PCB* pcbExec = obtenerPcbExec();
+                if (list_size(colaExec) && pcb->id != pcbExec->id) {//sacar list_size
+                    pcb->quantum = QUANTUM - pcb->tiempoEjecutando;
+                    log_info(info_logger, "PID: <%d> - Proceso con <%d> de quantum sobrante", pcbExec->id, pcbExec->quantum);
+                    pcb->tiempoEjecutando = 0;
+			        return NULL;
+                }
+            }
+        }
+
+		if (pcb->tiempoEjecutando >= QUANTUM) {//DESALOJO
+            if (list_size(colaExec)) {
+                PCB* pcbExec = obtenerPcbExec();
+                if (list_size(colaExec) && pcb->id == pcbExec->id) {
+                    pcb->quantum = 0;
+                    enviarValor_uint32(pcbExec->id, cpuInterrupt_fd, INTERRUPCIONCPU, info_logger);
+                    log_info(info_logger, "PID: <%d> - Desalojado por fin de Quantum", pcbExec->id);
+                } 
+            }
+            pcb->tiempoEjecutando = 0;
 			return NULL;
 		}
 	}
 }
 
 void moverProceso_readyExec(){
-        pthread_mutex_lock(&mutex_ColaReady);
         pthread_mutex_lock(&mutex_colaExec);
-        PCB *pcbReady = list_remove(colaReady,0);
-        list_add(colaExec,pcbReady);
+        PCB* pcbReady;
+
+        if (list_size(colaReadyVRR)) {
+            pthread_mutex_lock(&mutex_colaVRR);
+            pcbReady = list_remove(colaReadyVRR,0);
+            list_add(colaReadyVRR,pcbReady);
+            pthread_mutex_unlock(&mutex_colaVRR);
+        }
+        else if (list_size(colaReady)) {
+            pthread_mutex_lock(&mutex_ColaReady);
+            pcbReady = list_remove(colaReady,0);
+            list_add(colaExec,pcbReady);
+            pthread_mutex_unlock(&mutex_ColaReady);
+        } 
 
         if (strcmp(ALGORITMO_PLANIFICACION, "VRR") == 0) {
-            //
+            pthread_t atenderVRR;
+            pthread_create(&atenderVRR, NULL, esperarVRR, (void*) pcbReady);
+            pthread_detach(atenderVRR);
             mostrarEstadoColas();
         } 
 
@@ -164,7 +190,6 @@ void moverProceso_readyExec(){
             pthread_detach(atenderRR);
         }
 
-        pthread_mutex_unlock(&mutex_ColaReady);
         pthread_mutex_unlock(&mutex_colaExec);
         mandarPaquetePCB(pcbReady);
         log_info(info_logger, "PID: [%d] - Estado Anterior: READY - Estado Actual: EXEC.", pcbReady->id);
@@ -192,7 +217,7 @@ void moverProceso_ExecBloq (PCB* pcbBuscado) {
     log_info(info_logger, "PID: [%d] - Estado Anterior: EXEC - Estado Actual: BLOQ.", pcbBuscado->id);
 
     sem_post(&sem_cpuLibre);
-    if (list_size(colaReady))
+    if (list_size(colaReady) || list_size(colaReadyVRR))
     	sem_post(&sem_procesosReady);
 }
 
@@ -201,9 +226,17 @@ void moverProceso_BloqReady (PCB* pcbBuscado) {
     eliminarElementoLista(pcbBuscado, colaBloq);
     pthread_mutex_unlock(&mutex_colaBloq);
 
-    pthread_mutex_lock(&mutex_ColaReady);
-    list_add(colaReady, pcbBuscado);
-    pthread_mutex_unlock(&mutex_ColaReady);
+    if (pcbBuscado->quantum) {
+        pthread_mutex_lock(&mutex_colaVRR);
+        list_add(colaReadyVRR, pcbBuscado);
+        pthread_mutex_unlock(&mutex_colaVRR);
+    }
+    else {
+        pthread_mutex_lock(&mutex_ColaReady);
+        list_add(colaReady, pcbBuscado);
+        pthread_mutex_unlock(&mutex_ColaReady);
+    }
+        
     log_info(info_logger, "PID: [%d] - Estado Anterior: BLOQ - Estado Actual: READY.", pcbBuscado->id);
     sem_post(&sem_procesosReady);
 }
@@ -226,7 +259,7 @@ void moverProceso_ExecExit (PCB *pcbBuscado) {
         liberarRecursosTomados(pcbBuscado);
 
     sem_post(&sem_procesosExit);
-    if (list_size(colaReady))
+    if (list_size(colaReady) || list_size(colaReadyVRR))
      	sem_post(&sem_procesosReady);
 }
 
@@ -235,9 +268,16 @@ void moverProceso_ExecReady (PCB* pcbBuscado) {
     eliminarElementoLista(pcbBuscado, colaExec);
     pthread_mutex_unlock(&mutex_colaExec);
 
-    pthread_mutex_lock(&mutex_ColaReady);
-    list_add(colaReady, pcbBuscado);
-    pthread_mutex_unlock(&mutex_ColaReady);
+    if (pcbBuscado->quantum) {
+        pthread_mutex_lock(&mutex_colaVRR);
+        list_add(colaReadyVRR, pcbBuscado);
+        pthread_mutex_unlock(&mutex_colaVRR);
+    }
+    else {
+        pthread_mutex_lock(&mutex_ColaReady);
+        list_add(colaReady, pcbBuscado);
+        pthread_mutex_unlock(&mutex_ColaReady);
+    }
 
     log_info(info_logger, "PID: [%d] - Estado Anterior: EXEC - Estado Actual: READY", pcbBuscado->id);
     sem_post(&sem_procesosReady);
@@ -277,6 +317,7 @@ void mostrarEstadoColas () {
     mostrarEstadoColasAux("Bloqueados", colaBloq);
     mostrarEstadoColasAux("Ejecutando", colaExec);
     mostrarEstadoColasAux("Ready", colaReady);
+    mostrarEstadoColasAux("Ready VRR", colaReadyVRR);
     pthread_mutex_unlock(&mutex_debug_logger);
 }
 
