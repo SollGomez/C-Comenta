@@ -254,13 +254,21 @@ void compactar(char* nombreArchivo, t_archivo_metadata* archivoATruncar) {
      
     if(!tamanioActual) {
         posicionFinalActual = archivoATruncar->bloqueInicial;
+        //bitarray_clean_bit(bitmap, posicionFinalActual);
     }else {
         posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
     }
 
-    while(posicionFinalActual != tamanioActual){
-        bitarray_clean_bit(bitmap, posicionFinalActual);
-        posicionFinalActual--;
+    if(posicionFinalActual == 0){
+        for(uint i=0; i<tamanioActual; i++) {
+            bitarray_clean_bit(bitmap, posicionFinalActual);
+            posicionFinalActual++;
+        }
+    }else{
+        for(uint i=0; i<tamanioActual; i++) {
+            bitarray_clean_bit(bitmap, posicionFinalActual);
+            posicionFinalActual--;
+        }
     }
 
     uint32_t dondeLeer = archivoATruncar->bloqueInicial * cfg_entradaSalida->BLOCK_SIZE;
@@ -292,12 +300,13 @@ void compactar(char* nombreArchivo, t_archivo_metadata* archivoATruncar) {
                 uint32_t posFinalActual = bitOcupado + bloquesArchivoAMover - 1;
                 
                 uint32_t nuevoBit = bitDisponible;
-                for(uint32_t i=bitOcupado; i<posFinalActual; i++) {
+                for(uint32_t i=bitOcupado; i<=posFinalActual; i++) {
                     
                     bitarray_clean_bit(bitmap, i);
                     bitarray_set_bit(bitmap, nuevoBit);
                     nuevoBit ++;
                 }
+
                 msync(bitmap, cfg_entradaSalida->BLOCK_COUNT/8, MS_SYNC);
 
                 char* bitAux= string_itoa(bitDisponible);
