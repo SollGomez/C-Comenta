@@ -35,6 +35,8 @@ void cualInterfaz(int tipoInterfaz);
 
 void inicializarProceso(int);
 void GuardarNombreArchiv(uint32_t pid, char* file_name);
+void* manejarLectura(uint32_t posInicial, uint32_t tamanio, uint32_t pid);
+void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32_t pid);
 void realizarPedidoLectura(int cliente_socket);     //Vale para io y cpu. Les manda LECTURA_REALIZADA
 void realizarPedidoEscritura(int cliente_socket);   //Vale para io y cpu. Les manda ESCRITURA_REALIZADA
 
@@ -47,8 +49,6 @@ t_log* iniciar_logger(char*);
 // void leer_consola(t_log*);
 void PaqueteHand(int, t_log*);
 // void terminar_programa(int, t_log*);
-void realizarPedidoEscrituraInterfaz(int cliente_socket);
-void realizarPedidoLecturaInterfaz(int cliente_socket);
 
 
 #endif

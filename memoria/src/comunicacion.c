@@ -131,11 +131,13 @@ void *recibirIO(int interfaz_fd){
 
 //  		t_list *lista = list_create();
   		switch (cod_op) {
- 			case IO_STDIN_READ_DONE:
+ 			case IO_STDIN_READ_DONE: //ACCESO_PEDIDO_ESCRITURA
 				realizarPedidoEscritura(interfaz_fd);
  				break;
- 			case IO_STDOUT_WRITE_LEER_DIRECCION_EN_MEMORIA:
+
+ 			case IO_STDOUT_WRITE_LEER_DIRECCION_EN_MEMORIA: //ACCESO_PEDIDO_LECTURA
 				realizarPedidoLectura(interfaz_fd);
+
  				break;
   			case -1:
   				 log_error(logger, "el cliente se desconecto.");
@@ -243,21 +245,57 @@ void realizarPedidoLectura(int cliente_socket){			//Vale para io y cpu. Les mand
     uint32_t pid = *(uint32_t*)list_get(listaInts,2);
 
     pthread_mutex_lock(&mutex_espacioContiguo);
-    log_trace(trace_logger,"Accediendo a Espacio de Usuario para Lectura en la Dirección: <%d> de Tamanio: <%d> para el Proceso con PID: <%d>", posicion, tamanio, pid);
-    simularRetardoSinMensaje(RETARDO_RESPUESTA);
-    log_trace(trace_logger,"Se accedió a Espacio de Usuario correctamente");
-    void* datos = recibePedidoDeLectura(posicion, tamanio, pid);
+    //log_trace(trace_logger,"Accediendo a Espacio de Usuario para Lectura en la Dirección: <%d> de Tamanio: <%d> para el Proceso con PID: <%d>", posicion, tamanio, pid);
+    void* datos = malloc(tamanio);
+	datos = manejarLectura(posicion, tamanio, pid);
+    //log_trace(trace_logger,"Se accedió a Espacio de Usuario correctamente");
     pthread_mutex_unlock(&mutex_espacioContiguo);
     t_datos* unosDatos = malloc(sizeof (t_datos));
     unosDatos->datos = datos;
     unosDatos->tamanio = tamanio;
-    enviarListaIntsYDatos(listaInts,unosDatos, cliente_socket, info_logger, LECTURA_REALIZADA);
+    enviarListaIntsYDatos(listaInts, unosDatos, cliente_socket, info_logger, LECTURA_REALIZADA);
     free(datos);
     free(unosDatos);
     list_clean_and_destroy_elements(listaInts,free);
     list_destroy(listaInts);
 }
 
+void* manejarLectura(uint32_t posInicial, uint32_t tamanio, uint32_t pid) {
+	void* datos = malloc(tamanio);
+	uint32_t frameQueCorresponde = posInicial / TAM_PAGINA;
+	uint32_t tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
+	uint32_t pagActual;
+	
+	while(tamanio > tamPrimerFrame) {
+		memcpy(datos, leerMemoria(posInicial, tamPrimerFrame, pid), tamPrimerFrame);
+		pagActual = obtenerPaginaConMarco(frameQueCorresponde);
+		frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual+1);
+		posInicial = frameQueCorresponde * TAM_PAGINA;
+		tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
+		tamanio -= tamPrimerFrame;
+	}
+	memcpy(datos, leerMemoria(posInicial, tamanio, pid), tamanio);
+	return datos;
+}
+
+void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32_t pid) {
+	uint32_t offset = 0;
+	uint32_t frameQueCorresponde = posInicial / TAM_PAGINA;
+	uint32_t tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
+	uint32_t pagActual;
+	
+	while(tamanio > tamPrimerFrame) {
+		escribirMemoria(posInicial, datos+offset, tamPrimerFrame, pid);
+		offset += tamPrimerFrame;
+		pagActual = obtenerPaginaConMarco(frameQueCorresponde);
+		frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual+1);
+		posInicial = frameQueCorresponde * TAM_PAGINA;
+		tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
+		tamanio -= tamPrimerFrame;
+	}
+	escribirMemoria(posInicial, datos+offset, tamPrimerFrame, pid);
+	return;
+}
 
 void realizarPedidoEscritura(int cliente_socket){		//Vale para io y cpu. Les manda ESCRITURA_REALIZADA
     t_datos* unosDatos = malloc(sizeof(t_datos));
@@ -265,10 +303,9 @@ void realizarPedidoEscritura(int cliente_socket){		//Vale para io y cpu. Les man
     uint32_t* posicion = list_get(listaInts,0);
     uint32_t* pid = list_get(listaInts,1);
     pthread_mutex_lock(&mutex_espacioContiguo);
-    log_trace(trace_logger,"Accediendo a Espacio de Usuario para Escritura en la Direccion: <%d> para el Proceso con PID: <%d>", *posicion, *pid);
-    simularRetardoSinMensaje(RETARDO_RESPUESTA);
-    log_trace(trace_logger,"Se accedio a Espacio de Usuario correctamente");
-    recibePedidoDeEscritura(*posicion,unosDatos->datos, unosDatos->tamanio, *pid);
+    //log_trace(trace_logger,"Accediendo a Espacio de Usuario para Escritura en la Direccion: <%d> para el Proceso con PID: <%d>", *posicion, *pid);
+	manejarEscritura(*posicion, unosDatos->datos, unosDatos->tamanio, *pid);
+    //log_trace(trace_logger,"Se accedio a Espacio de Usuario correctamente");
     free(unosDatos->datos);
     free(unosDatos);
     list_clean_and_destroy_elements(listaInts, free);

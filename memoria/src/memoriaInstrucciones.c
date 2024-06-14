@@ -108,19 +108,6 @@ void liberarTablaDePaginas(uint32_t pid){
     log_trace(trace_logger, "No se encontró una tabla con PID <%d> en tablaGeneral", pid);
 }
 
-//REVISAR
-Pagina* obtenerPaginaConMarco(uint32_t marco){
-    for (int i = 0; i < list_size(tablaGeneral); i++) {
-        TablaDePaginas* tabla = list_get(tablaGeneral, i);
-        for (int j = 0; j < list_size(tabla->paginas); j++) {
-            Pagina* pagina = list_get(tabla->paginas, j);
-            if (pagina->marco == marco)
-                return pagina;
-        }
-    }
-    log_trace(trace_logger, "El marco solicitado está vacío");
-    return NULL;
-}
 
 bool crearEstructurasAdministrativas(){
     bool comp1 = crearSemaforos();
