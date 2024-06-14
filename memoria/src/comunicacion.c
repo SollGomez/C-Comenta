@@ -261,20 +261,22 @@ void realizarPedidoLectura(int cliente_socket){			//Vale para io y cpu. Les mand
 }
 
 void* manejarLectura(uint32_t posInicial, uint32_t tamanio, uint32_t pid) {
+	uint32_t offset = 0;
 	void* datos = malloc(tamanio);
 	uint32_t frameQueCorresponde = posInicial / TAM_PAGINA;
 	uint32_t tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
 	uint32_t pagActual;
 	
 	while(tamanio > tamPrimerFrame) {
-		memcpy(datos, leerMemoria(posInicial, tamPrimerFrame, pid), tamPrimerFrame);
+		memcpy(datos+offset, leerMemoria(posInicial, tamPrimerFrame, pid), tamPrimerFrame);
+		offset += tamPrimerFrame;
 		pagActual = obtenerPaginaConMarco(frameQueCorresponde);
 		frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual+1);
 		posInicial = frameQueCorresponde * TAM_PAGINA;
-		tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
 		tamanio -= tamPrimerFrame;
+		tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
 	}
-	memcpy(datos, leerMemoria(posInicial, tamanio, pid), tamanio);
+	memcpy(datos+offset, leerMemoria(posInicial, tamanio, pid), tamanio);
 	return datos;
 }
 
@@ -285,15 +287,17 @@ void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32
 	uint32_t pagActual;
 	
 	while(tamanio > tamPrimerFrame) {
+		log_trace(trace_logger, "tamanio a leer %d, tamanio que puedo leer en esta pag %d", tamanio, tamPrimerFrame);
 		escribirMemoria(posInicial, datos+offset, tamPrimerFrame, pid);
 		offset += tamPrimerFrame;
 		pagActual = obtenerPaginaConMarco(frameQueCorresponde);
 		frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual+1);
 		posInicial = frameQueCorresponde * TAM_PAGINA;
+		tamanio = tamanio - tamPrimerFrame;
 		tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
-		tamanio -= tamPrimerFrame;
+		log_trace(trace_logger, "escribo en la siguiente pagina");
 	}
-	escribirMemoria(posInicial, datos+offset, tamPrimerFrame, pid);
+	escribirMemoria(posInicial, datos+offset, tamanio, pid);
 	return;
 }
 
