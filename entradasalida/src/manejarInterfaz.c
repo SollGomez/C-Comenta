@@ -381,7 +381,7 @@ bool tengoEspacioAMiLado(t_archivo_metadata* archivoATruncar, uint32_t tamanioNu
 
     uint32_t tamanioActual = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
 
-    uint32_t bloquesASumar = tamanioNuevoEnBloques - tamanioActual;
+    uint32_t bloquesASumar;
 
     uint32_t posicionFinalActual;
      
@@ -390,10 +390,16 @@ bool tengoEspacioAMiLado(t_archivo_metadata* archivoATruncar, uint32_t tamanioNu
     }else {
         posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
     }
+    
+    if(!tamanioActual) {
+        bloquesASumar = tamanioNuevoEnBloques - 1;
+    }else {
+        bloquesASumar = tamanioNuevoEnBloques - tamanioActual;
+    }
 
     uint32_t posicionFinal = posicionFinalActual + bloquesASumar;
 
-    for(uint32_t i = posicionFinalActual + 1; i < posicionFinal; i++) {
+    for(uint32_t i = posicionFinalActual + 1; i <= posicionFinal; i++) {
 
         if(bitarray_test_bit(bitmap, i)) {
             return false;
