@@ -141,13 +141,25 @@ void truncarArchivo (char* nombreArchivo, uint32_t tamanio) {
     archivoATruncar->bloqueInicial = config_get_int_value(archivoATruncar->configArchivo, "BLOQUE_INICIAL");
     archivoATruncar->tamArchivo = config_get_int_value(archivoATruncar->configArchivo, "TAMANIO_ARCHIVO");
 
+    
+
     if(archivoATruncar->tamArchivo == tamanio)
         return;
+
+    // if(archivoATruncar->tamArchivo == 0 && tamanio == cfg_entradaSalida->BLOCK_SIZE) {
+    //     log_info(info_logger, "No agrego bloques");
+    //     char* stringAuxiliar = string_itoa(tamanio);
+    //     config_set_value(archivoATruncar->configArchivo, "TAMANIO_ARCHIVO", stringAuxiliar);
+    //     config_save(archivoATruncar->configArchivo);
+    //     fclose(f);
+    //     return;
+    // }
 
     if(archivoATruncar->tamArchivo > tamanio){
 
         if(tamanio < 0) {
             log_info(info_logger, "No puede haber tamanio negativo");
+            fclose(f);
             return;
         }
 
@@ -187,7 +199,8 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
         log_info(info_logger, "Tengo espacio a mi lado");
         while(bloquesASumar) {
 
-            bitarray_set_bit(bitmap, posicionFinalActual + bloquesASumar);
+            bitarray_set_bit(bitmap, posicionFinalActual + bloquesASumar - 1);
+            log_info(info_logger, "Asigno bit: %d", posicionFinalActual + bloquesASumar - 1);
             bloquesASumar--;
         }
         return;
@@ -204,7 +217,7 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
 
         void* datos = leerArchivo(nombreArchivo, dirASacarDatos, archivoATruncar->tamArchivo);
 
-        log_info(info_logger, "Estoy pasando cositas: %s", datos);
+        log_info(info_logger, "Estoy pasando cositas: %s", datos);  //TODO ver si cambiar a %p
 
         escribirArchivo(nombreArchivo, datos, direccionAPonerDatos, archivoATruncar->tamArchivo);
 
@@ -220,6 +233,7 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
         uint32_t posicionFinal = posInicialNueva + bloquesASumar;
 
         for(int i=posInicialNueva; i<posicionFinal; i++){
+            log_info(info_logger, "Asigno bit: %d", i);
             bitarray_set_bit(bitmap, i);
         }
         return;
@@ -295,21 +309,49 @@ void compactar(char* nombreArchivo, t_archivo_metadata* archivoATruncar) {
                 uint32_t direccionAPonerDatos = bitDisponible * cfg_entradaSalida->BLOCK_SIZE;
 
                 void* datosAMover = leerArchivo(nombreArchivo, dirASacarDatos, tamArchivoAMover);
-                log_info(info_logger, "Estoy pasando cositas: %s", datosAMover);
+                log_info(info_logger, "Estoy pasando cositas: %s", datosAMover);  //TODO ver si cambiar a %p
                 escribirArchivo(nombreArchivo, datosAMover, direccionAPonerDatos, tamArchivoAMover);
 
             }
 
         }
     }
+    uint32_t tamanioArchivoAuxiliar;
+    if(!archivoATruncar->tamArchivo)
+        tamanioArchivoAuxiliar = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
+    else
+        tamanioArchivoAuxiliar = 1;
 
-    //ESCRIBIR EL AUXILIAR
-    // for(uint32_t i=0; i<bitarray_get_max_bit(bitmap); i++) {
+    bool esElPrimero = true;
+    uint32_t primerBit;
+    for(int i=0; i<bitarray_get_max_bit(bitmap); i++) {
         
-    //     if(!bitarray_test_bit(bitmap, i))
-    //         bitarray_set_bit(bitmap, i);
-    // }
-    // msync(bitmap, cfg_entradaSalida->BLOCK_COUNT/8, MS_SYNC);
+        if(!bitarray_test_bit(bitmap, i)){
+
+            for(int j=0; j<tamanioArchivoAuxiliar; j++){
+
+                if(esElPrimero) {
+                    primerBit = i;
+                    esElPrimero = false;
+                }
+                bitarray_set_bit(bitmap, i);
+                i++;
+            }
+            break;
+        }
+    }
+
+    char* stringAuxiliar = string_itoa(primerBit);
+    config_set_value(archivoATruncar->configArchivo, "BLOQUE_INICIAL", stringAuxiliar);
+    config_save(archivoATruncar->configArchivo);
+
+    uint32_t dirAEscribir = primerBit * cfg_entradaSalida->BLOCK_SIZE;
+    
+    escribirArchivo(archivoATruncar->nombreArchivo, datosAux, dirAEscribir, archivoATruncar->tamArchivo);
+
+    msync(bitmap, cfg_entradaSalida->BLOCK_COUNT/8, MS_SYNC);
+
+    log_info(info_logger, "Sali de compactacion");
 
 }
 
@@ -320,6 +362,7 @@ uint32_t primerBitDisponible() {
         if(!bitarray_test_bit(bitmap, i))
             return i;
     }
+    return -1;
 }
 
 uint32_t primerBitOcupado() {
@@ -328,6 +371,8 @@ uint32_t primerBitOcupado() {
         if(bitarray_test_bit(bitmap, i))
             return i;
     }
+
+    return -1;
 }
 
 bool tengoEspacioAMiLado(t_archivo_metadata* archivoATruncar, uint32_t tamanioNuevo) {

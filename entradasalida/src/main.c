@@ -10,18 +10,14 @@ int main(int argc, char* argv[]) {
 	crearEstructurasFs();
 
 	crearArchivo("pruebaLoca.txt");
-	
-	truncarArchivo("pruebaLoca.txt", 64);
-	crearArchivo("pruebaLoca2.txt");
+	truncarArchivo("pruebaLoca.txt", 64); 
 	escribirArchivo("hola ", "HOLA COMO ESTAS HOLA COMO ESTAS HOLA COMO ESTAS HOLA COMO ESTAS", 0, 64);
+	crearArchivo("pruebaLoca2.txt");
 
 	//msync(bitmap, cfg_entradaSalida->BLOCK_COUNT, MS_SYNC);
-	truncarArchivo("pruebaLoca2.txt", 128);	
-	truncarArchivo("pruebaLoca.txt", 192);
+	truncarArchivo("pruebaLoca2.txt", 896);
+	truncarArchivo("pruebaLoca.txt", 128);
 	//truncarArchivo("pruebaLoca.txt", 0);
-
-	leerArchivo("dasdsadasdas", 0, 64);
-
 
 	// pthread_t kernel;
 	// pthread_t memoria;

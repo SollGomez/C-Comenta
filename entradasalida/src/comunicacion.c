@@ -96,7 +96,7 @@ int conectarKernel(char *modulo){
 
 	send(kernel_fd, &handshakeEntradasalida, sizeof(int32_t), 0);
 
-	listaDeArchivos; = list_create();
+	list_create(listaDeArchivos);
 	int32_t tamanioLista;
 
 	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "poner dialfs") == 0){		// HABLAR CON AXO
@@ -365,9 +365,11 @@ void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 }
 
 void* solicitudIO_FS_CREATE (void* cliente_socket) {
-	char* nombreArch;
+
+	int conexion = *((int*) cliente_socket);
+	char* nombreArch = malloc(10);
 	uint32_t pid;
-	strcpy(nombreArch, recibirEnteroYString(cliente_socket, &pid));
+	strcpy(nombreArch, recibirEnteroYString(conexion, &pid));
 
 	crearArchivo(nombreArch);
 	logCrearArchivo(pid, nombreArch);
@@ -376,9 +378,10 @@ void* solicitudIO_FS_CREATE (void* cliente_socket) {
 }
 
 void* solicitudIO_FS_DELETE (void* cliente_socket) {
-	char* nombreArch;
+	int conexion = *((int*) cliente_socket);
+	char* nombreArch = malloc(10);
 	uint32_t pid;
-	strcpy(nombreArch, recibirEnteroYString(cliente_socket, &pid));
+	strcpy(nombreArch, recibirEnteroYString(conexion, &pid));
 
 	eliminarArchivo(nombreArch);
 	logEliminarArchivo(pid, nombreArch);
@@ -387,13 +390,19 @@ void* solicitudIO_FS_DELETE (void* cliente_socket) {
 }
 
 void* solicitudIO_FS_TRUNCATE (void* cliente_socket) {
-	
+
+	int conexion = *((int*) cliente_socket);
+	return NULL;
 }
 
 void* solicitudIO_FS_WRITE (void* cliente_socket) {
-	
+
+	int conexion = *((int*) cliente_socket);
+	return NULL;
 }
 
 void* solicitudIO_FS_READ (void* cliente_socket) {
 	
+	int conexion = *((int*) cliente_socket);
+	return NULL;
 }
