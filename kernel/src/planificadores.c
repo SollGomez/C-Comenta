@@ -178,6 +178,7 @@ void moverProceso_readyExec(){
         } 
 
         if (strcmp(ALGORITMO_PLANIFICACION, "VRR") == 0) {
+            log_info(info_logger, "Usando VRR");
             pthread_t atenderVRR;
             pthread_create(&atenderVRR, NULL, esperarVRR, (void*) pcbReady);
             pthread_detach(atenderVRR);
@@ -185,6 +186,7 @@ void moverProceso_readyExec(){
         } 
 
         if (strcmp(ALGORITMO_PLANIFICACION, "RR") == 0) {
+            log_info(info_logger, "Usando RR");
             pthread_t atenderRR;
             pthread_create(&atenderRR, NULL, esperarRR, (void*) pcbReady);
             pthread_detach(atenderRR);
