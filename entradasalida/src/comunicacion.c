@@ -166,7 +166,7 @@ void *recibirMemoria() {
 			break;
 			
 		case ESCRITURA_REALIZADA:
-			enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd);
+			enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd, info_logger);
 			break;
 
 		case -1:
@@ -319,7 +319,7 @@ void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede ca
 
 	printf("\n\n PID <%d> - <%s>\n\n", pid, datitos->datos);
 
-	enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd);
+	enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd, info_logger);
 	return NULL;
 }
 
@@ -367,7 +367,7 @@ void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 	logOperacion(pid, "IO_GEN_SLEEP");
 	manejarInterfazGenerica(unidadesDeTrabajo);
 
-	enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd);
+	enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd, info_logger);
 
 	return NULL;
 }
