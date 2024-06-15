@@ -311,9 +311,9 @@ char* leer_valor_de_memoria(int direccion_fisica, int bytesRegistro) {
     uint32_t uint32t_dir_fis = direccion_fisica;
     uint32_t uint32t_tamanio = bytesRegistro; 
 
+    list_add(listaInts, &PCB_Actual->id);
     list_add(listaInts, &uint32t_dir_fis);
     list_add(listaInts, &uint32t_tamanio);
-    list_add(listaInts, &PCB_Actual->id);
 
     enviarListaUint32_t(listaInts,memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA);
     char* valor = recibir_valor_de_memoria();
@@ -322,7 +322,7 @@ char* leer_valor_de_memoria(int direccion_fisica, int bytesRegistro) {
     log_info(info_logger, "PID: <%d> - Acción: <LEER> - Dirección Fisica: <%d> - Valor: <%s>", PCB_Actual->id, direccion_fisica, valor);
 
     return valor;
- }
+}
 
 char* recibir_valor_de_memoria(){
 
@@ -351,48 +351,43 @@ char* recibir_valor_de_memoria(){
     return valor;
 }
 
-void escribir_valor_en_memoria(int direccion_fisica, int cantidad_bytes, char* valor){
-
-
+void escribir_valor_en_memoria(int direccion_fisica, int cantidad_bytes, char* valor) {
     t_list* listaInts = list_create();
     t_datos* unosDatos = malloc(sizeof(t_datos));
     unosDatos->tamanio= cantidad_bytes;
     unosDatos->datos = (void*) valor;
-    list_add(listaInts, &direccion_fisica);
     list_add(listaInts, &PCB_Actual->id);
+    list_add(listaInts, &direccion_fisica);
 
     enviarListaIntsYDatos(listaInts, unosDatos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
     list_clean(listaInts);
     list_destroy(listaInts);
 
-    char* valor2 = recibir_confirmacion_de_escritura() ;
-    if (strcmp(valor2, "OK") == 0) {
+    char* valor2 = recibir_confirmacion_de_escritura();
+    if (strcmp(valor2, "OK") == 0) 
         log_info(info_logger, "PID: <%d> - Accion: <ESCRIBIR> - Dirección Fisica: <%d> - Valor: <%s>", PCB_Actual->id, direccion_fisica, valor);
-    }
     free(unosDatos);
+}
 
- }
+char* recibir_confirmacion_de_escritura() {
+    char* valor; 
+    int cod_op = recibir_operacion(memoria_fd);
 
- char*  recibir_confirmacion_de_escritura(){
-
-        char* valor; 
-        int cod_op = recibir_operacion(memoria_fd);
-
-		switch (cod_op) {
-		case ESCRITURA_REALIZADA:
-             recibirOrden(memoria_fd);
-             valor= "OK";
-			 break;
-        }
-        return valor;
+    switch (cod_op) {
+        case ESCRITURA_REALIZADA:
+            recibirOrden(memoria_fd);
+            valor= "OK";
+            break;
+    }
+    return valor;
 }
 
 int calcular_bytes_segun_registro(char* registro){
     int bytes;
 
-    if ((strcmp(registro, "AX") == 0)||(strcmp(registro, "BX") == 0)||(strcmp(registro, "CX") == 0)||(strcmp(registro, "DX") == 0))
+    if ((strcmp(registro, "AX") == 0) || (strcmp(registro, "BX") == 0) || (strcmp(registro, "CX") == 0) || (strcmp(registro, "DX") == 0))
         bytes = 1;
-    if ((strcmp(registro, "EAX") == 0)||(strcmp(registro, "EBX") == 0)||(strcmp(registro, "ECX") == 0)||(strcmp(registro, "EDX") == 0)||(strcmp(registro, "SI") == 0)||(strcmp(registro, "DI") == 0))
+    if ((strcmp(registro, "EAX") == 0) || (strcmp(registro, "EBX") == 0) || (strcmp(registro, "ECX") == 0) || (strcmp(registro, "EDX") == 0) || (strcmp(registro, "SI") == 0) || (strcmp(registro, "DI") == 0))
         bytes = 4;
 
     return bytes;

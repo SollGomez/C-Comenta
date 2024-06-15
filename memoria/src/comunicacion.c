@@ -25,7 +25,7 @@ int recibirConexion(char *puerto) {
 	pthread_create(&tid[1], NULL, recibirKernel, NULL);
 	int32_t tipoInterfaz;
 	int entradasalida_fd;
-	while(1){
+	while (1) {
 		entradasalida_fd = esperar_cliente(memoria_fd);
 		recv(entradasalida_fd, &tipoInterfaz, sizeof(int32_t), MSG_WAITALL);
 		interfazIO_fd[tipoInterfaz] = entradasalida_fd;

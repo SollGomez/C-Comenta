@@ -10,7 +10,7 @@ int planificadorCortoAvance;
 void* iniciarConsola () {
 	pthread_mutex_init(&semaforo, NULL);
 	while (1) {
-	    char *linea = readline(">");
+	    char* linea = readline(">");
 	    log_info(info_logger,"linea: %s",linea);
 
 	    if (!strncmp(linea,"EJECUTAR_SCRIPT", strlen("EJECUTAR_SCRIPT")))
@@ -40,12 +40,13 @@ void* iniciarConsola () {
 	    	free(linea);
 	    	break;
 	    }
+
 	    free(linea);
 	}
 }
 
 void ejecutar_script (char* linea) {
-	printf("RECONOCI LA LINEA");
+	log_info(info_logger, "RECONOCI LA LINEA %s", linea);
 
 	path = malloc(sizeof(linea));
 	char* saveptr = malloc(sizeof(linea));
@@ -63,24 +64,21 @@ void ejecutar_script (char* linea) {
 }
 
 void* ejecutar_script_operaciones (void* parametros) {
-	pthread_mutex_lock(&semaforo);
     char* pathptr = (char*) parametros;
 
-	FILE *fptr;
+	FILE* fptr;
 
 	fptr = fopen(pathptr, "r");
 	char instruccion[100];
 	
-	
-	if(fptr == NULL)
-		printf("\nNO ENCONTRE EL ARCHIVO");
+	if (fptr == NULL)
+		log_info(info_logger, "NO ENCONTRE EL ARCHIVO");
 
-	if(fptr != NULL)
-		printf("\n encontre el archivo %s", fptr);
+	if (fptr != NULL)
+		log_info(info_logger, "ENCONTRE EL ARCHIVO");
 
 	while (fgets(instruccion, sizeof(instruccion), fptr)) {
-		if (!strncmp(instruccion,"EJECUTAR_SCRIPT", strlen("EJECUTAR_SCRIPT")))
-	    	ejecutar_script(instruccion);
+		log_info(info_logger, "ESTOY LEYENDO UN ARCHIVO. Instruccion <%s>", instruccion);
 
 	    if (!strncmp(instruccion,"INICIAR_PROCESO", strlen("INICIAR_PROCESO")))
 	    	iniciar_proceso(instruccion);
@@ -102,7 +100,6 @@ void* ejecutar_script_operaciones (void* parametros) {
 	    	PROCESO_ESTADO(instruccion);
 	}
 
-    pthread_mutex_unlock(&semaforo);
 	        
 	fclose(fptr);
     //free(pathptr);
@@ -127,6 +124,7 @@ void iniciar_proceso (char* linea) {
 }
 
 void* inicializarProceso (void* parametros) {
+	log_info(info_logger, "voy a iniciar proceso");
 	pthread_mutex_lock(&semaforo);
     char* pathptr = (char*) parametros;
 	PCB *pcb = crearPcb(pathptr);

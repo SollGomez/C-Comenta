@@ -39,18 +39,17 @@ void ciclo_de_instruccion(){
 }
 
 void fetch(){
-		t_list* listaInts = list_create();
+	t_list* listaInts = list_create();
 
-		log_info(info_logger, "PID: <%d> - FETCH - Program Counter: <%d>", PCB_Actual->id, PCB_Actual->program_counter);
-		
-		list_add(listaInts, &PCB_Actual->id);
-		list_add(listaInts, &PCB_Actual->program_counter);
+	log_info(info_logger, "PID: <%d> - FETCH - Program Counter: <%d>", PCB_Actual->id, PCB_Actual->program_counter);
+	
+	list_add(listaInts, &PCB_Actual->id);
+	list_add(listaInts, &PCB_Actual->program_counter);
 
-		enviarListaUint32_t(listaInts,memoria_fd, info_logger, SOLICITUDINSTRUCCION);
+	enviarListaUint32_t(listaInts,memoria_fd, info_logger, SOLICITUDINSTRUCCION);
 
-		list_clean(listaInts);
-		list_destroy(listaInts);
-
+	list_clean(listaInts);
+	list_destroy(listaInts);
 }
 
 void decode(){
