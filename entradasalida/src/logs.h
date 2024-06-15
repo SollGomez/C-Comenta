@@ -3,18 +3,14 @@
 
 #include <commons/log.h>
 #include <commons/config.h>
+#include <commons/bitarray.h>
+
 #include <string.h>
 #include <pthread.h>
 #include <utils/estructurasCompartidas.h>
 #include <semaphore.h>
-
-extern pthread_mutex_t mutex_recvKernel;
-extern pthread_mutex_t mutex_recvMemoria;
-extern pthread_mutex_t mutex_peticiones_pendientes;
-
-extern t_list* lista_peticiones_pendientes;
-
-extern sem_t sem_contador_peticiones;
+#include <fcntl.h>
+#include <sys/mman.h>
 
 typedef struct 
 {
@@ -32,13 +28,41 @@ typedef struct
 
 } t_config_entradaSalida;
 
+typedef struct{
+
+	void* direccionArchivo;
+	int tamanio;
+	int fd;
+
+} archBloques; 
+
+typedef struct 
+{
+    uint32_t bloqueInicial;
+    uint32_t tamArchivo;
+    char* nombreArchivo;
+    t_config* configArchivo;
+} t_archivo_metadata;
+
+
 int cargar_configuracion();
 int init_loggers_config(char* path);
+void crearArchivoBloques();
+void crearBitmap();
+void crearEstructurasFs();
 
 t_config_entradaSalida *cfg_entradaSalida_start();
-void crearSemaforos();
-void crearListas();
 void logOperacion(uint32_t pid, char* operacionARealizar);
+void logCrearArchivo(uint32_t pid, char* nombreArchivo);
+void logTruncarArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanio);
+void logEliminarArchivo(uint32_t pid, char* nombreArchivo);
+void logLeerArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir, uint32_t punteroArchivo);
+void logEscribirArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir, uint32_t punteroArchivo);
+
+extern t_bitarray* bitmap;
+extern archBloques* archivoBloques;
+extern void* bitarraycontent;
+extern t_list* lista_archivos;
 
 
 #endif /* LOGS_H_ */

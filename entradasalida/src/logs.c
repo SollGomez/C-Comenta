@@ -8,18 +8,86 @@ t_config* configuracionEntradasalida;
 bool logsCreados = false;
 bool configCreada = false;
 t_config_entradaSalida* cfg_entradaSalida;
+archBloques* archivoBloques;
+void* bitarraycontent;
+t_bitarray* bitmap;
+t_list* lista_archivos;
 
-void crearSemaforos() {
-    pthread_mutex_init(&mutex_recvKernel, NULL);
-    pthread_mutex_init(&mutex_recvMemoria, NULL);
-    
-    pthread_mutex_init(&mutex_peticiones_pendientes, NULL);
 
-    sem_init(&sem_contador_peticiones, 0, 0);
+void crearEstructurasFs() {
+
+    crearBitmap();
+
+    crearArchivoBloques();
 }
 
-void crearListas() {
-   lista_peticiones_pendientes = list_create();
+
+void crearBitmap() {
+    char* path = string_new();
+    string_append(&path, cfg_entradaSalida->PATH_BASE_DIALFS);
+    string_append(&path, "/bitmap.dat");
+
+    int tamanio_bitmap = cfg_entradaSalida->BLOCK_COUNT / 8;
+
+    int fd = open(path, O_RDWR|O_CREAT,  S_IRUSR|S_IWUSR);
+	if (fd == -1){
+        log_info(info_logger, "Error al abrir/crear el archivo bitmap");
+        return;
+    }
+
+	ftruncate(fd, tamanio_bitmap);
+    bitarraycontent = mmap(NULL, tamanio_bitmap, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+
+	if(bitarraycontent == MAP_FAILED)  {
+        log_info(info_logger, "Error al mapear el archivo bitmap de bloques en memoria");
+        close(fd);
+        return;
+    }
+
+    bitmap =  bitarray_create_with_mode(bitarraycontent,  tamanio_bitmap, LSB_FIRST);
+
+    // for (int i = 0; i < cfg_entradaSalida->BLOCK_COUNT; i++) {
+    //     bitarray_clean_bit(bitmap, i);
+    // }
+
+    msync(bitmap, tamanio_bitmap, MS_SYNC);
+    log_trace(trace_logger, "Bitmap Creado :)");
+    return;
+}
+
+void crearArchivoBloques() {
+    
+    archivoBloques = malloc(sizeof(archBloques));
+    int blockCount = cfg_entradaSalida->BLOCK_COUNT;
+    int blockSize = cfg_entradaSalida->BLOCK_SIZE;
+    archivoBloques->tamanio = blockCount*blockSize;
+
+    char* path = string_new();
+    string_append(&path, cfg_entradaSalida->PATH_BASE_DIALFS);
+    string_append(&path, "/bloques.dat");
+    
+
+    log_info(info_logger, "%s", path);
+    
+    archivoBloques->fd = open(path, O_CREAT| O_RDWR,  S_IRUSR|S_IWUSR);
+    if (archivoBloques->fd == -1){
+        log_trace(trace_logger,"Error al abrir/crear el archivo de bloques");
+        return;
+    }
+
+    ftruncate(archivoBloques->fd, archivoBloques->tamanio);
+    archivoBloques->direccionArchivo = mmap(NULL, archivoBloques->tamanio, PROT_READ | PROT_WRITE, MAP_SHARED, archivoBloques->fd , 0);
+
+    if(archivoBloques->direccionArchivo == MAP_FAILED) {
+	       log_trace(trace_logger, "Error al mapear el archivo en memoria");
+	       close(archivoBloques->fd);
+	       return;
+	    }
+
+    msync(archivoBloques->direccionArchivo, archivoBloques->tamanio, MS_SYNC);
+
+    log_trace(trace_logger, "Archivo de Bloques creado");
+    close(archivoBloques->fd);
 }
 
 int init_loggers_config(char* path){
@@ -108,12 +176,12 @@ void logCrearArchivo(uint32_t pid, char* nombreArchivo){
     log_info(info_logger, "PID: <%d> - Crear Archivo: <%s>", pid, nombreArchivo);
 }
 
-void logTruncarArchivo(uint32_t pid, char* nombreArchivo){
-    log_info(info_logger, "PID: <%d> - Truncar Archivo: <%s>", pid, nombreArchivo);
+void logTruncarArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanio){
+    log_info(info_logger, "PID: <%d> - Truncar Archivo: <%s> - Tamaño <%d>", pid, nombreArchivo, tamanio);
 }
 
-void logEliminarArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamArchivoTruncado){
-    log_info(info_logger, "PID: <%d> - Eliminar Archivo: <%s> - Tamaño <%d>", pid, nombreArchivo, tamArchivoTruncado);
+void logEliminarArchivo(uint32_t pid, char* nombreArchivo){
+    log_info(info_logger, "PID: <%d> - Eliminar Archivo: <%s>", pid, nombreArchivo);
 }
 
 void logLeerArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir, uint32_t punteroArchivo){

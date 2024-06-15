@@ -7,24 +7,34 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
     cargar_configuracion();
-	crearListas();
-	crearSemaforos();
-	iniciarAtencionPeticiones();
+	crearEstructurasFs();
 
+	listaDeArchivos = list_create();
+	crearArchivo("pruebaLoca.txt");
+	list_add(listaDeArchivos, "pruebaLoca.txt");
+	truncarArchivo("pruebaLoca.txt", 64); 
+	escribirArchivo("hola ", "HOLA COMO ESTAS HOLA COMO ESTAS HOLA COMO ESTAS HOLA COMO ESTAS", 0, 64);
+	crearArchivo("pruebaLoca2.txt");
+	list_add(listaDeArchivos, "pruebaLoca2.txt");
 
-	pthread_t kernel;
-	pthread_t memoria;
+	//msync(bitmap, cfg_entradaSalida->BLOCK_COUNT, MS_SYNC);
+	truncarArchivo("pruebaLoca2.txt", 65408);
+	truncarArchivo("pruebaLoca.txt", 128);
+	//truncarArchivo("pruebaLoca.txt", 0);
 
-    pthread_create(&kernel, NULL, iniciarKernel, NULL);
+	// pthread_t kernel;
+	// pthread_t memoria;
 
-	if(cfg_entradaSalida->TIPO_INTERFAZ_INT != 3) {
-		pthread_create(&memoria, NULL, iniciarMemoria, NULL);
-		pthread_join(memoria, NULL);
-	}
+    // pthread_create(&kernel, NULL, iniciarKernel, NULL);
 
-	pthread_join(kernel, NULL);
+	// if(cfg_entradaSalida->TIPO_INTERFAZ_INT != 3) {
+	// 	pthread_create(&memoria, NULL, iniciarMemoria, NULL);
+	// 	pthread_join(memoria, NULL);
+	// }
 
-	cerrarPrograma();
+	// pthread_join(kernel, NULL);
+
+	// cerrarPrograma();
     return 0;
 }
 

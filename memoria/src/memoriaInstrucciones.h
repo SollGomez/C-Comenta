@@ -1,6 +1,6 @@
 #ifndef MEMORIAINSTRUCCIONES_H_
 #define MEMORIAINSTRUCCIONES_H_
-#include "main.h"
+#include "comunicacion.h"
 
 //#define TAM_PAGINA config_get_int_value(config,"TAM_PAGINA")
 
@@ -38,7 +38,6 @@ Instruccion* retornarInstruccionACPU(uint32_t pid, uint32_t pc);
 
 
 //REVISAR
-Pagina* obtenerPaginaConMarco(uint32_t marco); //REVISAR
 void liberarTablaDePaginas(uint32_t pid);      //REVISAR
 
 

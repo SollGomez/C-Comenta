@@ -6,7 +6,6 @@
 #include <utils/estructurasCompartidas.h>
 #include <comunicacion.h>
 #include <stdbool.h>
-#include <comunicacion.h>
 #include <pthread.h>
 #include <commons/collections/queue.h>
 #include <commons/config.h>
