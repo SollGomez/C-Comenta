@@ -41,7 +41,7 @@ void crearBitmap() {
 	if(bitarraycontent == MAP_FAILED)  {
         log_info(info_logger, "Error al mapear el archivo bitmap de bloques en memoria");
         close(fd);
-        return false;
+        return;
     }
 
     bitmap =  bitarray_create_with_mode(bitarraycontent,  tamanio_bitmap, LSB_FIRST);
@@ -176,12 +176,12 @@ void logCrearArchivo(uint32_t pid, char* nombreArchivo){
     log_info(info_logger, "PID: <%d> - Crear Archivo: <%s>", pid, nombreArchivo);
 }
 
-void logTruncarArchivo(uint32_t pid, char* nombreArchivo){
-    log_info(info_logger, "PID: <%d> - Truncar Archivo: <%s>", pid, nombreArchivo);
+void logTruncarArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanio){
+    log_info(info_logger, "PID: <%d> - Truncar Archivo: <%s> - Tamaño <%d>", pid, nombreArchivo, tamanio);
 }
 
 void logEliminarArchivo(uint32_t pid, char* nombreArchivo){
-    log_info(info_logger, "PID: <%d> - Eliminar Archivo: <%s> - Tamaño <%d>", pid, nombreArchivo);
+    log_info(info_logger, "PID: <%d> - Eliminar Archivo: <%s>", pid, nombreArchivo);
 }
 
 void logLeerArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir, uint32_t punteroArchivo){
