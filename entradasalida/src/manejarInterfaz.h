@@ -6,7 +6,7 @@
 
 void cualInterfaz();
 void manejarInterfazGenerica(uint32_t unidadesDeTrabajo);
-void manejarInterfazStdin(uint32_t direccionFisica);
+void manejarInterfazStdin(uint32_t direccionFisica, uint32_t pid);
 void crearArchivo(char* nombreArchivo);
 void eliminarArchivo(char* nombreArchivo);
 void truncarArchivo (char* nombreArchivo, uint32_t tamanio);

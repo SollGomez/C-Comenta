@@ -49,15 +49,16 @@ void cualInterfaz(int tipoInterfaz){
 	{
 	case 0: //STDOUT
 		log_info(logger, "Interfaz STDOUT conectada");
+		recibirIO(tipoInterfaz);
 		break;
 	case 1: //STDIN
 		log_info(logger, "Interfaz STDIN conectada");
+		recibirIO(tipoInterfaz);
 		break;
 	case 2: //DIAL_FS
 		log_info(logger, "Interfaz DIAL_FS conectada");
+		recibirIO(tipoInterfaz);
 		break;
-	case 3: //GENERICA
-		log_info(logger, "Interfaz GENERICA conectada");
 		break;
 	default:
 		break;
@@ -239,10 +240,10 @@ void PaqueteHand(int conexion, t_log* logger){
 // }
 
 void realizarPedidoLectura(int cliente_socket){			//Vale para io y cpu. Les manda LECTURA_REALIZADA
-    t_list* listaInts = recibirListaUint32_t(cliente_socket);
-    uint32_t posicion = *(uint32_t*)list_get(listaInts,0);
-    uint32_t tamanio = *(uint32_t*)list_get(listaInts,1);
-    uint32_t pid = *(uint32_t*)list_get(listaInts,2);
+    t_list* listaInts = recibirListaUint32_t(cliente_socket);	// 0 pid, 1 dirfisica, 2 tamanio
+    uint32_t posicion = *(uint32_t*)list_get(listaInts,1);
+    uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);
+    uint32_t pid = *(uint32_t*)list_get(listaInts,0);
 
     pthread_mutex_lock(&mutex_espacioContiguo);
     //log_trace(trace_logger,"Accediendo a Espacio de Usuario para Lectura en la Dirección: <%d> de Tamanio: <%d> para el Proceso con PID: <%d>", posicion, tamanio, pid);
@@ -304,8 +305,8 @@ void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32
 void realizarPedidoEscritura(int cliente_socket){		//Vale para io y cpu. Les manda ESCRITURA_REALIZADA
     t_datos* unosDatos = malloc(sizeof(t_datos));
     t_list* listaInts = recibirListaIntsYDatos(cliente_socket, unosDatos);
-    uint32_t* posicion = list_get(listaInts,0);
-    uint32_t* pid = list_get(listaInts,1);
+    uint32_t* posicion = list_get(listaInts,1);
+    uint32_t* pid = list_get(listaInts,0);
     pthread_mutex_lock(&mutex_espacioContiguo);
     //log_trace(trace_logger,"Accediendo a Espacio de Usuario para Escritura en la Direccion: <%d> para el Proceso con PID: <%d>", *posicion, *pid);
 	manejarEscritura(*posicion, unosDatos->datos, unosDatos->tamanio, *pid);

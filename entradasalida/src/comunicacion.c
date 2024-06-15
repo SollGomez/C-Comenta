@@ -161,9 +161,12 @@ void *recibirMemoria() {
 
 		switch (cod_op)
 		{
-		case IO_STDOUT_WRITE_LECTURA_EXITOSA:
-			
+		case LECTURA_REALIZADA:
 			devolucionIO_STDOUT_WRITE(&memoria_fd);
+			break;
+			
+		case ESCRITURA_REALIZADA:
+			enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd);
 			break;
 
 		case -1:
@@ -301,14 +304,22 @@ void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede ca
 
 	int conexion = *((int*) cliente_socket);
 	char* textoAMostrar = malloc(sizeof(char*));
-	uint32_t* pid = malloc(sizeof(uint32_t));
 
-	strcpy(textoAMostrar, recibirEnteroYString(conexion, pid));
+	t_datos* datitos = malloc(sizeof(t_datos));
+
+	t_list* listaInts;
+
+	list_create(listaInts);
+
+	listaInts = recibirListaIntsYDatos(conexion, datitos);
+
+	uint32_t pid = list_get(listaInts, 0);
 
 	usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 10000);
 
-	printf("\n\n PID <%d> - <%s>\n\n", *pid, textoAMostrar);
+	printf("\n\n PID <%d> - <%s>\n\n", pid, datitos->datos);
 
+	enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd);
 	return NULL;
 }
 
@@ -318,9 +329,9 @@ void* solicitudIO_STDOUT_WRITE(void* cliente_socket) {
 	int conexion = *((int*) cliente_socket);
 
 	t_list* listaEnteros = list_create();
-	listaEnteros = recibirListaUint32_t(conexion);
+	listaEnteros = recibirListaUint32_t(conexion); // 0 pid, 1 dirfisica, 2 tamanio
 	uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0);
-	enviarListaUint32_t(listaEnteros, memoria_fd, info_logger, IO_STDOUT_WRITE_LEER_DIRECCION_EN_MEMORIA);
+	enviarListaUint32_t(listaEnteros, memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA);
 
 	log_info(info_logger, "PID: <%d> Direccion fisica enviada a memoria", pid);
 	logOperacion(pid, "IO_STDOUT_WRITE");
@@ -333,12 +344,12 @@ void *solicitudIO_STDIN_READ(void* cliente_socket) {
 	int conexion = *((int*) cliente_socket);
 
 	t_list* listaEnteros = list_create();
-	listaEnteros = recibirListaUint32_t(conexion);
+	listaEnteros = recibirListaUint32_t(conexion);	// 0 pid, 1 dirfisica, 2 tamanio
 	uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0); 
 	uint32_t direccionFisica = *(uint32_t*)list_get(listaEnteros, 1);
 
 	logOperacion(pid, "IO_STDIN_READ");
-	manejarInterfazStdin(direccionFisica);
+	manejarInterfazStdin(direccionFisica, pid);
 
 	return NULL;
 }
@@ -355,6 +366,8 @@ void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 
 	logOperacion(pid, "IO_GEN_SLEEP");
 	manejarInterfazGenerica(unidadesDeTrabajo);
+
+	enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd);
 
 	return NULL;
 }

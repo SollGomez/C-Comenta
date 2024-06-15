@@ -25,21 +25,27 @@ void cualInterfaz() {
 }
 
 
-void manejarInterfazGenerica(uint32_t unidadesDeTrabajo) {
-    
-    
-    
+void manejarInterfazGenerica(uint32_t unidadesDeTrabajo) {    
         sleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO+4);               //DESPUES VER SI ES USLEEP O SLEEP
         // usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 100000);
         printf("SLEEP TERMINADO\n");
 }
 
-void manejarInterfazStdin(uint32_t direccionFisicaAEscribir) {
-    char* input;
-    input = readline(">");
+void manejarInterfazStdin(uint32_t direccionFisicaAEscribir, uint32_t pid) {
 
-    log_trace(trace_logger, "El texto ingresado fue: %s", input);
-    enviarEnteroYString(direccionFisicaAEscribir, input, memoria_fd, info_logger, IO_STDIN_READ_DONE);
+    t_datos* datos = malloc(sizeof(t_datos));
+    datos->datos = readline(">");
+
+    t_list* listaEnteros;
+    list_create(listaEnteros);
+
+    list_add(listaEnteros, &pid);
+    list_add(listaEnteros, &direccionFisicaAEscribir);
+
+    log_trace(trace_logger, "El texto ingresado fue: %s", datos->datos);
+    
+    enviarListaIntsYDatos(listaEnteros, datos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
+
 
 }
 
@@ -181,7 +187,7 @@ void truncarArchivo (char* nombreArchivo, uint32_t tamanio) {
 
 void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar) {
 
-   // uint32_t bloquesActuales = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE; 
+
 
     uint32_t bloquesASumar = (tamanio - archivoATruncar->tamArchivo) / cfg_entradaSalida->BLOCK_SIZE;
     uint32_t tamanioActual = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
@@ -193,8 +199,7 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
         posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
     }
     
-    //uint32_t posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
-    //ROMPE :( revisar
+
     if (tengoEspacioAMiLado(archivoATruncar, tamanio)) {              // AGRANDAMOS NORMAL
         log_info(info_logger, "Tengo espacio a mi lado");
         while(bloquesASumar) {
@@ -254,7 +259,6 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
      
     if(!tamanioActual) {
         posicionFinalActual = archivoATruncar->bloqueInicial;
-        //bitarray_clean_bit(bitmap, posicionFinalActual);
     }else {
         posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1;
     }
