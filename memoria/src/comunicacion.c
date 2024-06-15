@@ -307,10 +307,10 @@ void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32
 void realizarPedidoEscritura(int cliente_socket){		//Vale para io y cpu. Les manda ESCRITURA_REALIZADA
     t_datos* unosDatos = malloc(sizeof(t_datos));
     t_list* listaInts = recibirListaIntsYDatos(cliente_socket, unosDatos);
-    uint32_t* posicion = list_get(listaInts,1);
     uint32_t* pid = list_get(listaInts,0);
+    uint32_t* posicion = list_get(listaInts,1);
     pthread_mutex_lock(&mutex_espacioContiguo);
-    //log_trace(trace_logger,"Accediendo a Espacio de Usuario para Escritura en la Direccion: <%d> para el Proceso con PID: <%d>", *posicion, *pid);
+    log_trace(trace_logger,"me llego pid %d, pos %d y tamanio %d y valor %s", *pid, *posicion, unosDatos->tamanio, unosDatos->datos);
 	manejarEscritura(*posicion, unosDatos->datos, unosDatos->tamanio, *pid);
     //log_trace(trace_logger,"Se accedio a Espacio de Usuario correctamente");
     free(unosDatos->datos);

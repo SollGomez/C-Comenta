@@ -30,7 +30,9 @@ int main(int argc, char* argv[]) {
 	PUERTO_INTERRUPT = config_get_string_value(config, "PUERTO_ESCUCHA_INTERRUPT");
 	
 	ALGORITMO_TLB = config_get_string_value(config, "ALGORITMO_TLB");
-	CANTIDAD_ENTRADAS_TLB = atoi(config_get_string_value(config, "CANTIDAD_ENTRADAS_TLB"));
+	//CANTIDAD_ENTRADAS_TLB = atoi(config_get_string_value(config, "CANTIDAD_ENTRADAS_TLB"));
+	CANTIDAD_ENTRADAS_TLB = config_get_int_value(config, "CANTIDAD_ENTRADAS_TLB");
+
 	TLB = list_create();
 
 	sem_init(&bin_ciclo,0,1);

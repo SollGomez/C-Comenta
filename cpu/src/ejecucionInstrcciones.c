@@ -130,7 +130,9 @@ void ejecutar_MOV_IN(char* registro, int direccion_logica) {
 
 
 void ejecutar_MOV_OUT(int direccion_logica, char* registro) {
+    log_info(info_logger, "REGISTRO: %s", registro);
     int cantidad_bytes = calcular_bytes_segun_registro(registro);
+    log_info(info_logger, "TAMANIO A ESCRIBIR EN BYTES: %d", cantidad_bytes);
 	int valorDelRegistro = obtener_valor_registroCPU(registro);
     int direccion_fisica = traducir_direccion_logica(direccion_logica);
 

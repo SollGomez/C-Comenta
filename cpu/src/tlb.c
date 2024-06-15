@@ -25,19 +25,22 @@ int buscarMarcoEnTLB(uint32_t pidBuscar, uint32_t numPagBuscar)
 void agregarEntradaTLB(uint32_t pidAgregar, uint32_t numPagAgregar, uint32_t marcoAgregar)
 {
     entradaTLB* entradaAgregar = malloc(sizeof(entradaTLB));
-
     entradaAgregar->pid = pidAgregar;
     entradaAgregar->numPag = numPagAgregar;
     entradaAgregar->marco = marcoAgregar;
-
+    
+    log_info(info_logger, "list size: %d", list_size(TLB));
+    log_info(info_logger, "cant entradas: %d", CANTIDAD_ENTRADAS_TLB);
     if(list_size(TLB) <  CANTIDAD_ENTRADAS_TLB)
     {
         list_add(TLB, entradaAgregar);
     }
     else{
-        entradaTLB* entradaRemovida = list_remove(TLB, 0);
-        free(entradaRemovida);
-        list_add(TLB, entradaAgregar);
+        if(CANTIDAD_ENTRADAS_TLB){
+            entradaTLB* entradaRemovida = list_remove(TLB, 0);
+            free(entradaRemovida);
+            list_add(TLB, entradaAgregar);
+        }
     }
 
 }

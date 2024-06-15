@@ -142,7 +142,7 @@ void execute(){
 	}
     else if (strcmp(nombre_instruccion_actual, "MOV_IN") == 0) {
         char* registro = instruccion->param1;
-        int direccion_logica = atoi(instruccion->param2);
+        int direccion_logica = obtener_valor_registroCPU(instruccion->param2);
         log_info(info_logger, "PID: <%d> - Ejecutando: <MOV_IN> - <%s> - <%d>", PCB_Actual->id, registro, direccion_logica);
 
         ejecutar_MOV_IN(registro, direccion_logica);
@@ -150,7 +150,7 @@ void execute(){
 
     else if (strcmp(nombre_instruccion_actual, "MOV_OUT") == 0) {
 
-        int direccion_logica = atoi(instruccion->param1);
+        int direccion_logica = obtener_valor_registroCPU(instruccion->param1);
         char* registro = instruccion->param2;
 
         log_info(info_logger, "PID: <%d> - Ejecutando: <MOV_OUT> - <%d> - <%s>", PCB_Actual->id, direccion_logica, registro);
