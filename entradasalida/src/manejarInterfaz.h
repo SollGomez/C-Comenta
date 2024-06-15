@@ -21,4 +21,4 @@ void escribirArchivo(char* nombreArchivo, void* datos, uint32_t direccionAEscrib
 void* leerArchivo(char* nombreArchivo, uint32_t direccionALeer, uint32_t tamanioALeer);
 uint32_t primerBitDisponible();
 uint32_t primerBitOcupado();
-void compactar(char* nombreArchivo, t_archivo_metadata* archivoATruncar);
+void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar);

@@ -240,13 +240,13 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
     }
 
     //TODO COMPACTACION :'(
-    compactar(nombreArchivo, archivoATruncar);
+    compactar(nombreArchivo, tamanio, archivoATruncar);
     
     return;
 
 }
 
-void compactar(char* nombreArchivo, t_archivo_metadata* archivoATruncar) {
+void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar) {
     log_trace(trace_logger, "Voy a compactar :)"); //CAMBIAR
     
     uint32_t tamanioActual = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
@@ -361,6 +361,28 @@ void compactar(char* nombreArchivo, t_archivo_metadata* archivoATruncar) {
     msync(bitmap, cfg_entradaSalida->BLOCK_COUNT/8, MS_SYNC);
 
     log_info(info_logger, "Sali de compactacion");
+
+    // uint32_t bloquesASumar = (tamanio - archivoATruncar->tamArchivo) / cfg_entradaSalida->BLOCK_SIZE;
+    // uint32_t tamanioActual2 = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
+    // uint32_t posicionFinalActual2;
+     
+    // if(!tamanioActual2) {
+    //     posicionFinalActual2 = archivoATruncar->bloqueInicial;
+    // }else {
+    //     posicionFinalActual2 = archivoATruncar->bloqueInicial + tamanioActual2 - 1;
+    // }
+    // while(bloquesASumar) {
+    //         bitarray_set_bit(bitmap, posicionFinalActual2 + bloquesASumar - 1);
+    //         log_info(info_logger, "Asigno bit: %d", posicionFinalActual2 + bloquesASumar - 1);
+    //         bloquesASumar--;
+    // }
+
+
+    for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
+       log_info(info_logger, "%d", bitarray_test_bit(bitmap, i));
+    }
+
+    //agrandarArchivo(nombreArchivo, tamanio, archivoATruncar);
 
 }
 

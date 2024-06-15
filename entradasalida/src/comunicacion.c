@@ -192,7 +192,6 @@ void *recibirKernel() {
 			switch (cod_op)
 			{
 			case IO_STDOUT_WRITE:
-				
 				solicitudIO_STDOUT_WRITE(&kernel_fd);
 				break;
 
@@ -215,7 +214,6 @@ void *recibirKernel() {
 			switch (cod_op)
 			{
 			case IO_STDIN_READ:
-				
 				solicitudIO_STDIN_READ(&kernel_fd);
 				break;
 			
@@ -276,11 +274,8 @@ void *recibirKernel() {
 				switch (cod_op)
 				{
 				case IO_GEN_SLEEP: 	
-
-					pthread_t genSleep;
-					pthread_create(&genSleep, NULL, (void *)solicitudIO_GEN_SLEEP, &kernel_fd);
-					pthread_join(genSleep, NULL);
-						break;
+					solicitudIO_GEN_SLEEP(&kernel_fd);
+					break;
 				
 				case -1:
 					log_error(info_logger, "El cliente se desconecto");
