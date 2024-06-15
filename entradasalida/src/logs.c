@@ -192,5 +192,10 @@ void logEscribirArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscr
     log_info(info_logger, "PID: <%d> - Escribir Archivo: <%s> - Tamaño a escribir: <%d> - Puntero Archivo: <%d>", pid, nombreArchivo, tamanioAEscribir, punteroArchivo);
 }
 
+void logInicioCompactacion(uint32_t pid){
+    log_info(info_logger, "PID: <%d> - Inicio Compactación");
+}
 
-
+void logFinCompactacion(uint32_t pid){
+    log_info(info_logger, "PID: <%d> - Fin Compactación");
+}

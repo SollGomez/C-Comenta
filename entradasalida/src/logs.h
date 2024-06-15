@@ -58,6 +58,8 @@ void logTruncarArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanio);
 void logEliminarArchivo(uint32_t pid, char* nombreArchivo);
 void logLeerArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir, uint32_t punteroArchivo);
 void logEscribirArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscribir, uint32_t punteroArchivo);
+void logFinCompactacion(uint32_t pid);
+void logInicioCompactacion(uint32_t pid);
 
 extern t_bitarray* bitmap;
 extern archBloques* archivoBloques;

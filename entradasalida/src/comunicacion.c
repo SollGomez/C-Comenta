@@ -399,18 +399,18 @@ void* solicitudIO_FS_DELETE (void* cliente_socket) {
 
 void* solicitudIO_FS_TRUNCATE (void* cliente_socket) {
 
-	int conexion = *((int*) cliente_socket);
+	//int conexion = *((int*) cliente_socket);
 	return NULL;
 }
 
 void* solicitudIO_FS_WRITE (void* cliente_socket) {
 
-	int conexion = *((int*) cliente_socket);
+	//int conexion = *((int*) cliente_socket);
 	return NULL;
 }
 
 void* solicitudIO_FS_READ (void* cliente_socket) {
 	
-	int conexion = *((int*) cliente_socket);
+	//int conexion = *((int*) cliente_socket);
 	return NULL;
 }
