@@ -472,7 +472,7 @@ uint32_t obtenerInterfaz(char* interfaz){
         numeroInterfaz=1;
     if(!strcmp(interfaz,"DIAL_FS"))
         numeroInterfaz=2;
-    if(!strcmp(interfaz,"GENERICA"))
+    if(!strcmp(interfaz,"ESPERA"))
         numeroInterfaz=3;
 
     return numeroInterfaz;

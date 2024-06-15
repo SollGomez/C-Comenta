@@ -128,8 +128,7 @@ void GuardarInstrucsDeProceso(uint32_t pid, char* file_name){
 
     t_list* listaInstrucciones = list_create();
     char* path = string_new();
-    string_append(&path, "/home/utnso/scripts-pruebas"); // PATH_INSTRUCCIONES
-	string_append(&path, "/");
+    string_append(&path, PATH_INSTRUCCIONES);
 	string_append(&path, file_name);
 
     FILE* archivoPseudocodigo;

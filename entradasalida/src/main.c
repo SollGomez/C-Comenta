@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
     cargar_configuracion();
-	crearEstructurasFs();
+	/*crearEstructurasFs();
 
 	listaDeArchivos = list_create();
 	crearArchivo("pruebaLoca.txt");
@@ -21,20 +21,20 @@ int main(int argc, char* argv[]) {
 	truncarArchivo("pruebaLoca2.txt", 65408);
 	truncarArchivo("pruebaLoca.txt", 128);
 	//truncarArchivo("pruebaLoca.txt", 0);
+*/
+	pthread_t kernel;
+	pthread_t memoria;
 
-	// pthread_t kernel;
-	// pthread_t memoria;
+    pthread_create(&kernel, NULL, iniciarKernel, NULL);
 
-    // pthread_create(&kernel, NULL, iniciarKernel, NULL);
+	if(cfg_entradaSalida->TIPO_INTERFAZ_INT != 3) {
+		pthread_create(&memoria, NULL, iniciarMemoria, NULL);
+		pthread_join(memoria, NULL);
+	}
 
-	// if(cfg_entradaSalida->TIPO_INTERFAZ_INT != 3) {
-	// 	pthread_create(&memoria, NULL, iniciarMemoria, NULL);
-	// 	pthread_join(memoria, NULL);
-	// }
+	pthread_join(kernel, NULL);
 
-	// pthread_join(kernel, NULL);
-
-	// cerrarPrograma();
+	cerrarPrograma();
     return 0;
 }
 

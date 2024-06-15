@@ -210,10 +210,10 @@ void moverProceso_NewReady(){
 void moverProceso_ExecBloq (PCB* pcbBuscado) {
     pthread_mutex_lock(&mutex_colaExec);
     eliminarElementoLista(pcbBuscado, colaExec);
+    pthread_mutex_unlock(&mutex_colaExec);
+
     pthread_mutex_lock(&mutex_colaBloq);
     list_add(colaBloq, pcbBuscado);
-
-    pthread_mutex_unlock(&mutex_colaExec);
     pthread_mutex_unlock(&mutex_colaBloq);
 
     log_info(info_logger, "PID: [%d] - Estado Anterior: EXEC - Estado Actual: BLOQ.", pcbBuscado->id);
@@ -241,6 +241,10 @@ void moverProceso_BloqReady (PCB* pcbBuscado) {
         
     log_info(info_logger, "PID: [%d] - Estado Anterior: BLOQ - Estado Actual: READY.", pcbBuscado->id);
     sem_post(&sem_procesosReady);
+
+    if (!list_size(colaExec))
+        sem_post(&sem_cpuLibre);
+
 }
 
 void moverProceso_ExecExit (PCB *pcbBuscado) {

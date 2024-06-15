@@ -210,28 +210,12 @@ void* recibirIO (int interfaz_fd) {
 				moverProceso_BloqReady(pcbBuscado);
 				break;
 			}
-		// 	case ACCESO_PEDIDO_ESCRITURA:
-		// 		realizarPedidoLecturaFs(filesystem_fd);
-
-		// 		break;
-		// 	case PEDIR_SWAP:
-		// 		lista = recibirListaUint32_t(filesystem_fd);
-		// 		cargarPaginasEnTabla(pidGlobal, sizeGlobal, lista);
-		// 		list_destroy_and_destroy_elements(lista, free); //LINEA AGREGADA
-		// 		break;
-		// 	case LECTURA_BLOQUE_SWAP:
-		// 		t_datos* unosDatos = malloc(sizeof(t_datos));
-		// 		void* datos;
-
-		// 		t_list* listaConSwap = recibirListaIntsYDatos(filesystem_fd,unosDatos);
-		// 		uint32_t posSwap = *(uint32_t *)list_get(listaConSwap, 0);
-		// 		datos = unosDatos->datos;
-		// 		recibirDatosDeFs(datos, posSwap);
-
-		// 		free(unosDatos->datos);
-		// 		free(unosDatos);
-		// 		list_destroy_and_destroy_elements(listaConSwap, free); //LINEA AGREGADA
-		// 		break;
+			case SOLICITUD_IO_CUMPLIDA: {
+				uint32_t pid = recibirValor_uint32(interfaz_fd);
+				PCB* pcbBuscado = buscarProcesoBloq(pid);
+				moverProceso_BloqReady(pcbBuscado);
+				break;
+			}
 			 case -1:
 				 log_error(logger, "el cliente se desconecto.");
 
@@ -327,17 +311,17 @@ void escucharCPU (void) {
 		switch(cod_op){
 		    case WAIT: {
 				PCB* pcbRecibida = recibir_contextoEjecucion_y_char(cpuDispatch_fd);
-				char* nombreArchivo = pcbRecibida->nombreRecurso;
+				char* nombreRecurso = pcbRecibida->nombreRecurso;
 				actualizarPcbEjecucion(pcbRecibida);
-				manejoDeRecursos("WAIT", nombreArchivo);
+				manejoDeRecursos("WAIT", nombreRecurso);
 				break;
 			}
 
 			case SIGNAL: {
 				PCB* pcbRecibida = recibir_contextoEjecucion_y_char(cpuDispatch_fd);
-				char* nombreArchivo=pcbRecibida->nombreRecurso;
+				char* nombreRecurso = pcbRecibida->nombreRecurso;
 				actualizarPcbEjecucion(pcbRecibida);
-				manejoDeRecursos("SIGNAL", nombreArchivo);
+				manejoDeRecursos("SIGNAL", nombreRecurso);
 				break;
 			}
 
@@ -375,13 +359,13 @@ void escucharCPU (void) {
 				enviarListaUint32_t(listaInts,vectorIO[interfaz], info_logger, IO_GEN_SLEEP);
 
 				moverProceso_ExecBloq(pcbActualizada);
-				SleepCpu *aux = malloc(sizeof(SleepCpu));
+				/*SleepCpu *aux = malloc(sizeof(SleepCpu));
 				aux->pcb = pcbActualizada;
 				aux->segundosSleep = tiempoSleep;
-				log_info(info_logger,"PID: <%d> - Bloqueado por <SLEEP>", pcbActualizada->id);
+				*/log_info(info_logger,"PID: <%d> - Bloqueado por <SLEEP>", pcbActualizada->id);/*
 				pthread_t atenderSleep;
 				pthread_create(&atenderSleep,NULL,esperaTiempo,(void*)aux);
-				pthread_detach(atenderSleep);
+				pthread_detach(atenderSleep);*/
 
 				list_clean(listaInts);
 				list_destroy(listaInts);
@@ -520,7 +504,7 @@ void manejoDeRecursos(char* orden, char* recursoSolicitado){
     PCB* unaPcb = obtenerPcbExec();
 
     bool coincideConSolicitado (Recurso* unRecurso) {
-        return strcmp(unRecurso->nombreRecurso, recursoSolicitado) == 0;
+        return strncmp(unRecurso->nombreRecurso, recursoSolicitado, strlen(unRecurso->nombreRecurso)) == 0;
     }
 
     Recurso* recursoEncontrado = list_find(estadoBlockRecursos, coincideConSolicitado);
@@ -594,7 +578,7 @@ void* esperaTiempo(void* aux1){
     moverProceso_BloqReady(aux2->pcb);
     free(aux2);
 }
-PCB* buscarProcesoBloq(uint32_t pid){
+PCB* buscarProcesoBloq(uint32_t pid) {
 	for(int i=0 ; i<list_size(colaBloq) ; i++){
 		PCB* pcbBuscado = list_get(colaBloq, i);
 		if(pcbBuscado->id == pid)
