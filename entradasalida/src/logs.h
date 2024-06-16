@@ -44,6 +44,12 @@ typedef struct
     t_config* configArchivo;
 } t_archivo_metadata;
 
+typedef struct 
+{
+    int fd;
+    t_bitarray* info;
+} t_bitmap;
+
 
 int cargar_configuracion();
 int init_loggers_config(char* path);
@@ -61,7 +67,7 @@ void logEscribirArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscr
 void logFinCompactacion(uint32_t pid);
 void logInicioCompactacion(uint32_t pid);
 
-extern t_bitarray* bitmap;
+extern t_bitmap* bitmap;
 extern archBloques* archivoBloques;
 extern void* bitarraycontent;
 extern t_list* lista_archivos;

@@ -11,8 +11,10 @@ bool configCreada = false;
 t_config_entradaSalida* cfg_entradaSalida;
 archBloques* archivoBloques;
 void* bitarraycontent;
-t_bitarray* bitmap;
+
 t_list* lista_archivos;
+t_bitmap* bitmap;
+
 
 
 void crearEstructurasFs() {
@@ -27,31 +29,31 @@ void crearBitmap() {
     char* path = string_new();
     string_append(&path, cfg_entradaSalida->PATH_BASE_DIALFS);
     string_append(&path, "/bitmap.dat");
-
+    bitmap = malloc(sizeof(t_bitmap));
     int tamanio_bitmap = cfg_entradaSalida->BLOCK_COUNT / 8;
 
-    int fd = open(path, O_RDWR|O_CREAT,  S_IRUSR|S_IWUSR);
-	if (fd == -1){
+    bitmap->fd = open(path, O_RDWR|O_CREAT,  S_IRUSR|S_IWUSR);
+	if (bitmap->fd == -1){
         log_info(info_logger, "Error al abrir/crear el archivo bitmap");
         return;
     }
 
-	ftruncate(fd, tamanio_bitmap);
-    bitarraycontent = mmap(NULL, tamanio_bitmap, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	ftruncate(bitmap->fd, tamanio_bitmap);
+    bitarraycontent = mmap(NULL, tamanio_bitmap, PROT_READ | PROT_WRITE, MAP_SHARED, bitmap->fd, 0);
 
 	if(bitarraycontent == MAP_FAILED)  {
         log_info(info_logger, "Error al mapear el archivo bitmap de bloques en memoria");
-        close(fd);
+        close(bitmap->fd);
         return;
     }
 
-    bitmap =  bitarray_create_with_mode(bitarraycontent,  tamanio_bitmap, LSB_FIRST);
+    bitmap->info =  bitarray_create_with_mode(bitarraycontent,  tamanio_bitmap, LSB_FIRST);
 
     // for (int i = 0; i < cfg_entradaSalida->BLOCK_COUNT; i++) {
     //     bitarray_clean_bit(bitmap, i);
     // }
 
-    msync(bitmap, tamanio_bitmap, MS_SYNC);
+    msync(bitmap->info, tamanio_bitmap, MS_SYNC);
     log_trace(trace_logger, "Bitmap Creado :)");
     return;
 }
