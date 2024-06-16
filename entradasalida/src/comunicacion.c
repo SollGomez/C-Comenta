@@ -302,7 +302,7 @@ void *recibirKernel() {
 
 void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede causar problemas. Estar al tanto.
 
-	int conexion = *((int*) cliente_socket);
+	int conexion = *((int* ) cliente_socket);
 	char* textoAMostrar = malloc(sizeof(char*));
 
 	t_datos* datitos = malloc(sizeof(t_datos));
@@ -326,11 +326,11 @@ void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede ca
 
 void* solicitudIO_STDOUT_WRITE(void* cliente_socket) {
 	
-	int conexion = *((int*) cliente_socket);
+	int conexion = *((int* ) cliente_socket);
 
 	t_list* listaEnteros = list_create();
 	listaEnteros = recibirListaUint32_t(conexion); // 0 pid, 1 dirfisica, 2 tamanio
-	uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0);
+	uint32_t pid = *(uint32_t* )list_get(listaEnteros, 0);
 	enviarListaUint32_t(listaEnteros, memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA);
 
 	log_info(info_logger, "PID: <%d> Direccion fisica enviada a memoria", pid);
@@ -341,7 +341,7 @@ void* solicitudIO_STDOUT_WRITE(void* cliente_socket) {
 
 void *solicitudIO_STDIN_READ(void* cliente_socket) {
 
-	int conexion = *((int*) cliente_socket);
+	int conexion = *((int* ) cliente_socket);
 
 	t_list* listaEnteros = list_create();
 	listaEnteros = recibirListaUint32_t(conexion);	// 0 pid, 1 dirfisica, 2 tamanio
@@ -356,13 +356,13 @@ void *solicitudIO_STDIN_READ(void* cliente_socket) {
 
 void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 
-	int conexion = *((int*) cliente_socket);
+	int conexion = *((int* ) cliente_socket);
 	
 	t_list* listaEnteros = list_create();
 	listaEnteros = recibirListaUint32_t(conexion);
 
-	uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0);
-	uint32_t unidadesDeTrabajo = *(uint32_t*)list_get(listaEnteros, 1);
+	uint32_t pid = *(uint32_t* )list_get(listaEnteros, 0);
+	uint32_t unidadesDeTrabajo = *(uint32_t* )list_get(listaEnteros, 1);
 
 	logOperacion(pid, "IO_GEN_SLEEP");
 	manejarInterfazGenerica(unidadesDeTrabajo);
@@ -374,8 +374,8 @@ void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 
 void* solicitudIO_FS_CREATE (void* cliente_socket) {
 
-	int conexion = *((int*) cliente_socket);
-	char* nombreArch = malloc(10);
+	int conexion = *((int* ) cliente_socket);
+	char* nombreArch = string_new();
 	uint32_t pid;
 	strcpy(nombreArch, recibirEnteroYString(conexion, &pid));
 
@@ -386,8 +386,8 @@ void* solicitudIO_FS_CREATE (void* cliente_socket) {
 }
 
 void* solicitudIO_FS_DELETE (void* cliente_socket) {
-	int conexion = *((int*) cliente_socket);
-	char* nombreArch = malloc(10);
+	int conexion = *((int* ) cliente_socket);
+	char* nombreArch = string_new();
 	uint32_t pid;
 	strcpy(nombreArch, recibirEnteroYString(conexion, &pid));
 
@@ -399,13 +399,30 @@ void* solicitudIO_FS_DELETE (void* cliente_socket) {
 
 void* solicitudIO_FS_TRUNCATE (void* cliente_socket) {
 
-	//int conexion = *((int*) cliente_socket);
+	int conexion = *((int* ) cliente_socket);
+	char* nombreArch = string_new();
+	uint32_t pid;
+	uint32_t tamanio;
+	string_append(nombreArch, recibirEnteroEnteroChar(conexion, &pid, &tamanio));
+	logTruncarArchivo(pid, nombreArch, tamanio);
+	truncarArchivo(nombreArch, tamanio, pid);
 	return NULL;
 }
 
 void* solicitudIO_FS_WRITE (void* cliente_socket) {
 
-	//int conexion = *((int*) cliente_socket);
+	int conexion = *((int* ) cliente_socket);
+
+	t_datos* datos = malloc(sizeof(datos)); 
+	t_list* listaDeInts = list_create();
+	listaDeInts = recibirListaIntsYDatos
+
+	uint32_t pid = *(uint32_t* )list_get(listaDeInts, 0);
+	uint32_t tamanio = *(uint32_t* )list_get(listaDeInts, 1);
+	uint32_t puntero = *(uint32_t* )list_get(listaDeInts, 2);
+	//TODO
+	// logEscribirArchivo(pid, datos->datos, tamanio, puntero);
+	// escribirArchivo( , datos->datos, puntero, tamanio)
 	return NULL;
 }
 

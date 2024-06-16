@@ -328,8 +328,7 @@ void moverArchivosHaciaAtras(char* nombreArchivo, uint32_t bloquesLibresDetras, 
 void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar, uint32_t pid) {
     
     logInicioCompactacion(pid);
-
-    log_trace(trace_logger, "Estoy truncando el archivo <%s>", nombreArchivo);
+    log_trace(trace_logger, "Estoy compactando el archivo <%s>", nombreArchivo);
 
     for(int i=list_size(listaDeArchivos) - 1; i>=0; i--){
 
@@ -339,7 +338,7 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
         string_append(&path, "/");
         string_append(&path, list_get(listaDeArchivos, i));
         
-          FILE* f = fopen(path, "ab");
+        FILE* f = fopen(path, "ab");
         if(f == NULL) {
             log_info(info_logger, "No se pudo abrir el archivo %s", path);
             free(path);
@@ -479,6 +478,7 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
 
 
     logFinCompactacion(pid);
+    usleep(cfg_entradaSalida->RETRASO_COMPACTACION);
 
 
 }
