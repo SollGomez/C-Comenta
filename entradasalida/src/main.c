@@ -9,34 +9,34 @@ int main(int argc, char* argv[]) {
     cargar_configuracion();
 	crearEstructurasFs();
 
-	uint32_t pid = (uint32_t)10;
+	uint32_t pid = (uint32_t*) 10;
 	listaDeArchivos = list_create();
 	crearArchivo("archivo.txt");
-	crearArchivo("archivo2.txt");
-	crearArchivo("archivo3.txt");
-	crearArchivo("archivo4.txt");
+	crearArchivo("pizzas.txt");
+	crearArchivo("tomates.txt");
+	crearArchivo("nose.txt");
 	list_add(listaDeArchivos, "archivo.txt");
-	list_add(listaDeArchivos, "archivo2.txt");
-	list_add(listaDeArchivos, "archivo3.txt");
-	list_add(listaDeArchivos, "archivo4.txt");
+	list_add(listaDeArchivos, "pizzas.txt");
+	list_add(listaDeArchivos, "tomates.txt");
+	list_add(listaDeArchivos, "nose.txt");
 
 	//truncarArchivo("archivo.txt", 64, pid); 
 	escribirArchivo("hola ", "HOLA COMO ESTAS HOLA COMO ESTAS HOLA COMO ESTAS HOLA COMO ESTAS", 0, 64);
 	mostrarBitmap();
-	log_error(error_logger, "Truncando <archivo3> a 128");	
-	truncarArchivo("archivo3.txt", 128, pid);
+	log_error(error_logger, "Truncando <tomates> a 128");	
+	truncarArchivo("tomates.txt", 128, pid);
 	mostrarBitmap();
 	log_error(error_logger, "Truncando <archivo> a 192");
 	truncarArchivo("archivo.txt", 192, pid);
 	//mostrarBitmap();
-	//log_error(error_logger, "Truncando <archivo2> a 64");
-	//truncarArchivo("archivo2.txt", 64, pid);
+	//log_error(error_logger, "Truncando <pizzas> a 64");
+	//truncarArchivo("pizzas.txt", 64, pid);
 	mostrarBitmap();
 	log_error(error_logger, "Truncando <archivo> a 64");
 	truncarArchivo("archivo.txt", 64, pid);
 	mostrarBitmap();
-	log_error(error_logger, "Truncando <archivo2> a 128");
-	truncarArchivo("archivo2.txt", 128, pid);
+	log_error(error_logger, "Truncando <pizzas> a 128");
+	truncarArchivo("pizzas.txt", 128, pid);
 	mostrarBitmap();
 	
 
