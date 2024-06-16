@@ -24,6 +24,14 @@ void cualInterfaz() {
     return;
 }
 
+void mostrarBitmap() {
+	for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
+		log_info(info_logger, "bit en la posicion %d es: %d", i, bitarray_test_bit(bitmap, i));
+		if(i == 10)
+			break;
+	}
+}
+
 
 void manejarInterfazGenerica(uint32_t unidadesDeTrabajo) {    
         sleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO+4);               //DESPUES VER SI ES USLEEP O SLEEP
@@ -141,16 +149,26 @@ void truncarArchivo (char* nombreArchivo, uint32_t tamanio, uint32_t pid) {
     string_append(&base, nombreArchivo); // se da por hecho que esta el .txt
     //string_append(base, ".txt");
     FILE* f = fopen(base, "ab");
+    if(f == NULL) {
+        log_error(error_logger, "No se pudo abrir el archivo %s", base);
+        free(base);
+        return;
+    }
 
     t_archivo_metadata* archivoATruncar = malloc(sizeof(t_archivo_metadata));
     archivoATruncar->configArchivo = config_create(base);
     archivoATruncar->bloqueInicial = config_get_int_value(archivoATruncar->configArchivo, "BLOQUE_INICIAL");
+    log_error(error_logger, "Bloque inicial del archivo <%s> - <%d>  ", nombreArchivo, archivoATruncar->bloqueInicial);
     archivoATruncar->tamArchivo = config_get_int_value(archivoATruncar->configArchivo, "TAMANIO_ARCHIVO");
 
     
 
-    if(archivoATruncar->tamArchivo == tamanio)
+    if(archivoATruncar->tamArchivo == tamanio) {
+        fclose(f);
+        free(archivoATruncar);
+        free(base);
         return;
+    }
 
     // if(archivoATruncar->tamArchivo == 0 && tamanio == cfg_entradaSalida->BLOCK_SIZE) {
     //     log_info(info_logger, "No agrego bloques");
@@ -183,33 +201,39 @@ void truncarArchivo (char* nombreArchivo, uint32_t tamanio, uint32_t pid) {
     config_save(archivoATruncar->configArchivo);
 
     fclose(f);
+    free(archivoATruncar);
+    free(base);
+
 }
 
 void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar, uint32_t pid) {
 
 
 
-    uint32_t bloquesASumar = (tamanio - archivoATruncar->tamArchivo) / cfg_entradaSalida->BLOCK_SIZE;   //1
-    uint32_t tamanioActual = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;   //1
-    uint32_t posicionFinalActual;   
-     
-    if(!tamanioActual) {
-        posicionFinalActual = archivoATruncar->bloqueInicial;   // no entra
-    }else {
-        posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual; //- 1;   // 0 + 1 - 1 = 0
-    }
-    
+    uint32_t bloquesASumar = (tamanio + cfg_entradaSalida->BLOCK_SIZE - 1) / cfg_entradaSalida->BLOCK_SIZE - 
+                            (archivoATruncar->tamArchivo + cfg_entradaSalida->BLOCK_SIZE - 1) / cfg_entradaSalida->BLOCK_SIZE;  
+    uint32_t tamanioActual = (archivoATruncar->tamArchivo + cfg_entradaSalida->BLOCK_SIZE - 1) / cfg_entradaSalida->BLOCK_SIZE;   
+    uint32_t posicionFinalActual =  (tamanioActual == 0) ? archivoATruncar->bloqueInicial : archivoATruncar->bloqueInicial + tamanioActual - 1;   
 
-    if (tengoEspacioAMiLado(archivoATruncar, tamanio)) {              // AGRANDAMOS NORMAL
+    // if (!tamanioActual) {
+    //     posicionFinalActual = archivoATruncar->bloqueInicial;   
+    // } else {
+    //     posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1; 
+    // }
+
+    if (tengoEspacioAMiLado(archivoATruncar, tamanio)) {     // AGRANDAMOS NORMAL
         log_info(info_logger, "Tengo espacio a mi lado");
-        while(bloquesASumar) {
-
-            bitarray_set_bit(bitmap, posicionFinalActual + bloquesASumar - 1);  // 0 + 1 - 1 = 0
-            log_info(info_logger, "Asigno bit: %d", posicionFinalActual + bloquesASumar - 1);
+        uint32_t posicionInicialAsignacion = posicionFinalActual;
+        log_debug(debug_logger, "Posicion inicial de asignación <%d> bloques a sumar <%d>", posicionInicialAsignacion, bloquesASumar);
+        while (bloquesASumar > 0) {
+            bitarray_set_bit(bitmap, posicionInicialAsignacion);
+            log_info(info_logger, "Asigno bit: %d", posicionInicialAsignacion);
+            posicionInicialAsignacion++;
             bloquesASumar--;
         }
         return;
     }
+
 
     compactar(nombreArchivo, tamanio, archivoATruncar, pid);
     
@@ -217,12 +241,147 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
 
 }
 
+bool hayBloquesAtrasDelArchivoATruncar(t_archivo_metadata* archivoATruncar, uint32_t* bloquesLibresDetras) {
+
+    log_info(info_logger,  "hay bloques libres detras?");
+
+    *bloquesLibresDetras = 0;
+    uint32_t bloqueInicialArchivo = archivoATruncar->bloqueInicial;
+    
+    if (bloqueInicialArchivo == 0) return false; // Si está en el primer bloque, no hay bloques detrás
+    
+    uint32_t bloqueActual = bloqueInicialArchivo - 1;
+    
+    while (bloqueActual >= 0 && !bitarray_test_bit(bitmap, bloqueActual)) {
+        (*bloquesLibresDetras)++;
+        if (bloqueActual == 0) break; // Para evitar underflow
+        bloqueActual--;
+    }
+    
+    return (*bloquesLibresDetras > 0);
+}
+
+void moverArchivosHaciaAtras(char* nombreArchivo, uint32_t bloquesLibresDetras, t_archivo_metadata* archivoATruncar) {
+    log_info(info_logger, "Muevo archivos hacia atras %d bloques", bloquesLibresDetras);
+
+    int archivoObjetivoIndex = -1;
+    for (int i = 0; i < list_size(listaDeArchivos); i++) {
+        if (strcmp(nombreArchivo, list_get(listaDeArchivos, i)) == 0) {
+            archivoObjetivoIndex = i;
+            break;
+        }
+    }
+
+    if (archivoObjetivoIndex == -1) {
+        log_error(error_logger, "Archivo objetivo no encontrado en la lista: %s", nombreArchivo);
+        return;
+    }
+
+    for (int i = archivoObjetivoIndex; i < list_size(listaDeArchivos); i++) {
+        char* nombreArchivoActual = list_get(listaDeArchivos, i);
+        char* path = string_new();
+        string_append(&path, cfg_entradaSalida->PATH_BASE_DIALFS);
+        string_append(&path, "/");
+        string_append(&path, nombreArchivoActual);
+
+        FILE* f = fopen(path, "ab");
+        if (f == NULL) {
+            log_info(info_logger, "No se pudo abrir el archivo %s", path);
+            free(path);
+            continue;
+        }
+
+        log_info(info_logger, "Moviendo archivo <%s> hacia atrás", nombreArchivoActual);
+
+        t_config* config = config_create(path);
+        uint32_t bloqueInicialArchivoAMover = config_get_int_value(config, "BLOQUE_INICIAL");
+        uint32_t tamArchivoAMover = config_get_int_value(config, "TAMANIO_ARCHIVO");
+        
+        uint32_t posicionFinalArchivoAMover = (tamArchivoAMover == 0) ? bloqueInicialArchivoAMover : 
+                                              bloqueInicialArchivoAMover + (tamArchivoAMover + cfg_entradaSalida->BLOCK_SIZE - 1) / cfg_entradaSalida->BLOCK_SIZE - 1;
+
+        // Asegurarse de que no se moverá a una posición negativa
+        if (bloqueInicialArchivoAMover < bloquesLibresDetras) {
+            log_error(error_logger, "No se puede mover el archivo %s porque resulta en una posición negativa", nombreArchivoActual);
+            fclose(f);
+            free(path);
+            config_destroy(config);
+            continue;
+        }
+
+        uint32_t bloqueInicialAux = bloqueInicialArchivoAMover;
+        do {
+            bitarray_clean_bit(bitmap, bloqueInicialAux);
+            bloqueInicialAux++;
+        } while (bloqueInicialAux <= posicionFinalArchivoAMover);
+
+        bloqueInicialAux = bloqueInicialArchivoAMover - bloquesLibresDetras;
+        uint32_t nuevaPosicionFinalArchivoAMover = posicionFinalArchivoAMover - bloquesLibresDetras;
+        do {
+            log_info(info_logger, "Me seteo en %d", bloqueInicialAux);
+            bitarray_set_bit(bitmap, bloqueInicialAux);
+            bloqueInicialAux++;
+        } while (bloqueInicialAux <= nuevaPosicionFinalArchivoAMover);
+
+        void* datosAMover = leerArchivo(nombreArchivoActual, bloqueInicialArchivoAMover, tamArchivoAMover);
+        escribirArchivo(nombreArchivoActual, datosAMover, bloqueInicialArchivoAMover - bloquesLibresDetras, tamArchivoAMover);
+
+
+        uint32_t aString = bloqueInicialArchivoAMover - bloquesLibresDetras;
+        archivoATruncar->bloqueInicial = aString;
+        char* stringAux = string_itoa(aString);
+        config_set_value(config, "BLOQUE_INICIAL", stringAux);
+        config_save(config);
+
+        msync(bitmap, cfg_entradaSalida->BLOCK_COUNT/8, MS_SYNC);
+        log_debug(debug_logger, "Bloque inicial de archivo <%s> luego de mover hacia atrás <%d>", nombreArchivoActual, aString);
+
+
+        mostrarBitmap();
+        uint32_t queSEYO = config_get_int_value(config, "BLOQUE_INICIAL");
+        
+
+        log_debug(debug_logger, "Valor de la posición inicial del archivo <%s> luego de desplazarse para atras <%d>", nombreArchivoActual,  queSEYO);
+        //if(strcmp("pruebaLoca2.txt", ))
+        free(path);
+        config_destroy(config);
+        fclose(f);
+    }
+}
+
+
+
 void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar, uint32_t pid) {
     
     logInicioCompactacion(pid);
-    
 
+    log_debug(debug_logger, "Estoy truncando el archivo <%s>", nombreArchivo);
+
+    uint32_t bloquesLibresDetras = 0;
+    if (hayBloquesAtrasDelArchivoATruncar(archivoATruncar, &bloquesLibresDetras)) {
+        moverArchivosHaciaAtras(nombreArchivo, bloquesLibresDetras, archivoATruncar);
+    }
+
+    char* path2 = string_new();
+    string_append(&path2, cfg_entradaSalida->PATH_BASE_DIALFS);
+    string_append(&path2, "/");
+    string_append(&path2, nombreArchivo);
     
+    FILE* f2 = fopen(path2, "ab");
+    if(f2 == NULL) {
+        log_info(info_logger, "No se pudo abrir el archivo %s", path2);
+        free(path2);
+        //continue;
+    }
+
+
+    t_config* config2 = config_create(path2);
+
+    uint32_t bloqueAHORA = config_get_int_value(config2, "BLOQUE_INICIAL");
+    archivoATruncar->bloqueInicial = bloqueAHORA;
+    log_debug(debug_logger, "Bloque inicial del archivo <%s> a la hora de compactar <%d>", nombreArchivo, bloqueAHORA);
+    free(path2);
+
     uint32_t bloquesAMoverse = (tamanio / cfg_entradaSalida->BLOCK_SIZE) - 1; //La cantidad de bloques que todos los archivos se van a mover para darle espacio a este archivo
 
     // Se da por hecho que los archivos de la lista están ordenados de primero a ultimo (Debería tener sentido)
@@ -238,11 +397,13 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
         string_append(&path, "/");
         string_append(&path, list_get(listaDeArchivos, i));
 
-        log_info(info_logger, "Path %s", path);
+        log_debug(debug_logger, "El archivo <%s> está siendo movido así puedo truncar", path);
 
         FILE* f = fopen(path, "ab");
         if(f == NULL) {
-            log_info(info_logger, "WHAT");
+            log_info(info_logger, "No se pudo abrir el archivo %s", path);
+            free(path);
+            continue;
         }
 
 
@@ -251,12 +412,13 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
         bloqueInicialArchivoAMover = config_get_int_value(config, "BLOQUE_INICIAL");
         uint32_t tamArchivoAMover = config_get_int_value(config, "TAMANIO_ARCHIVO");
         
-        uint32_t posicionFinalArchivoAMover;
-        if(!tamArchivoAMover){
-            posicionFinalArchivoAMover = bloqueInicialArchivoAMover;
-        } else {
-            posicionFinalArchivoAMover = bloqueInicialArchivoAMover + (tamArchivoAMover/cfg_entradaSalida->BLOCK_SIZE) - 1;
-        }
+        uint32_t posicionFinalArchivoAMover = (tamArchivoAMover == 0) ? bloqueInicialArchivoAMover : 
+                                              bloqueInicialArchivoAMover + (tamArchivoAMover + cfg_entradaSalida->BLOCK_SIZE - 1) / cfg_entradaSalida->BLOCK_SIZE - 1;
+        // if(!tamArchivoAMover){
+        //     posicionFinalArchivoAMover = bloqueInicialArchivoAMover;
+        // } else {
+        //     posicionFinalArchivoAMover = bloqueInicialArchivoAMover + (tamArchivoAMover/cfg_entradaSalida->BLOCK_SIZE) - 1;
+        // }
 
         log_trace(trace_logger, "Datos: posicionfinalArchivo: %d, bloqueInicialarchivoAMover: %d, cantidad de bloques a moverse: %d", posicionFinalArchivoAMover, bloqueInicialArchivoAMover, bloquesAMoverse);
          
@@ -277,41 +439,48 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
 
         
         void* datosAMover = leerArchivo(list_get(listaDeArchivos, i), bloqueInicialArchivoAMover, tamArchivoAMover);
-        log_info(info_logger, "Estoy pasando cositas: %s", datosAMover);
+        //log_info(info_logger, "Estoy pasando cositas: %s", datosAMover);
         escribirArchivo(list_get(listaDeArchivos, i), datosAMover, bloqueInicialArchivoAMover + bloquesAMoverse, tamArchivoAMover);
 
         char* stringAux= string_itoa(bloqueInicialArchivoAMover + bloquesAMoverse);
         config_set_value(config, "BLOQUE_INICIAL", stringAux);
         config_save(config);
+        
+        fclose(f);
+        free(path); 
+        config_destroy(config);
 
     }
 
 
     uint32_t bloquesASumar = (tamanio + cfg_entradaSalida->BLOCK_SIZE - 1) / cfg_entradaSalida->BLOCK_SIZE - 
-                            (archivoATruncar->tamArchivo + cfg_entradaSalida->BLOCK_SIZE - 1) / cfg_entradaSalida->BLOCK_SIZE;  
-    uint32_t tamanioActual = (archivoATruncar->tamArchivo + cfg_entradaSalida->BLOCK_SIZE - 1) / cfg_entradaSalida->BLOCK_SIZE;   
-    uint32_t posicionFinalActual;   
+                        (archivoATruncar->tamArchivo + cfg_entradaSalida->BLOCK_SIZE - 1) / cfg_entradaSalida->BLOCK_SIZE;
 
-    if (!tamanioActual) {
-        posicionFinalActual = archivoATruncar->bloqueInicial;   
-    } else {
-        posicionFinalActual = archivoATruncar->bloqueInicial + tamanioActual - 1; 
-    }
+    uint32_t tamanioActual = (archivoATruncar->tamArchivo + cfg_entradaSalida->BLOCK_SIZE - 1) / cfg_entradaSalida->BLOCK_SIZE;
 
-    if (tengoEspacioAMiLado(archivoATruncar, tamanio)) {     // AGRANDAMOS NORMAL
+    uint32_t posicionFinalActual = (tamanioActual == 0) ? archivoATruncar->bloqueInicial : archivoATruncar->bloqueInicial + tamanioActual - 1;
+
+    if (tengoEspacioAMiLado(archivoATruncar, tamanio)) {  // AGRANDAMOS NORMAL
 
         log_info(info_logger, "Tengo espacio a mi lado luego de compactar");
-        uint32_t posicionInicialAsignacion = posicionFinalActual + 1;
+
+        // Si el archivo tenía tamaño 0, debemos empezar la asignación desde el bloque inicial
+        uint32_t posicionInicialAsignacion = (tamanioActual == 0) ? archivoATruncar->bloqueInicial : posicionFinalActual + 1;
+
+        log_debug(debug_logger, "Posicion inicial de asignación <%d> bloques a sumar <%d>", posicionInicialAsignacion, bloquesASumar);
+
         while (bloquesASumar > 0) {
             bitarray_set_bit(bitmap, posicionInicialAsignacion);
             log_info(info_logger, "Asigno bit: %d", posicionInicialAsignacion);
             posicionInicialAsignacion++;
             bloquesASumar--;
         }
-        
-    }
+}
+
 
     logFinCompactacion(pid);
+
+
 }
 
 //Asumimos que siempre hay espacio disponible y ocupado
@@ -359,34 +528,25 @@ bool tengoEspacioAMiLado(t_archivo_metadata* archivoATruncar, uint32_t tamanioNu
     uint32_t posicionFinal = posicionFinalActual + bloquesASumar;   //0 + 1 = 1
 
     for (uint32_t i = posicionFinalActual + 1; i <= posicionFinal; i++) {
-    if (bitarray_test_bit(bitmap, i)) {
-        log_info(info_logger, "retorna feka");
-        return false;
+        if (bitarray_test_bit(bitmap, i)) {
+            log_info(info_logger, "No hay espacio suficiente a mi lado para truncar");
+            return false;
+        }
     }
-}
 
     return true;
 }
 
 void achicarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar) {
     
-    uint32_t bloquesActuales = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE; 
+    uint32_t bloquesActuales = (archivoATruncar->tamArchivo + cfg_entradaSalida->BLOCK_SIZE - 1) / cfg_entradaSalida->BLOCK_SIZE;
+    uint32_t bloquesARestar = (archivoATruncar->tamArchivo - tamanio + cfg_entradaSalida->BLOCK_SIZE - 1) / cfg_entradaSalida->BLOCK_SIZE;
 
-    uint32_t bloquesARestar = (archivoATruncar->tamArchivo - tamanio) / cfg_entradaSalida->BLOCK_SIZE;
-    
-    log_info(info_logger, "Bloque restado: %d", bloquesActuales);
+    log_info(info_logger, "Bloques a restar: %d", bloquesARestar);
 
-    while(bloquesARestar) {
-
-        bloquesARestar--;
-        if(bloquesARestar == 0)
-            break;
-
-        bitarray_clean_bit(bitmap, bloquesActuales - 1);
-        bloquesActuales--;
+    for(uint32_t i = 0; i < bloquesARestar; i++) {
+        bitarray_clean_bit(bitmap, bloquesActuales - 1 - i);
     }
-
-    return; 
 }
 
 uint32_t hayEspacioContiguo(uint32_t blocksRequested) {
@@ -420,7 +580,7 @@ void escribirArchivo(char* nombreArchivo, void* datos, uint32_t direccionAEscrib
     //log_info(info_logger, "Offset: %d", offset);
     //uint32_t numeroDeBloque = encontrarNumeroBloque(direccionAEscribir); //no se usa porque damos por hecho que la dir es pasada en bytes    
 
-    log_info(info_logger, "Escribo esta data: %s del tam %d", datos, tamanioAEscribir);
+    //log_info(info_logger, "Escribo esta data: %s del tam %d", datos, tamanioAEscribir);
 
     char* pathArchivoBloques = string_new();
     string_append(&pathArchivoBloques, cfg_entradaSalida->PATH_BASE_DIALFS);
@@ -458,7 +618,7 @@ void* leerArchivo(char* nombreArchivo, uint32_t direccionALeer, uint32_t tamanio
     //msync(archivoBloques->archivo, archivoBloques->tamanio, MS_SYNC);
     memcpy(datos, archivoBloques->direccionArchivo + direccionALeer, tamanioALeer);
 
-    log_info(info_logger, "La data que lei es: %s", datos);
+    //log_info(info_logger, "La data que lei es: %s", datos);
 
     close(archivoBloques->fd);
     return datos;

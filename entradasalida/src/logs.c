@@ -4,6 +4,7 @@
 t_log* info_logger;
 t_log* trace_logger;
 t_log* error_logger;
+t_log* debug_logger;
 t_config* configuracionEntradasalida;
 bool logsCreados = false;
 bool configCreada = false;
@@ -95,6 +96,7 @@ int init_loggers_config(char* path){
     trace_logger = log_create("trace_logger.log", "entradaSalida", true, LOG_LEVEL_TRACE);
     info_logger = log_create("info_logger.log", "entradaSalida", true, LOG_LEVEL_INFO);
     error_logger = log_create("error_logger.log","entradaSalida", true, LOG_LEVEL_ERROR);
+    debug_logger = log_create("debug_logger.log", "entradaSalida", true, LOG_LEVEL_DEBUG);
 
     if(trace_logger== NULL || info_logger== NULL || error_logger== NULL){
 

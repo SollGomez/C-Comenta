@@ -11,20 +11,34 @@ int main(int argc, char* argv[]) {
 
 	uint32_t pid = (uint32_t)10;
 	listaDeArchivos = list_create();
-	crearArchivo("pruebaLoca.txt");
-	list_add(listaDeArchivos, "pruebaLoca.txt");
-	list_add(listaDeArchivos, "pruebaLoca2.txt");
-	list_add(listaDeArchivos, "pruebaLoca3.txt");
-	truncarArchivo("pruebaLoca.txt", 64, pid); 
-	escribirArchivo("hola ", "HOLA COMO ESTAS HOLA COMO ESTAS HOLA COMO ESTAS HOLA COMO ESTAS", 0, 64);
-	crearArchivo("pruebaLoca2.txt");
-	crearArchivo("pruebaLoca3.txt");
-	truncarArchivo("pruebaLoca3.txt", 128, pid);
-	truncarArchivo("pruebaLoca.txt", 128, pid);
+	crearArchivo("archivo.txt");
+	crearArchivo("archivo2.txt");
+	crearArchivo("archivo3.txt");
+	crearArchivo("archivo4.txt");
+	list_add(listaDeArchivos, "archivo.txt");
+	list_add(listaDeArchivos, "archivo2.txt");
+	list_add(listaDeArchivos, "archivo3.txt");
+	list_add(listaDeArchivos, "archivo4.txt");
 
-	for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
-		log_info(info_logger, "bit en la posicion %d es: %d", i, bitarray_test_bit(bitmap, i));
-	}
+	//truncarArchivo("archivo.txt", 64, pid); 
+	escribirArchivo("hola ", "HOLA COMO ESTAS HOLA COMO ESTAS HOLA COMO ESTAS HOLA COMO ESTAS", 0, 64);
+	mostrarBitmap();
+	log_error(error_logger, "Truncando <archivo3> a 128");	
+	truncarArchivo("archivo3.txt", 128, pid);
+	mostrarBitmap();
+	log_error(error_logger, "Truncando <archivo> a 192");
+	truncarArchivo("archivo.txt", 192, pid);
+	//mostrarBitmap();
+	//log_error(error_logger, "Truncando <archivo2> a 64");
+	//truncarArchivo("archivo2.txt", 64, pid);
+	mostrarBitmap();
+	log_error(error_logger, "Truncando <archivo> a 64");
+	truncarArchivo("archivo.txt", 64, pid);
+	mostrarBitmap();
+	log_error(error_logger, "Truncando <archivo2> a 128");
+	truncarArchivo("archivo2.txt", 128, pid);
+	mostrarBitmap();
+	
 
 	//msync(bitmap, cfg_entradaSalida->BLOCK_COUNT, MS_SYNC);
 	//truncarArchivo("pruebaLoca2.txt", 65408);

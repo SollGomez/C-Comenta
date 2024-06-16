@@ -21,3 +21,6 @@ void* leerArchivo(char* nombreArchivo, uint32_t direccionALeer, uint32_t tamanio
 uint32_t primerBitDisponible();
 uint32_t primerBitOcupado();
 void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar, uint32_t pid);
+void moverArchivosHaciaAtras(char* nombreArchivo, uint32_t bloquesLibresDetras, t_archivo_metadata* archivoATruncar);
+bool hayBloquesAtrasDelArchivoATruncar(t_archivo_metadata* archivoATruncar, uint32_t* bloquesLibresDetras);
+void mostrarBitmap();

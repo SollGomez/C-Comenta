@@ -13,5 +13,4 @@
 extern t_config* config;
 
 t_config *crearConfig(char* configPath);
-
 #endif /* MAIN_H_ */
