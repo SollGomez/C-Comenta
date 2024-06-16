@@ -180,8 +180,17 @@ void truncarArchivo(char* nombreArchivo, uint32_t tamanio, uint32_t pid) {
 
     char* stringAuxiliar = string_itoa(tamanio);
     config_set_value(archivoATruncar->configArchivo, "TAMANIO_ARCHIVO", stringAuxiliar);
+
+    char* stringAuxiliar2 = string_itoa(archivoATruncar->bloqueInicial);
+    config_set_value(archivoATruncar->configArchivo, "BLOQUE_INICIAL", stringAuxiliar2);
+
     config_save(archivoATruncar->configArchivo);
+    
+    uint32_t valor = config_get_int_value(archivoATruncar->configArchivo, "BLOQUE_INICIAL");
+    //log_debug(debug_logger, "LUEGO DE TRUNCAR; VEO CUAL ES EL BLOQUE: var %d Lo que dice la config %d", archivoATruncar->bloqueInicial, valor);
+    
     free(stringAuxiliar);
+    free(stringAuxiliar2);
 
     config_destroy(archivoATruncar->configArchivo);
     free(archivoATruncar);
@@ -283,7 +292,7 @@ void moverArchivosHaciaAtras(char* nombreArchivo, uint32_t bloquesLibresDetras, 
         uint32_t nuevaPosicionInicial = bloqueInicialArchivoAMover - bloquesLibresDetras;
         uint32_t nuevaPosicionFinal = posicionFinalArchivoAMover - bloquesLibresDetras;
         for (uint32_t bloque = nuevaPosicionInicial; bloque <= nuevaPosicionFinal; bloque++) {
-            log_info(info_logger, "Me seteo en %d", bloque);
+            log_info(info_logger, "Seteo archivo <%s> en %d", nombreArchivoActual, bloque);
             bitarray_set_bit(bitmap, bloque);
         }
 
@@ -291,11 +300,15 @@ void moverArchivosHaciaAtras(char* nombreArchivo, uint32_t bloquesLibresDetras, 
         escribirArchivo(nombreArchivoActual, datosAMover, nuevaPosicionInicial, tamArchivoAMover);
 
         char* stringAux = string_itoa(nuevaPosicionInicial);
+        //log_debug(debug_logger, "nueva posicion inicial es: %d", nuevaPosicionFinal);
         config_set_value(config, "BLOQUE_INICIAL", stringAux);
         config_save(config);
+
+        uint32_t valor = config_get_int_value(config, "BLOQUE_INICIAL");
+        //log_debug(debug_logger, "bloque inicial de la config del archivo <%s> es <%d>", nombreArchivoActual, valor);
         free(stringAux);
 
-        mostrarBitmap();
+        //mostrarBitmap();
 
         free(path);
         config_destroy(config);
@@ -335,6 +348,7 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
     archivoATruncar->bloqueInicial = bloqueAHORA;
     //log_debug(debug_logger, "Bloque inicial del archivo <%s> a la hora de compactar <%d>", nombreArchivo, bloqueAHORA);
     free(path2);
+    config_destroy(config2);
 
     uint32_t bloquesAMoverse = (tamanio / cfg_entradaSalida->BLOCK_SIZE) - 1; //La cantidad de bloques que todos los archivos se van a mover para darle espacio a este archivo
 
@@ -421,7 +435,7 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
         // Si el archivo tenía tamaño 0, debemos empezar la asignación desde el bloque inicial
         uint32_t posicionInicialAsignacion = (tamanioActual == 0) ? archivoATruncar->bloqueInicial : posicionFinalActual + 1;
 
-        //log_debug(debug_logger, "Posicion inicial de asignación <%d> bloques a sumar <%d>", posicionInicialAsignacion, bloquesASumar);
+        //log_debug(debug_logger, "Posicion inicial de asignación del archivo <%s> - <%d>", nombreArchivo, archivoATruncar->bloqueInicial);
 
         while (bloquesASumar > 0) {
             bitarray_set_bit(bitmap, posicionInicialAsignacion);
@@ -429,7 +443,7 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
             posicionInicialAsignacion++;
             bloquesASumar--;
         }
-}
+    }
 
 
     logFinCompactacion(pid);

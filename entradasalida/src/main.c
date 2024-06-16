@@ -28,9 +28,9 @@ int main(int argc, char* argv[]) {
 	mostrarBitmap();
 	log_error(error_logger, "Truncando <archivo> a 192");
 	truncarArchivo("archivo.txt", 192, pid);
-	//mostrarBitmap();
-	//log_error(error_logger, "Truncando <pizzas> a 64");
-	//truncarArchivo("pizzas.txt", 64, pid);
+	mostrarBitmap();
+	log_error(error_logger, "Truncando <pizzas> a 64");
+	truncarArchivo("pizzas.txt", 64, pid);
 	mostrarBitmap();
 	log_error(error_logger, "Truncando <archivo> a 64");
 	truncarArchivo("archivo.txt", 64, pid);
@@ -38,7 +38,13 @@ int main(int argc, char* argv[]) {
 	log_error(error_logger, "Truncando <pizzas> a 128");
 	truncarArchivo("pizzas.txt", 128, pid);
 	mostrarBitmap();
+
+
+	t_config* config = config_create("/home/utnso/dialfs/pizzas.txt");
+
+	int valor = config_get_int_value(config, "BLOQUE_INICIAL");
 	
+	printf("VALOR: %d", valor);
 
 	//msync(bitmap, cfg_entradaSalida->BLOCK_COUNT, MS_SYNC);
 	//truncarArchivo("pruebaLoca2.txt", 65408);
