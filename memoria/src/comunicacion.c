@@ -130,30 +130,26 @@ void cualInterfaz(int tipoInterfaz){
 
 void *recibirIO(int interfaz_fd) {
   	while(1) {
-  		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex
-// 		pthread_mutex_lock(&mutexFS);
-
-//  		t_list *lista = list_create();
+  		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex;
   		switch (cod_op) {
- 			case IO_STDIN_READ_DONE: //ACCESO_PEDIDO_ESCRITURA
+ 			case IO_STDIN_READ_DONE:{
 				realizarPedidoEscritura(interfaz_fd);
  				break;
-
- 			case IO_STDOUT_WRITE_LEER_DIRECCION_EN_MEMORIA: //ACCESO_PEDIDO_LECTURA
+			} //ACCESO_PEDIDO_ESCRITURA
+ 			case IO_STDOUT_WRITE_LEER_DIRECCION_EN_MEMORIA:{
 				realizarPedidoLectura(interfaz_fd);
-
  				break;
-  			case -1:
-  				 log_error(logger, "el cliente se desconecto.");
-
-  				 log_error(logger, "Terminando servidor. I/O");
-  				 return NULL;
-  			default:
-
+			} //ACCESO_PEDIDO_LECTURA
+  			case -1:{
+  				log_error(logger, "el cliente se desconecto.");
+  				log_error(logger, "Terminando servidor. I/O");
+  				return NULL;
+			}
+  			default:{
   				log_warning(logger,"Operacion desconocida. No quieras meter la pata %d ", cod_op);
   				break;
+			}
   		}
-//  		//pthread_mutex_unlock(&mutexFS);
   	}
 }
 
