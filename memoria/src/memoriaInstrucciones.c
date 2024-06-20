@@ -113,6 +113,7 @@ bool crearEstructurasAdministrativas(){
     bool comp1 = crearSemaforos();
     bool comp2 = crearEspacioContiguoDeMemoria();
     bool comp3 = inicializarBitmap();
+    instruccionesDeProcesos = list_create();
     return comp1 && comp2 && comp3;
 }
 

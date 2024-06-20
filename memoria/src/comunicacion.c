@@ -105,9 +105,10 @@ void cualInterfaz(int tipoInterfaz){
 					t_paquete* paquete = crear_paquete(SOLICITUDINSTRUCCION, info_logger);
 					Instruccion* instruccion;
 					log_trace(trace_logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
-					log_trace(trace_logger, "size instruccionesProceso: %d", list_size(instruccionesDeProcesos));
+					log_trace(trace_logger, "size instruccionesProceso antes de retorno: %d", list_size(instruccionesDeProcesos));
 					instruccion = retornarInstruccionACPU(*(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1)); // pid y pc
-					log_trace(trace_logger, "Instruccion: %s %s %s", instruccion->id, instruccion->param1, instruccion->param2);
+					log_trace(trace_logger, "size instruccionesProceso despues de retorno: %d", list_size(instruccionesDeProcesos));
+					//log_trace(trace_logger, "Instruccion: %s %s %s", instruccion->id, instruccion->param1, instruccion->param2);
 					usleep(RETARDO_RESPUESTA*1000); //ver si cambiar a sleep
 					// log_info(info_logger, "instruccion: %s %s %s %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2
 					// 														, instruccion->param3, instruccion->param4, instruccion->param5);
@@ -250,10 +251,10 @@ void realizarPedidoLectura(int cliente_socket){			//Vale para io y cpu. Les mand
     uint32_t pid = *(uint32_t*)list_get(listaInts,0);
 
     pthread_mutex_lock(&mutex_espacioContiguo);
-    //log_trace(trace_logger,"Accediendo a Espacio de Usuario para Lectura en la Dirección: <%d> de Tamanio: <%d> para el Proceso con PID: <%d>", posicion, tamanio, pid);
+    log_trace(trace_logger,"Accediendo a Espacio de Usuario para Lectura en la Dirección: <%d> de Tamanio: <%d> para el Proceso con PID: <%d>", posicion, tamanio, pid);
     void* datos = malloc(tamanio);
 	datos = manejarLectura(posicion, tamanio, pid);
-    //log_trace(trace_logger,"Se accedió a Espacio de Usuario correctamente");
+    log_trace(trace_logger,"Se accedió a Espacio de Usuario correctamente");
     pthread_mutex_unlock(&mutex_espacioContiguo);
     t_datos* unosDatos = malloc(sizeof (t_datos));
     unosDatos->datos = datos;
@@ -271,7 +272,7 @@ void* manejarLectura(uint32_t posInicial, uint32_t tamanio, uint32_t pid) {
 	uint32_t frameQueCorresponde = posInicial / TAM_PAGINA;
 	uint32_t tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
 	uint32_t pagActual;
-	
+
 	while(tamanio > tamPrimerFrame) {
 		memcpy(datos+offset, leerMemoria(posInicial, tamPrimerFrame, pid), tamPrimerFrame);
 		offset += tamPrimerFrame;
@@ -314,7 +315,8 @@ void realizarPedidoEscritura(int cliente_socket){		//Vale para io y cpu. Les man
     uint32_t* tamanio = list_get(listaInts,2);
 
     pthread_mutex_lock(&mutex_espacioContiguo);
-    log_trace(trace_logger,"me llego pid %d, pos %d y tamanio %d y valor %s", *pid, *posicion, unosDatos->tamanio, unosDatos->datos);
+    log_trace(trace_logger,"me llego pid %d, pos %d y tamanio %d y valor %s", *pid, *posicion, *tamanio, unosDatos->datos);
+	//manejarEscritura(*posicion, unosDatos->datos, unosDatos->tamanio, *pid, *tamanio);
 	manejarEscritura(*posicion, unosDatos->datos, unosDatos->tamanio, *pid, *tamanio);
     //log_trace(trace_logger,"Se accedio a Espacio de Usuario correctamente");
     free(unosDatos->datos);
