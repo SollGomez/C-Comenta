@@ -50,6 +50,7 @@ void resize(char* tamanio){
 		switch (cod_op) {
 		case RESIZE:{
             uint32_t resultado = recibirValor_uint32(memoria_fd);
+            log_error(error_logger, "resize recibe %d", resultado);
             if(resultado == 1){
                 log_info(info_logger, "Se agrandó correctamente el tamaño a %d", tam);
             }

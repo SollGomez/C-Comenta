@@ -13,37 +13,50 @@ void* iniciarConsola () {
 	    char* linea = readline(">");
 	    log_info(info_logger,"linea: %s",linea);
 
-	    if (!strncmp(linea,"EJECUTAR_SCRIPT", strlen("EJECUTAR_SCRIPT")))
-	    	ejecutar_script(linea);
-
-	    if (!strncmp(linea,"INICIAR_PROCESO", strlen("INICIAR_PROCESO"))){
-			log_info(info_logger, "lei iniciar proceso");
-	    	iniciar_proceso(linea);
+		if (!strncmp(linea, ":q", 2)) {
+			free(linea);
+			break;
 		}
 
-	    if (!strncmp(linea, "FINALIZAR_PROCESO", strlen("FINALIZAR_PROCESO")))
-	    	finalizar_proceso(linea);
+	    if (!strncmp(linea,"EJECUTAR_SCRIPT", strlen("EJECUTAR_SCRIPT")))
+	    	ejecutar_script(linea);
+		else
+			funcionesDeLaConsola(linea);
 
-	    if (!strncmp(linea,"DETENER_PLANIFICACION", strlen("DETENER_PLANIFICACION")))
-	    	DETENER_PLANIFICACION(linea);
+	    //free(linea);
+	}
+}
 
-	    if (!strncmp(linea,"INICIAR_PLANIFICACION", strlen("INICIAR_PLANIFICACION")))
-	    	INICIAR_PLANIFICACION(linea);
+void funcionesDeLaConsola(char* linea) {
+	if (!strncmp(linea,"INICIAR_PROCESO", strlen("INICIAR_PROCESO"))){
+		log_info(info_logger, "lei iniciar proceso");
+		iniciar_proceso(linea);
+	}
 
-	    if (!strncmp(linea,"MULTIPROGRAMACION", strlen("MULTIPROGRAMACION"))){
-	    	MULTIPROGRAMACION(linea);
-	    	log_info(info_logger, "Grado multiprog actualizado: %d", GRADO_MAX_MULTIPROGRAMACION);
-	    }
+	if (!strncmp(linea, "FINALIZAR_PROCESO", strlen("FINALIZAR_PROCESO"))) {
+		log_info(info_logger, "lei finalizar proceso");
+		finalizar_proceso(linea);
+	}
 
-	    if (!strncmp(linea, "PROCESO_ESTADO", strlen("PROCESO_ESTADO")))
-	    	PROCESO_ESTADO(linea);
+	if (!strncmp(linea,"DETENER_PLANIFICACION", strlen("DETENER_PLANIFICACION"))) {
+		log_info(info_logger, "lei detener plani");
+		DETENER_PLANIFICACION(linea);
+	}
 
-	    if (!strncmp(linea, ":q", 2)) {
-	    	free(linea);
-	    	break;
-	    }
+	if (!strncmp(linea,"INICIAR_PLANIFICACION", strlen("INICIAR_PLANIFICACION"))) {
+		log_info(info_logger, "lei iniciar plani");
+		INICIAR_PLANIFICACION(linea);
+	}
 
-	    free(linea);
+	if (!strncmp(linea,"MULTIPROGRAMACION", strlen("MULTIPROGRAMACION"))) {
+		log_info(info_logger, "lei cambiar grado multiprog");
+		MULTIPROGRAMACION(linea);
+		log_info(info_logger, "Grado multiprog actualizado: %d", GRADO_MAX_MULTIPROGRAMACION);
+	}
+
+	if (!strncmp(linea, "PROCESO_ESTADO", strlen("PROCESO_ESTADO"))) {
+		log_info(info_logger, "lei mostrar procesos");
+		PROCESO_ESTADO(linea);
 	}
 }
 
@@ -82,27 +95,8 @@ void* ejecutar_script_operaciones (void* parametros) {
 	while (fgets(instruccion, sizeof(instruccion), fptr)) {
 		log_info(info_logger, "ESTOY LEYENDO UN ARCHIVO. Instruccion <%s>", instruccion);
 
-	    if (!strncmp(instruccion,"INICIAR_PROCESO", strlen("INICIAR_PROCESO"))){
-	    	iniciar_proceso(instruccion);
-		}
-
-	    if (!strncmp(instruccion, "FINALIZAR_PROCESO", strlen("FINALIZAR_PROCESO")))
-	    	finalizar_proceso(instruccion);
-
-	    if (!strncmp(instruccion,"DETENER_PLANIFICACION", strlen("DETENER_PLANIFICACION")))
-	    	DETENER_PLANIFICACION(instruccion);
-
-	    if (!strncmp(instruccion,"INICIAR_PLANIFICACION", strlen("INICIAR_PLANIFICACION")))
-	    	INICIAR_PLANIFICACION(instruccion);
-
-	    if (!strncmp(instruccion,"MULTIPROGRAMACION", strlen("MULTIPROGRAMACION"))){
-	    	MULTIPROGRAMACION(instruccion);
-	    	log_info(info_logger, "Grado multiprog actualizado: %d", GRADO_MAX_MULTIPROGRAMACION);
-	    }
-	    if (!strncmp(instruccion, "PROCESO_ESTADO", strlen("PROCESO_ESTADO")))
-	    	PROCESO_ESTADO(instruccion);
+		funcionesDeLaConsola(instruccion);
 	}
-
 	        
 	fclose(fptr);
     //free(pathptr);
@@ -122,7 +116,7 @@ void iniciar_proceso (char* linea) {
     pthread_t tid;
     pthread_create(&(tid), NULL, inicializarProceso, path);
     pthread_join(tid, NULL);
-    free(saveptr);
+    //free(saveptr);
 
     return;
 }
@@ -137,7 +131,7 @@ void* inicializarProceso (void* parametros) {
 
     sem_post(&sem_procesosEnNew);
     log_info(info_logger, "Se crea el proceso <%d> en NEW", pcb->id);
-	free(pathptr);
+	//free(pathptr);
     pthread_mutex_unlock(&semaforo);
 
 	return NULL;
