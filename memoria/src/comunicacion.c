@@ -104,8 +104,9 @@ void cualInterfaz(int tipoInterfaz){
 					lista = recibirListaUint32_t(cpu_fd);
 					t_paquete* paquete = crear_paquete(SOLICITUDINSTRUCCION, info_logger);
 					Instruccion* instruccion;
-					log_info(logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
+					log_trace(trace_logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
 					instruccion = retornarInstruccionACPU(*(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1)); // pid y pc
+					log_trace(trace_logger, "Instrucicon: %s %s %s", instruccion->id, instruccion->param1, instruccion->param2);
 					usleep(RETARDO_RESPUESTA*1000); //ver si cambiar a sleep
 					// log_info(info_logger, "instruccion: %s %s %s %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2
 					// 														, instruccion->param3, instruccion->param4, instruccion->param5);
@@ -113,7 +114,7 @@ void cualInterfaz(int tipoInterfaz){
 					enviar_paquete(paquete, cpu_fd);
 					eliminar_paquete(paquete);
 //					list_clean(lista);
-//					list_destroy_and_destroy_elements(lista, free); // ESTO ERA SOLO LIST_DESTROY
+//					list_destroy_and_destroy_elements(lista, free); // ESTO ERA SOLO LIST_DESTRO
 					break;
 				case -1:
 					log_error(logger, "el cliente se desconecto.");
@@ -283,15 +284,15 @@ void* manejarLectura(uint32_t posInicial, uint32_t tamanio, uint32_t pid) {
 	return datos;
 }
 
-void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32_t pid) {
+void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32_t pid, uint32_t bytes) {
 	uint32_t offset = 0;
 	uint32_t frameQueCorresponde = posInicial / TAM_PAGINA;
 	uint32_t tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
 	uint32_t pagActual;
 	
 	while(tamanio > tamPrimerFrame) {
-		log_trace(trace_logger, "tamanio a leer %d, tamanio que puedo leer en esta pag %d", tamanio, tamPrimerFrame);
-		escribirMemoria(posInicial, datos+offset, tamPrimerFrame, pid);
+		log_trace(trace_logger, "tamanio a leer %d, tamanio que puedo leer en esta pag %d", bytes, tamPrimerFrame);
+		escribirMemoria(posInicial, datos+offset, tamPrimerFrame, pid, bytes);
 		offset += tamPrimerFrame;
 		pagActual = obtenerPaginaConMarco(frameQueCorresponde);
 		frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual+1);
@@ -300,7 +301,7 @@ void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32
 		tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
 		log_trace(trace_logger, "escribo en la siguiente pagina");
 	}
-	escribirMemoria(posInicial, datos+offset, tamanio, pid);
+	escribirMemoria(posInicial, datos+offset, tamanio, pid, bytes);
 	return;
 }
 
@@ -309,9 +310,11 @@ void realizarPedidoEscritura(int cliente_socket){		//Vale para io y cpu. Les man
     t_list* listaInts = recibirListaIntsYDatos(cliente_socket, unosDatos);
     uint32_t* pid = list_get(listaInts,0);
     uint32_t* posicion = list_get(listaInts,1);
+    uint32_t* tamanio = list_get(listaInts,2);
+
     pthread_mutex_lock(&mutex_espacioContiguo);
     log_trace(trace_logger,"me llego pid %d, pos %d y tamanio %d y valor %s", *pid, *posicion, unosDatos->tamanio, unosDatos->datos);
-	manejarEscritura(*posicion, unosDatos->datos, unosDatos->tamanio, *pid);
+	manejarEscritura(*posicion, unosDatos->datos, unosDatos->tamanio, *pid, *tamanio);
     //log_trace(trace_logger,"Se accedio a Espacio de Usuario correctamente");
     free(unosDatos->datos);
     free(unosDatos);

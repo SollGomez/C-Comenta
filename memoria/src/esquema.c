@@ -49,7 +49,7 @@ void crearTablaPaginasProceso(uint32_t pid, uint32_t size){
 	        exit(EXIT_FAILURE);
 	    }
 		nuevaPagina->marco = buscarMarcoLibre();
-        log_trace(trace_logger, "MARCO ELEGIDO PARA LA PAGINA %d: %d\n", i, nuevaPagina->marco);
+        log_trace(trace_logger, "MARCO ELEGIDO PARA LA PAGINA %d: %d", i, nuevaPagina->marco);
         log_trace(trace_logger, "LA CANT DE PAG ES %d", cantPaginas);
         list_add(nuevaTabla->paginas, nuevaPagina);
 		marcarMarcoOcupado(nuevaPagina->marco);
@@ -57,7 +57,7 @@ void crearTablaPaginasProceso(uint32_t pid, uint32_t size){
 	pthread_mutex_lock(&mutex_tablasPaginas);
     list_add(tablaGeneral, nuevaTabla);
     pthread_mutex_unlock(&mutex_tablasPaginas);
-    log_trace(trace_logger,"Tamaño de tablaGeneral después de iniciar proceso: %d\n", list_size(tablaGeneral));
+    log_trace(trace_logger,"Tamaño de tablaGeneral después de iniciar proceso: %d", list_size(tablaGeneral));
     log_info(info_logger, "PID: <%d> - Tamaño: <%d>", pid, cantPaginas); //log obligatorio
 }
 
@@ -66,11 +66,11 @@ void finalizacionDeProceso(uint32_t pid){
     log_trace(trace_logger, "TAMAÑO TABLA: %d", list_size(tabla->paginas));
     for (int j = 0; j < list_size(tabla->paginas); j++) {
         Pagina* pagina = list_get(tabla->paginas, j);
-        log_trace(trace_logger, "MARCO DE LA PAGINA %d: %d\n",j, pagina->marco);
+        log_trace(trace_logger, "MARCO DE LA PAGINA %d: %d",j, pagina->marco);
         marcarMarcoLibre(pagina->marco);
     }
 	liberarTablaDePaginas(pid);
-	log_trace(trace_logger,"Tamaño de tablaGeneral después de finalizar proceso: %d\n", list_size(tablaGeneral));
+	log_trace(trace_logger,"Tamaño de tablaGeneral después de finalizar proceso: %d", list_size(tablaGeneral));
 	return;
 };
 
@@ -110,16 +110,16 @@ uint32_t obtenerPaginaConMarco(uint32_t marco){
 
 void* leerMemoria(uint32_t direccionFisica, uint32_t tamanio, uint32_t pid){	//Devuelve el valor de la direccion fisica pedida
 	void* datos = malloc(tamanio);
-	log_info(info_logger,"PID: <%d> - Accion: <LEER> - Direccion fisica: <%d> - Tamanio: <%d>", pid,direccionFisica, tamanio); //log obligatorio
     memcpy(datos, espacio_contiguo + direccionFisica, tamanio);
+	log_info(info_logger,"PID: <%d> - Accion: <LEER> - Direccion fisica: <%d> - Tamanio: <%d>", pid, direccionFisica, tamanio); //log obligatorio
     simularRetardoSinMensaje(RETARDO_RESPUESTA);
 
     return datos;
 }
 
-void escribirMemoria(int direccionFisica, void* datos, uint32_t tamanio,uint32_t pid){	//Escribir lo indicado a partir de la dirección física pedida
-	log_info(info_logger,"PID: <%d> - Accion: <ESCRIBIR> - Direccion fisica: <%d> - Tamanio: <%d>", pid,direccionFisica, tamanio); //log obligatorio
+void escribirMemoria(int direccionFisica, void* datos, uint32_t tamanio, uint32_t pid, uint32_t bytes){	//Escribir lo indicado a partir de la dirección física pedida
 	memcpy(espacio_contiguo + direccionFisica, datos, tamanio);
+	log_info(info_logger,"PID: <%d> - Accion: <ESCRIBIR> - Direccion fisica: <%d> - Tamanio: <%d>", pid, direccionFisica, bytes); //log obligatorio
     simularRetardoSinMensaje(RETARDO_RESPUESTA);
 
 }
@@ -168,11 +168,11 @@ uint32_t agrandar(TablaDePaginas* tabla, uint32_t tamanio){
         for(int i=list_size(tabla->paginas); i<pagsFinales; i++){
             Pagina* nuevaPagina = malloc(sizeof(Pagina));
             if (nuevaPagina == NULL) {
-                log_trace(trace_logger, "Error: No se pudo asignar memoria para nuevaPagina\n");
+                log_trace(trace_logger, "Error: No se pudo asignar memoria para nuevaPagina");
                 exit(EXIT_FAILURE);
             }
             nuevaPagina->marco = buscarMarcoLibre();
-            log_trace(trace_logger, "MARCO ELEGIDO PARA LA PAGINA %d: %d\n", i, nuevaPagina->marco);
+            log_trace(trace_logger, "MARCO ELEGIDO PARA LA PAGINA %d: %d", i, nuevaPagina->marco);
             list_add(tabla->paginas, nuevaPagina);
             marcarMarcoOcupado(nuevaPagina->marco);
         }

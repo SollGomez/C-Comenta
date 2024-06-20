@@ -20,7 +20,6 @@ int traducir_direccion_logica(int direccion_logica) {
 
 		enviarListaUint32_t(listaInts,memoria_fd, info_logger, SOLICITUDMARCO);
 
-		uint32_t marco;
 		op_code_cliente cod = recibir_operacion(memoria_fd);
 
 		if(cod == SOLICITUDMARCO){        

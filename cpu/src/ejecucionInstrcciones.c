@@ -122,6 +122,8 @@ void ejecutar_MOV_IN(char* registro, int direccion_logica) {
     if (!(direccion_fisica < 0)) {
     	   char* valor;
            valor = leer_valor_de_memoria(direccion_fisica, cantidad_bytes);
+           log_info(info_logger, "LEI: %s", valor);
+           log_info(info_logger, "Pongo valor %s en el registro  %s", valor, registro);
            cambiar_valor_del_registroCPU(registro,valor);
            free(valor);
            PCB_Actual->program_counter++;
@@ -130,9 +132,8 @@ void ejecutar_MOV_IN(char* registro, int direccion_logica) {
 
 
 void ejecutar_MOV_OUT(int direccion_logica, char* registro) {
-    log_info(info_logger, "REGISTRO: %s", registro);
     int cantidad_bytes = calcular_bytes_segun_registro(registro);
-    log_info(info_logger, "TAMANIO A ESCRIBIR EN BYTES: %d", cantidad_bytes);
+    log_info(info_logger, "TAMANIO A LEER: %d", cantidad_bytes);
 	int valorDelRegistro = obtener_valor_registroCPU(registro);
     int direccion_fisica = traducir_direccion_logica(direccion_logica);
 
@@ -143,7 +144,7 @@ void ejecutar_MOV_OUT(int direccion_logica, char* registro) {
         escribir_valor_en_memoria(direccion_fisica,cantidad_bytes, buffer);
         PCB_Actual->program_counter++;
     }
-    free(valorDelRegistro);
+    //free(valorDelRegistro);
 }
 
 void ioGenSleep(char* interfaz, char* unidadesDeTrabajo){
@@ -335,7 +336,8 @@ char* recibir_valor_de_memoria(){
 		case LECTURA_REALIZADA:{
             t_datos* unosDatos = malloc(sizeof(t_datos));
             t_list* listaInts = recibirListaIntsYDatos(memoria_fd,unosDatos);
-            uint32_t tamanio = *(uint32_t*)list_get(listaInts,1);
+            uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);
+            log_info(info_logger, "TAMANIO DE MEMORIA: %d", tamanio); //SEMAFORO????
             valor = malloc(unosDatos->tamanio+1);
             memcpy(valor,unosDatos->datos,tamanio);
             valor[tamanio] = '\0';
@@ -356,10 +358,11 @@ char* recibir_valor_de_memoria(){
 void escribir_valor_en_memoria(int direccion_fisica, int cantidad_bytes, char* valor) {
     t_list* listaInts = list_create();
     t_datos* unosDatos = malloc(sizeof(t_datos));
-    unosDatos->tamanio= cantidad_bytes;
+    unosDatos->tamanio = strlen(valor);
     unosDatos->datos = (void*) valor;
     list_add(listaInts, &PCB_Actual->id);
     list_add(listaInts, &direccion_fisica);
+    list_add(listaInts, &cantidad_bytes);
 
     enviarListaIntsYDatos(listaInts, unosDatos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
     list_clean(listaInts);

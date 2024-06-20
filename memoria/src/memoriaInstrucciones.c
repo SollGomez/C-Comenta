@@ -140,7 +140,10 @@ void GuardarInstrucsDeProceso(uint32_t pid, char* file_name){
     char linea[60];
     while (!feof(archivoPseudocodigo)) {
         fgets(linea, sizeof(linea), archivoPseudocodigo);
-        list_add(listaInstrucciones, FormatearInstruccion(linea));
+        char** lineaLeida = string_split(linea, "\n");
+        list_add(listaInstrucciones, FormatearInstruccion(lineaLeida[0]));
+        //list_add(listaInstrucciones, FormatearInstruccion(linea));
+
     }
     log_trace(trace_logger, "Guardo %d instrucciones del proceso %d", list_size(listaInstrucciones), pid);
 

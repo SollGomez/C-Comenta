@@ -34,6 +34,6 @@ extern bool flagComunicacion;
 
 //Devuelve el valor de la direccion fisica pedida
 void* leerMemoria(uint32_t direccionFisica, uint32_t tamanio, uint32_t pid);
-void escribirMemoria(int direccionFisica, void* datos, uint32_t tamanio,uint32_t pid);
+void escribirMemoria(int direccionFisica, void* datos, uint32_t tamanio, uint32_t pid, uint32_t bytes);
 
 #endif /* ESQUEMA_H_ */

@@ -29,8 +29,6 @@ void agregarEntradaTLB(uint32_t pidAgregar, uint32_t numPagAgregar, uint32_t mar
     entradaAgregar->numPag = numPagAgregar;
     entradaAgregar->marco = marcoAgregar;
     
-    log_info(info_logger, "list size: %d", list_size(TLB));
-    log_info(info_logger, "cant entradas: %d", CANTIDAD_ENTRADAS_TLB);
     if(list_size(TLB) <  CANTIDAD_ENTRADAS_TLB)
     {
         list_add(TLB, entradaAgregar);
