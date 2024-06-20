@@ -12,7 +12,7 @@ uint32_t sizeGlobal;
 
 int recibirConexion(char *puerto) {
 	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
-	pthread_t tid[2];
+	pthread_t tid[5];
 //	pthread_t hilosIO[4];
 //	int contadorIO=0;
 
@@ -20,9 +20,9 @@ int recibirConexion(char *puerto) {
 	log_info(logger, "Servidor listo para recibir a los clientes");
 
 	cpu_fd = esperar_cliente(memoria_fd);
-	pthread_create(&tid[0], NULL, recibirCPU, NULL);
+	pthread_create(&tid[3], NULL, recibirCPU, NULL);
 	kernel_fd = esperar_cliente(memoria_fd);
-	pthread_create(&tid[1], NULL, recibirKernel, NULL);
+	pthread_create(&tid[4], NULL, recibirKernel, NULL);
 	int32_t tipoInterfaz;
 	int entradasalida_fd;
 	while (1) {
@@ -59,7 +59,6 @@ void cualInterfaz(int tipoInterfaz){
 		log_info(logger, "Interfaz DIAL_FS conectada");
 		recibirIO(tipoInterfaz);
 		break;
-		break;
 	default:
 		break;
 	}
@@ -67,70 +66,69 @@ void cualInterfaz(int tipoInterfaz){
 	log_destroy(logger);
 }
 
- void *recibirCPU(void){
- 		while(1) {
- 			int cod_op = recibir_operacion(cpu_fd);
- 			t_list *lista;
- 			switch (cod_op) {
-				case HANDSHAKE_CPU:
-					recibirOrden(cpu_fd);
-					log_info(logger,"HANDSHAKE con CPU acontecido");
-					PaqueteHand(cpu_fd, logger);
-					break;
-				case SOLICITUDMARCO:
-					lista = recibirListaUint32_t(cpu_fd);
-					uint32_t marco = obtenerMarcoDePagina(*(uint32_t*)list_get(lista,0), *(uint32_t*)list_get(lista,1));
-					enviarValor_uint32(marco, cpu_fd, SOLICITUDMARCO, info_logger);
+ void *recibirCPU(void) {
+	while(1) {
+		int cod_op = recibir_operacion(cpu_fd);
+		t_list *lista;
+		switch (cod_op) {
+			case HANDSHAKE_CPU:
+				recibirOrden(cpu_fd);
+				log_info(logger,"HANDSHAKE con CPU acontecido");
+				PaqueteHand(cpu_fd, logger);
+				break;
+			case SOLICITUDMARCO:
+				lista = recibirListaUint32_t(cpu_fd);
+				uint32_t marco = obtenerMarcoDePagina(*(uint32_t*)list_get(lista,0), *(uint32_t*)list_get(lista,1));
+				enviarValor_uint32(marco, cpu_fd, SOLICITUDMARCO, info_logger);
 //					list_clean(lista);
-					// list_destroy_and_destroy_elements(lista, free); //LINEA MODIFICADA
-					break;
-					
-				case ACCESO_PEDIDO_LECTURA:
-					realizarPedidoLectura(cpu_fd);
-					break;
+				// list_destroy_and_destroy_elements(lista, free); //LINEA MODIFICADA
+				break;
+				
+			case ACCESO_PEDIDO_LECTURA:
+				realizarPedidoLectura(cpu_fd);
+				break;
 
-				case ACCESO_PEDIDO_ESCRITURA:
-					realizarPedidoEscritura(cpu_fd);
-					break;
+			case ACCESO_PEDIDO_ESCRITURA:
+				realizarPedidoEscritura(cpu_fd);
+				break;
 
-				case RESIZE:
-				 	lista = recibirListaUint32_t(cpu_fd);
-				 	uint32_t resultado = resizeProceso(*(uint32_t*)list_get(lista,0), *(uint32_t*)list_get(lista,1)); //pid tamanio
-					enviarValor_uint32(resultado, cpu_fd, RESIZE, info_logger);
+			case RESIZE:
+				lista = recibirListaUint32_t(cpu_fd);
+				uint32_t resultado = resizeProceso(*(uint32_t*)list_get(lista,0), *(uint32_t*)list_get(lista,1)); //pid tamanio
+				enviarValor_uint32(resultado, cpu_fd, RESIZE, info_logger);
 
-					break;
+				break;
 
-				case SOLICITUDINSTRUCCION:
-					lista = recibirListaUint32_t(cpu_fd);
-					t_paquete* paquete = crear_paquete(SOLICITUDINSTRUCCION, info_logger);
-					Instruccion* instruccion;
-					log_trace(trace_logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
-					log_trace(trace_logger, "size instruccionesProceso antes de retorno: %d", list_size(instruccionesDeProcesos));
-					instruccion = retornarInstruccionACPU(*(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1)); // pid y pc
-					log_trace(trace_logger, "size instruccionesProceso despues de retorno: %d", list_size(instruccionesDeProcesos));
-					//log_trace(trace_logger, "Instruccion: %s %s %s", instruccion->id, instruccion->param1, instruccion->param2);
-					usleep(RETARDO_RESPUESTA*1000); //ver si cambiar a sleep
-					// log_info(info_logger, "instruccion: %s %s %s %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2
-					// 														, instruccion->param3, instruccion->param4, instruccion->param5);
-					agregar_instruccion_a_paquete(paquete, instruccion);
-					enviar_paquete(paquete, cpu_fd);
-					eliminar_paquete(paquete);
+			case SOLICITUDINSTRUCCION:
+				lista = recibirListaUint32_t(cpu_fd);
+				t_paquete* paquete = crear_paquete(SOLICITUDINSTRUCCION, info_logger);
+				Instruccion* instruccion;
+				log_trace(trace_logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
+				log_trace(trace_logger, "size instruccionesProceso antes de retorno: %d", list_size(instruccionesDeProcesos));
+				instruccion = retornarInstruccionACPU(*(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1)); // pid y pc
+				log_trace(trace_logger, "size instruccionesProceso despues de retorno: %d", list_size(instruccionesDeProcesos));
+				//log_trace(trace_logger, "Instruccion: %s %s %s", instruccion->id, instruccion->param1, instruccion->param2);
+				usleep(RETARDO_RESPUESTA*1000); //ver si cambiar a sleep
+				// log_info(info_logger, "instruccion: %s %s %s %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2
+				// 														, instruccion->param3, instruccion->param4, instruccion->param5);
+				agregar_instruccion_a_paquete(paquete, instruccion);
+				enviar_paquete(paquete, cpu_fd);
+				eliminar_paquete(paquete);
 //					list_clean(lista);
 //					list_destroy_and_destroy_elements(lista, free); // ESTO ERA SOLO LIST_DESTRO
-					break;
-				case -1:
-					log_error(logger, "el cliente se desconecto.");
-
- 						log_error(logger, "Terminando servidor.CPU");
- 						return NULL;
- 				default:
- 					log_warning(logger,"Operacion desconocida. No quieras meter la pata");
- 					break;
- 			}
- 		}
+				break;
+			case -1:
+				log_error(logger, "el cliente se desconecto.");
+				log_error(logger, "Terminando servidor.CPU");
+				return NULL;
+			default:
+				log_warning(logger,"Operacion desconocida. No quieras meter la pata");
+				break;
+		}
+	}
 }
 
-void *recibirIO(int interfaz_fd){
+void *recibirIO(int interfaz_fd) {
   	while(1) {
   		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex
 // 		pthread_mutex_lock(&mutexFS);
@@ -160,7 +158,7 @@ void *recibirIO(int interfaz_fd){
 }
 
 
-void *recibirKernel(){
+void *recibirKernel() {
 	while(1) {
 		int cod_op = recibir_operacion(kernel_fd);
  		switch (cod_op) {
@@ -184,7 +182,7 @@ void *recibirKernel(){
  	}
  }
 
-t_log* iniciar_logger(char *nombre){
+t_log* iniciar_logger(char *nombre) {
 	t_log* nuevo_logger;
 	nuevo_logger = log_create(nombre, "tp", 1, LOG_LEVEL_INFO);
 	if(nuevo_logger == NULL){

@@ -37,7 +37,7 @@ void manejarInterfazStdin(uint32_t direccionFisicaAEscribir, uint32_t pid) {
     datos->datos = readline(">");
 
     t_list* listaEnteros;
-    list_create(listaEnteros);
+    listaEnteros = list_create();
 
     list_add(listaEnteros, &pid);
     list_add(listaEnteros, &direccionFisicaAEscribir);
