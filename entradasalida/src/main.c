@@ -7,6 +7,8 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
     cargar_configuracion();
+
+	//manejarInterfazStdin(2, 30);
 	/*crearEstructurasFs();
 
 	listaDeArchivos = list_create();
@@ -22,6 +24,7 @@ int main(int argc, char* argv[]) {
 	truncarArchivo("pruebaLoca.txt", 128);
 	//truncarArchivo("pruebaLoca.txt", 0);
 */
+	
 	pthread_t kernel;
 	pthread_t memoria;
 
@@ -34,8 +37,9 @@ int main(int argc, char* argv[]) {
 
 	pthread_join(kernel, NULL);
 
-	cerrarPrograma();
+	//cerrarPrograma();
     return 0;
+	
 }
 
 t_config *crearConfig(char* configPath){

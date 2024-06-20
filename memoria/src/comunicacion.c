@@ -12,7 +12,7 @@ uint32_t sizeGlobal;
 
 int recibirConexion(char *puerto) {
 	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
-	pthread_t tid[2];
+	pthread_t tid[5];
 //	pthread_t hilosIO[4];
 //	int contadorIO=0;
 
@@ -20,9 +20,9 @@ int recibirConexion(char *puerto) {
 	log_info(logger, "Servidor listo para recibir a los clientes");
 
 	cpu_fd = esperar_cliente(memoria_fd);
-	pthread_create(&tid[0], NULL, recibirCPU, NULL);
+	pthread_create(&tid[3], NULL, recibirCPU, NULL);
 	kernel_fd = esperar_cliente(memoria_fd);
-	pthread_create(&tid[1], NULL, recibirKernel, NULL);
+	pthread_create(&tid[4], NULL, recibirKernel, NULL);
 	int32_t tipoInterfaz;
 	int entradasalida_fd;
 	while (1) {
@@ -58,7 +58,6 @@ void cualInterfaz(int tipoInterfaz){
 	case 2: //DIAL_FS
 		log_info(logger, "Interfaz DIAL_FS conectada");
 		recibirIO(tipoInterfaz);
-		break;
 		break;
 	default:
 		break;
@@ -132,30 +131,26 @@ void cualInterfaz(int tipoInterfaz){
 
 void *recibirIO(int interfaz_fd){
   	while(1) {
-  		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex
-// 		pthread_mutex_lock(&mutexFS);
-
-//  		t_list *lista = list_create();
+  		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex;
   		switch (cod_op) {
- 			case IO_STDIN_READ_DONE: //ACCESO_PEDIDO_ESCRITURA
+ 			case IO_STDIN_READ_DONE:{
 				realizarPedidoEscritura(interfaz_fd);
  				break;
-
- 			case IO_STDOUT_WRITE_LEER_DIRECCION_EN_MEMORIA: //ACCESO_PEDIDO_LECTURA
+			} //ACCESO_PEDIDO_ESCRITURA
+ 			case IO_STDOUT_WRITE_LEER_DIRECCION_EN_MEMORIA:{
 				realizarPedidoLectura(interfaz_fd);
-
  				break;
-  			case -1:
-  				 log_error(logger, "el cliente se desconecto.");
-
-  				 log_error(logger, "Terminando servidor. I/O");
-  				 return NULL;
-  			default:
-
+			} //ACCESO_PEDIDO_LECTURA
+  			case -1:{
+  				log_error(logger, "el cliente se desconecto.");
+  				log_error(logger, "Terminando servidor. I/O");
+  				return NULL;
+			}
+  			default:{
   				log_warning(logger,"Operacion desconocida. No quieras meter la pata %d ", cod_op);
   				break;
+			}
   		}
-//  		//pthread_mutex_unlock(&mutexFS);
   	}
 }
 

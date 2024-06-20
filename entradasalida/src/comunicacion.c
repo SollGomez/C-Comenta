@@ -99,7 +99,7 @@ int conectarKernel(char *modulo){
 	list_create(listaDeArchivos);
 	int32_t tamanioLista;
 
-	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "poner dialfs") == 0){		// HABLAR CON AXO
+	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS") == 0){		// HABLAR CON AXO
 		recv(kernel_fd, &tamanioLista, sizeof(int32_t), MSG_WAITALL);				//sizeof(lista)
 		recv(kernel_fd, listaDeArchivos, sizeof(tamanioLista), MSG_WAITALL);			//recibo lista de archivos
 	}
@@ -156,27 +156,35 @@ void terminar_programa(int conexion, t_log* logger){
 
 void *recibirMemoria() {
 
+	log_info(info_logger, "Entro a recibir memoria");
 	while(1) {
 		int cod_op = recibir_operacion(memoria_fd);
 
-		switch (cod_op)
-		{
-		case LECTURA_REALIZADA:
-			devolucionIO_STDOUT_WRITE(&memoria_fd);
-			break;
-			
-		case ESCRITURA_REALIZADA:
-			enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd, info_logger);
-			break;
+			switch (cod_op)
+			{
+			case LECTURA_REALIZADA:{
+				devolucionIO_STDOUT_WRITE(&memoria_fd);
+				break;
 
-		case -1:
-			log_error(info_logger, "El cliente se desconecto");
-			return NULL;
-			break;
-		
-		default:
-			log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-			break;
+			}
+				
+			case ESCRITURA_REALIZADA:{
+				enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd, info_logger);
+				break;
+			}
+
+			case -1:{
+
+				log_error(info_logger, "El cliente se desconecto");
+				return NULL;
+				break;
+			}
+			
+			default:{
+				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+				break;
+
+			}
 		
 		}
 	}
@@ -187,97 +195,46 @@ void *recibirKernel() {
 
 	switch (cfg_entradaSalida->TIPO_INTERFAZ_INT)
     {
-		case 0:  					//STDOUT
+		case 0:{
+
 			while(1) {
 
 			int cod_op = recibir_operacion(kernel_fd);
 
 			switch (cod_op)
 			{
-			case IO_STDOUT_WRITE:
-				solicitudIO_STDOUT_WRITE(&kernel_fd);
-				break;
+				case IO_STDOUT_WRITE:{
+					solicitudIO_STDOUT_WRITE(&kernel_fd);
+					break;
 
-			case -1:
-				log_error(info_logger, "El cliente se desconecto");
-				return NULL;
-				break;
-			
-			default:
-				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-				break;
-			}
-		}
-			break;
-		case 1:  						//STDIN
-			while(1) {
+				}
 
-			int cod_op = recibir_operacion(kernel_fd);
-
-			switch (cod_op)
-			{
-			case IO_STDIN_READ:
-				solicitudIO_STDIN_READ(&kernel_fd);
-				break;
-			
-			case -1:
-				log_error(info_logger, "El cliente se desconecto");
-				return NULL;
-				break;
-			
-			default:
-				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-				break;
-			}
-		}
-			break;
-		case 2: 					 	//DIALFS
-			while(1) {
-
-			int cod_op = recibir_operacion(kernel_fd);
-
-			switch (cod_op)
-			{
-			case IO_FS_CREATE:
-
-				break;
-
-			case IO_FS_DELETE:
-		
-				break;
-
-			case IO_FS_READ:
+				case -1:{
+					log_error(info_logger, "El cliente se desconecto");
+					return NULL;
+					break;
+					
+				}
 				
-				break;
+				default:{
+					log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+					break;
 
-			case IO_FS_TRUNCATE:
-		
-				break;
-
-			case IO_FS_WRITE:
-
-				break;
-			
-			case -1:
-				log_error(info_logger, "El cliente se desconecto");
-				return NULL;
-				break;
-			
-			default:
-				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-				break;
+				}
 			}
 		}
 			break;
-		case 3:  						//GENERICA
+		}  					//STDOUT
+		case 1: {
+
 			while(1) {
 
-					int cod_op = recibir_operacion(kernel_fd);
+			int cod_op = recibir_operacion(kernel_fd);
 
-				switch (cod_op)
-				{
-				case IO_GEN_SLEEP: 	
-					solicitudIO_GEN_SLEEP(&kernel_fd);
+			switch (cod_op)
+			{
+				case IO_STDIN_READ:
+					solicitudIO_STDIN_READ(&kernel_fd);
 					break;
 				
 				case -1:
@@ -287,13 +244,80 @@ void *recibirKernel() {
 				
 				default:
 					log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+					break;
+			}
+		}
+			break;
+		} 						//STDIN
+		case 2:{
+
+			while(1) {
+
+			int cod_op = recibir_operacion(kernel_fd);
+
+			switch (cod_op)
+			{
+				case IO_FS_CREATE:
+
+					break;
+
+				case IO_FS_DELETE:
+			
+					break;
+
+				case IO_FS_READ:
+					
+					break;
+
+				case IO_FS_TRUNCATE:
+			
+					break;
+
+				case IO_FS_WRITE:
+
+					break;
+				
+				case -1:
+					log_error(info_logger, "El cliente se desconecto");
+					return NULL;
+					break;
+				
+				default:
+					log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+					break;
+			}
+		}
+			break;
+		} 					 	//DIALFS
+		case 3:{
+
+			while(1) {
+
+					int cod_op = recibir_operacion(kernel_fd);
+
+				switch (cod_op)
+				{
+					case IO_GEN_SLEEP: 	
+						solicitudIO_GEN_SLEEP(&kernel_fd);
 						break;
+					
+					case -1:
+						log_error(info_logger, "El cliente se desconecto");
+						return NULL;
+						break;
+					
+					default:
+						log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+							break;
 				}
 		}
 			break;
-		default:
+		}  						//GENERICA
+		default:{
+
 			printf("Esa interfaz no existe :/");
 			break;
+		}
     }
 
 
