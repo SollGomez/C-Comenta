@@ -16,8 +16,10 @@ void* iniciarConsola () {
 	    if (!strncmp(linea,"EJECUTAR_SCRIPT", strlen("EJECUTAR_SCRIPT")))
 	    	ejecutar_script(linea);
 
-	    if (!strncmp(linea,"INICIAR_PROCESO", strlen("INICIAR_PROCESO")))
+	    if (!strncmp(linea,"INICIAR_PROCESO", strlen("INICIAR_PROCESO"))){
+			log_info(info_logger, "lei iniciar proceso");
 	    	iniciar_proceso(linea);
+		}
 
 	    if (!strncmp(linea, "FINALIZAR_PROCESO", strlen("FINALIZAR_PROCESO")))
 	    	finalizar_proceso(linea);
@@ -80,8 +82,9 @@ void* ejecutar_script_operaciones (void* parametros) {
 	while (fgets(instruccion, sizeof(instruccion), fptr)) {
 		log_info(info_logger, "ESTOY LEYENDO UN ARCHIVO. Instruccion <%s>", instruccion);
 
-	    if (!strncmp(instruccion,"INICIAR_PROCESO", strlen("INICIAR_PROCESO")))
+	    if (!strncmp(instruccion,"INICIAR_PROCESO", strlen("INICIAR_PROCESO"))){
 	    	iniciar_proceso(instruccion);
+		}
 
 	    if (!strncmp(instruccion, "FINALIZAR_PROCESO", strlen("FINALIZAR_PROCESO")))
 	    	finalizar_proceso(instruccion);
@@ -108,6 +111,7 @@ void* ejecutar_script_operaciones (void* parametros) {
 }
 
 void iniciar_proceso (char* linea) {
+	log_info(info_logger, "funcion iniciar");
 	path = malloc(sizeof(linea));
 	char* saveptr = malloc(sizeof(linea));
 
@@ -133,8 +137,8 @@ void* inicializarProceso (void* parametros) {
 
     sem_post(&sem_procesosEnNew);
     log_info(info_logger, "Se crea el proceso <%d> en NEW", pcb->id);
+	free(pathptr);
     pthread_mutex_unlock(&semaforo);
-    free(pathptr);
 
 	return NULL;
 }

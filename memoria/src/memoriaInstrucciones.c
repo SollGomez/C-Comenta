@@ -99,7 +99,7 @@ void liberarTablaDePaginas(uint32_t pid){
             pthread_mutex_lock(&mutex_tablasPaginas);
             void* element = list_remove(tablaGeneral, i);
             pthread_mutex_unlock(&mutex_tablasPaginas);
-            free(tabla->paginas);
+            list_clean_and_destroy_elements(tabla->paginas, free);
             free(tabla);
             log_trace(trace_logger, "Tabla con PID <%d> eliminada de tablaGeneral", pid);
             return;
@@ -123,7 +123,7 @@ bool iniciarMemoria(){
 
 // Guarda en una lista de procesos pid y lista de instrucciones
 void GuardarInstrucsDeProceso(uint32_t pid, char* file_name){
-    Proceso * newProceso = malloc(sizeof(Proceso));
+    Proceso* newProceso = malloc(sizeof(Proceso));
     newProceso->pid = pid;
 
     t_list* listaInstrucciones = list_create();
@@ -148,8 +148,15 @@ void GuardarInstrucsDeProceso(uint32_t pid, char* file_name){
     log_trace(trace_logger, "Guardo %d instrucciones del proceso %d", list_size(listaInstrucciones), pid);
 
     fclose(archivoPseudocodigo);
+    log_info(info_logger, "dsp de fclose");
     newProceso->instrucciones = listaInstrucciones;
+    log_info(info_logger, "dsp de listaInstrucciones");
+    log_info(info_logger, "newProceso - : %d", list_size(newProceso->instrucciones));
+    
+    log_info(info_logger, "instruccionesDeProcesos - : %d", list_size(instruccionesDeProcesos));
     list_add(instruccionesDeProcesos, newProceso);
+    log_info(info_logger, "dsp de list add: %d", list_size(instruccionesDeProcesos));
+    log_info(info_logger, "dsp de agregar a la lista");
     
 }
 

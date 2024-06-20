@@ -36,6 +36,7 @@ int main(int argc, char* argv[]) {
 
 	tablaGeneral = list_create();
 	instruccionesDeProcesos = list_create();
+	log_info(info_logger, "dsp de list create: %d", list_size(instruccionesDeProcesos));
 
 	iniciarMemoria();
 

@@ -334,13 +334,13 @@ void inicializarProceso(int cliente_socket){
 
     crearTablaPaginasProceso(pidGlobal, sizeGlobal);
 	sleep(1);
-	log_trace(trace_logger,"Tamaño de tablaGeneral antes de terminar inicializarProceso: %d\n", list_size(tablaGeneral));
+	log_trace(trace_logger,"Tamaño de tablaGeneral antes de terminar inicializarProceso: %d", list_size(tablaGeneral));
 
 	enviarOrden(INICIALIZAR_PROCESO_MEMORIA,cliente_socket, trace_logger);
 }
 
 void finalizarProceso(int cliente_socket){
-	log_trace(trace_logger,"Tamaño de tabla General al llegar a finalizar Proceso: %d\n", list_size(tablaGeneral));
+	log_trace(trace_logger,"Tamaño de tabla General al llegar a finalizar Proceso: %d", list_size(tablaGeneral));
     pthread_mutex_lock(&mutex_espacioContiguo);
     uint32_t pid = recibirValor_uint32(cliente_socket);
 	TablaDePaginas* tabla = obtenerTablaPorPID(pid);
@@ -361,8 +361,9 @@ void finalizarProceso(int cliente_socket){
 		free(instruccion);
 	}
 
+	log_info(info_logger, "tamaño: %d", list_size(instruccionesDeProcesos));
 	list_remove_by_condition(instruccionesDeProcesos, buscarPorPID);
-
+	log_info(info_logger, "tamaño: %d", list_size(instruccionesDeProcesos));
 	//free(programa);
 
 
