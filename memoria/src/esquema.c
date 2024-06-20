@@ -146,13 +146,16 @@ uint32_t resizeProceso(uint32_t pid, uint32_t tamanio) {
 	}else{
 		respuesta = agrandar(tabla, tamanio);
         log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Ampliar: <%d>", pid, tamOriginal, tamanio-tamOriginal); //log obligatorio
+        //log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Ampliar: <%d>", pid, tamOriginal, tamanio); //log obligatorio
 	}
 	return respuesta;
 }
 
 void achicar(TablaDePaginas* tabla, uint32_t tamanio){
     int pagsFinales = tamanio / TAM_PAGINA;
-
+    if(tamanio % TAM_PAGINA){
+        pagsFinales += 1;
+    }
     for(int i=list_size(tabla->paginas); i>pagsFinales; i--){
         Pagina* pag = list_get(tabla->paginas, i-1);
         list_remove(tabla->paginas, i-1);
@@ -173,6 +176,9 @@ uint32_t cantidadMarcosVacios() {
 uint32_t agrandar(TablaDePaginas* tabla, uint32_t tamanio){
     int pagsIniciales = list_size(tabla->paginas);
     int pagsFinales = tamanio / TAM_PAGINA;
+    if(tamanio % TAM_PAGINA){
+        pagsFinales += 1;
+    }
 
     if(cantidadMarcosVacios() >= pagsFinales-pagsIniciales){
         for(int i=list_size(tabla->paginas); i<pagsFinales; i++){
