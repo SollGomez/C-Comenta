@@ -415,7 +415,7 @@ void* solicitudIO_FS_WRITE (void* cliente_socket) {
 
 	t_datos* datos = malloc(sizeof(datos)); 
 	t_list* listaDeInts = list_create();
-	listaDeInts = recibirListaIntsYDatos
+	listaDeInts = recibirListaIntsYDatos;
 
 	uint32_t pid = *(uint32_t* )list_get(listaDeInts, 0);
 	uint32_t tamanio = *(uint32_t* )list_get(listaDeInts, 1);

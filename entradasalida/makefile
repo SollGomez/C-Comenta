@@ -20,6 +20,12 @@ OBJS = $(patsubst src/%.c,obj/%.o,$(SRCS_C))
 # Set binary targets
 BIN = bin/$(shell cd . && pwd | xargs basename)
 
+CONFIG_DIR = /home/utnso/tp-2024-1c-CANCH/configs
+
+CONFIG_NAME = entradasalidagenerica.config
+
+CONFIG_FILE = $(CONFIG_DIR)/$(CONFIG_NAME)
+
 .PHONY: all
 all: debug
 
@@ -54,7 +60,7 @@ start: debug
 
 .PHONY: memcheck
 memcheck: debug
-	valgrind --leak-check=full $(MEMCHECK_FLAGS) ./$(BIN) entradasalidagenerica.config
+	valgrind --leak-check=full $(MEMCHECK_FLAGS) ./$(BIN) $(CONFIG_FILE)
 
 .PHONY: helgrind
 helgrind: debug
