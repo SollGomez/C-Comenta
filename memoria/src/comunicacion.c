@@ -364,9 +364,7 @@ void finalizarProceso(int cliente_socket){
 		free(instruccion);
 	}
 
-	log_info(info_logger, "tamaño: %d", list_size(instruccionesDeProcesos));
 	list_remove_by_condition(instruccionesDeProcesos, buscarPorPID);
-	log_info(info_logger, "tamaño: %d", list_size(instruccionesDeProcesos));
 	//free(programa);
 
 
@@ -375,5 +373,5 @@ void finalizarProceso(int cliente_socket){
     pthread_mutex_unlock(&mutex_espacioContiguo);
     enviarOrden(FINALIZAR_PROCESO_MEMORIA, cliente_socket, info_logger);
     log_trace(trace_logger, "Proceso finalizado con éxito");
-    log_trace(trace_logger,"Tamaño de tablaGeneral al terminar finalizarProceso: %d\n", list_size(tablaGeneral));
+    log_trace(trace_logger,"Tamaño de tablaGeneral al terminar finalizarProceso: %d", list_size(tablaGeneral));
 }

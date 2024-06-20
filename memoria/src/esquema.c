@@ -91,7 +91,6 @@ uint32_t obtenerMarcoDePagina(uint32_t pid, uint32_t numeroPagina){
 		return pagina->marco;
 	}
 	else{
-        log_warning(warning_logger, "OUT OF MEMORY :(");
 		return -1;//HAY QUE VER QUE PASA SI HAY OUT OF MEMORY
     }
 }
@@ -120,16 +119,9 @@ void* leerMemoria(uint32_t direccionFisica, uint32_t tamanio, uint32_t pid){	//D
 }
 
 void escribirMemoria(uint32_t direccionFisica, void* datos, uint32_t tamanio, uint32_t pid, uint32_t bytes){	//Escribir lo indicado a partir de la dirección física pedida
-    log_trace(trace_logger, "size instruccionesProceso antes de memcpy: %d", list_size(instruccionesDeProcesos));
-    log_info(info_logger, "direcc: %d", direccionFisica);
-    log_info(info_logger, "data: %s", datos);
-    log_info(info_logger, "tam: %d", tamanio);
-    log_info(info_logger, "bytes: %d", bytes);
 
     memcpy(espacio_contiguo + direccionFisica, datos, tamanio);
-    log_trace(trace_logger, "size instruccionesProceso despues de memcpy: %d", list_size(instruccionesDeProcesos));
 	log_info(info_logger,"PID: <%d> - Accion: <ESCRIBIR> - Direccion fisica: <%d> - Tamanio: <%d>", pid, direccionFisica, bytes); //log obligatorio
-    log_trace(trace_logger, "size instruccionesProceso despues de escribir: %d", list_size(instruccionesDeProcesos));
     simularRetardoSinMensaje(RETARDO_RESPUESTA);
 
 }
@@ -146,7 +138,6 @@ uint32_t resizeProceso(uint32_t pid, uint32_t tamanio) {
 	}else{
 		respuesta = agrandar(tabla, tamanio);
         log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Ampliar: <%d>", pid, tamOriginal, tamanio-tamOriginal); //log obligatorio
-        //log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Ampliar: <%d>", pid, tamOriginal, tamanio); //log obligatorio
 	}
 	return respuesta;
 }

@@ -149,15 +149,9 @@ void GuardarInstrucsDeProceso(uint32_t pid, char* file_name){
     log_trace(trace_logger, "Guardo %d instrucciones del proceso %d", list_size(listaInstrucciones), pid);
 
     fclose(archivoPseudocodigo);
-    log_info(info_logger, "dsp de fclose");
     newProceso->instrucciones = listaInstrucciones;
-    log_info(info_logger, "dsp de listaInstrucciones");
-    log_info(info_logger, "newProceso - : %d", list_size(newProceso->instrucciones));
     
-    log_info(info_logger, "instruccionesDeProcesos - : %d", list_size(instruccionesDeProcesos));
     list_add(instruccionesDeProcesos, newProceso);
-    log_info(info_logger, "dsp de list add: %d", list_size(instruccionesDeProcesos));
-    log_info(info_logger, "dsp de agregar a la lista");
     
 }
 
