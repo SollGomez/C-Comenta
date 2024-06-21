@@ -5,6 +5,7 @@
 
 t_log* info_logger;
 t_log* error_logger;
+t_log* warning_logger;
 char* PUERTO_DISPATCH;
 char* PUERTO_INTERRUPT;
 char* ALGORITMO_TLB;
@@ -26,6 +27,8 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     info_logger = log_create("info_logger.log","Cpu", true, LOG_LEVEL_INFO);
 	error_logger = log_create("error_logger.log","Cpu", true, LOG_LEVEL_ERROR);
+	warning_logger = log_create("warning_logger.log", "Memory", true, LOG_LEVEL_WARNING);
+
 	PUERTO_DISPATCH = config_get_string_value(config, "PUERTO_ESCUCHA_DISPATCH");
 	PUERTO_INTERRUPT = config_get_string_value(config, "PUERTO_ESCUCHA_INTERRUPT");
 	

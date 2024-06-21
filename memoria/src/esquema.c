@@ -110,13 +110,12 @@ uint32_t obtenerPaginaConMarco(uint32_t marco){
 
 
 void* leerMemoria(uint32_t direccionFisica, uint32_t tamanio, uint32_t pid){	//Devuelve el valor de la direccion fisica pedida
-    void* datosPuntero = malloc(tamanio);
-
-    memcpy(datosPuntero, espacio_contiguo + direccionFisica, tamanio);
+    void* datos = malloc(tamanio);
+    memcpy(datos, espacio_contiguo + direccionFisica, tamanio);
 	log_info(info_logger,"PID: <%d> - Accion: <LEER> - Direccion fisica: <%d> - Tamanio: <%d>", pid, direccionFisica, tamanio); //log obligatorio
     simularRetardoSinMensaje(RETARDO_RESPUESTA);
-
-    return datosPuntero;
+    //log_warning(warning_logger, "VALOR de leerMemoria: %s", datos);
+    return datos;
 }
 
 void escribirMemoria(uint32_t direccionFisica, void* datos, uint32_t tamanio, uint32_t pid){	//Escribir lo indicado a partir de la dirección física pedida

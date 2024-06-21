@@ -963,3 +963,43 @@ char* recibirEnteroEnteroEnteroEnteroChar(int socket_cliente, uint32_t* entero1,
 
 	return palabraRecibida;
 }
+
+char* recibirEnteroEnteroEnteroChar(int socket_cliente, uint32_t* entero1, uint32_t* entero2, uint32_t* entero3){
+	uint32_t tamanioBuffer;
+	uint32_t desplazamiento = 0;
+	void *buffer = recibir_buffer(&tamanioBuffer, socket_cliente);
+
+	memcpy(entero1, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+	memcpy(entero2, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    memcpy(entero3, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+	uint32_t tamanioPalabra=0;
+	memcpy(&tamanioPalabra, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+	char* palabraRecibida = malloc(tamanioPalabra + 1);
+	memcpy(palabraRecibida, buffer + desplazamiento, tamanioPalabra + 1);
+	desplazamiento += tamanioPalabra + 1;
+
+	return palabraRecibida;
+}
+
+
+void enviar_uint32_y_uint32_y_uint32_y_char(char* path, uint32_t valor1, uint32_t valor2, uint32_t valor3, int socket, op_code_cliente orden, t_log *logger){
+    t_paquete * paquete= crear_paquete(orden, logger);
+    agregar_a_paquete2(paquete, &valor1, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &valor2, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &valor3, sizeof(uint32_t));
+
+    uint32_t largo_nombre = strlen(path) + 1;
+	agregar_a_paquete2(paquete, &largo_nombre, sizeof(uint32_t));
+	agregar_a_paquete2(paquete, path, largo_nombre);
+
+    enviar_paquete(paquete,socket);
+    eliminar_paquete(paquete);
+}

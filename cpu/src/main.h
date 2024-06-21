@@ -16,6 +16,7 @@
 extern t_config* config;
 extern t_log* info_logger;
 extern t_log* error_logger;
+extern t_log* warning_logger;
 extern sem_t bin_ciclo;
 
 extern char* ALGORITMO_TLB;
