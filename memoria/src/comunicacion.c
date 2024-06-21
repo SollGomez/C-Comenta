@@ -104,9 +104,7 @@ void cualInterfaz(int tipoInterfaz){
 				t_paquete* paquete = crear_paquete(SOLICITUDINSTRUCCION, info_logger);
 				Instruccion* instruccion;
 				log_trace(trace_logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
-				log_trace(trace_logger, "size instruccionesProceso antes de retorno: %d", list_size(instruccionesDeProcesos));
 				instruccion = retornarInstruccionACPU(*(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1)); // pid y pc
-				log_trace(trace_logger, "size instruccionesProceso despues de retorno: %d", list_size(instruccionesDeProcesos));
 				//log_trace(trace_logger, "Instruccion: %s %s %s", instruccion->id, instruccion->param1, instruccion->param2);
 				usleep(RETARDO_RESPUESTA*1000); //ver si cambiar a sleep
 				// log_info(info_logger, "instruccion: %s %s %s %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2
@@ -240,81 +238,126 @@ void PaqueteHand(int conexion, t_log* logger){
 
 void realizarPedidoLectura(int cliente_socket){			//Vale para io y cpu. Les manda LECTURA_REALIZADA
     t_list* listaInts = recibirListaUint32_t(cliente_socket);	// 0 pid, 1 dirfisica, 2 tamanio
+    uint32_t pid = *(uint32_t*)list_get(listaInts,0);
     uint32_t posicion = *(uint32_t*)list_get(listaInts,1);
     uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);
-    uint32_t pid = *(uint32_t*)list_get(listaInts,0);
 
     pthread_mutex_lock(&mutex_espacioContiguo);
     log_trace(trace_logger,"Accediendo a Espacio de Usuario para Lectura en la Dirección: <%d> de Tamanio: <%d> para el Proceso con PID: <%d>", posicion, tamanio, pid);
-    void* datos = malloc(tamanio);
-	datos = manejarLectura(posicion, tamanio, pid);
+    uint32_t datos = manejarLectura(posicion, tamanio, pid);
     log_trace(trace_logger,"Se accedió a Espacio de Usuario correctamente");
     pthread_mutex_unlock(&mutex_espacioContiguo);
-    t_datos* unosDatos = malloc(sizeof (t_datos));
-    unosDatos->datos = datos;
-    unosDatos->tamanio = tamanio;
-    enviarListaIntsYDatos(listaInts, unosDatos, cliente_socket, info_logger, LECTURA_REALIZADA);
-    free(datos);
-    free(unosDatos);
-    list_clean_and_destroy_elements(listaInts,free);
-    list_destroy(listaInts);
+	log_trace(trace_logger, "ANTES DE ADD..");
+	list_add(listaInts, &datos);
+	log_trace(trace_logger, "DESPUES DE ADD..");
+    //t_datos* unosDatos = malloc(sizeof (t_datos));
+    //unosDatos->datos = datos;
+    //unosDatos->tamanio = tamanio;
+	enviarListaUint32_t(listaInts, cliente_socket, info_logger, LECTURA_REALIZADA);
+	log_trace(trace_logger, "DESPUES DE ADD..");
+
+    //enviarListaIntsYDatos(listaInts, unosDatos, cliente_socket, info_logger, LECTURA_REALIZADA);
+    // free(datos);
+    // free(unosDatos);
+    //list_clean_and_destroy_elements(listaInts,free);
+    //list_destroy(listaInts);
 }
 
-void* manejarLectura(uint32_t posInicial, uint32_t tamanio, uint32_t pid) {
-	uint32_t offset = 0;
-	void* datos = malloc(tamanio);
+uint32_t manejarLectura(uint32_t posInicial, uint32_t tamanio, uint32_t pid) {
+	uint32_t datos = 0;
+	void* datosPuntero = &datos;
+	uint32_t lei = 0;
 	uint32_t frameQueCorresponde = posInicial / TAM_PAGINA;
-	uint32_t tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
+	uint32_t tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial; //cuanto puedo leer en el frame actual
 	uint32_t pagActual;
 
-	while(tamanio > tamPrimerFrame) {
-		memcpy(datos+offset, leerMemoria(posInicial, tamPrimerFrame, pid), tamPrimerFrame);
-		offset += tamPrimerFrame;
-		pagActual = obtenerPaginaConMarco(frameQueCorresponde);
-		frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual+1);
-		posInicial = frameQueCorresponde * TAM_PAGINA;
-		tamanio -= tamPrimerFrame;
-		tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
-	}
-	memcpy(datos+offset, leerMemoria(posInicial, tamanio, pid), tamanio);
-	return datos;
-}
+	if(tamPrimerFrame >= tamanio){
+		log_trace(trace_logger, "VOY A LEI EN UN SOLO FRAME");
+		memcpy(datosPuntero, leerMemoria(posInicial, tamanio, pid), tamanio);
+		log_trace(trace_logger, "YA LEI %d EN UN SOLO FRAME", datos);
 
-void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32_t pid, uint32_t bytes) {
-	uint32_t offset = 0;
-	uint32_t frameQueCorresponde = posInicial / TAM_PAGINA;
-	uint32_t tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
-	uint32_t pagActual;
-	
-	while(tamanio > tamPrimerFrame) {
-		log_trace(trace_logger, "tamanio a leer %d, tamanio que puedo leer en esta pag %d", bytes, tamPrimerFrame);
-		escribirMemoria(posInicial, datos+offset, tamPrimerFrame, pid, bytes);
-		offset += tamPrimerFrame;
+	}else{
+		memcpy(datosPuntero, leerMemoria(posInicial, tamanio, pid), tamanio);
+		lei += tamPrimerFrame;
 		pagActual = obtenerPaginaConMarco(frameQueCorresponde);
 		frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual+1);
 		posInicial = frameQueCorresponde * TAM_PAGINA;
 		tamanio = tamanio - tamPrimerFrame;
 		tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
-		log_trace(trace_logger, "escribo en la siguiente pagina");
+		memcpy(datosPuntero+lei, leerMemoria(posInicial+lei, tamanio, pid), tamanio);
 	}
-	escribirMemoria(posInicial, datos+offset, tamanio, pid, bytes);
+	log_trace(trace_logger, "POR SALIR DE MANEJAR LECTURA...");
+	return datos;
+
+	// while(tamanio > tamPrimerFrame) {
+	// 	memcpy(datos+offset, leerMemoria(posInicial, tamPrimerFrame, pid), tamPrimerFrame);
+	// 	offset += tamPrimerFrame;
+	// 	pagActual = obtenerPaginaConMarco(frameQueCorresponde);
+	// 	frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual+1);
+	// 	posInicial = frameQueCorresponde * TAM_PAGINA;
+	// 	tamanio -= tamPrimerFrame;
+	// 	tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
+	// }
+	// memcpy(datos+offset, leerMemoria(posInicial, tamanio, pid), tamanio);
+	// return datos;
+}
+
+void manejarEscritura(uint32_t posInicial, uint32_t datos, uint32_t pid, uint32_t tamanio) {
+
+	void* punteroDatos = &datos;
+	// uint8_t* datosP1 = punteroDatos;
+	// uint8_t* datosP2  = punteroDatos + 1;
+	// uint8_t* datosP3  = punteroDatos + 2;
+	// uint8_t* datosP4  = punteroDatos + 3;
+
+	uint32_t escribi = 0;
+	uint32_t frameQueCorresponde = posInicial / TAM_PAGINA;
+	uint32_t tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial; //cuanto puedo leer en el frame actual
+	uint32_t pagActual;
+
+	if(tamPrimerFrame >= tamanio)
+		escribirMemoria(posInicial, punteroDatos, tamanio, pid);
+	else{
+		escribirMemoria(posInicial, punteroDatos, tamPrimerFrame, pid);
+		escribi += tamPrimerFrame;
+		pagActual = obtenerPaginaConMarco(frameQueCorresponde);
+		frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual+1);
+		posInicial = frameQueCorresponde * TAM_PAGINA;
+		tamanio = tamanio - tamPrimerFrame;
+		tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
+		escribirMemoria(posInicial+escribi, punteroDatos+escribi, tamanio, pid);
+	}
+	// while(tamanio > tamPrimerFrame) {
+	// 	log_trace(trace_logger, "tamanio a leer %d, tamanio que puedo leer en esta pag %d", tamanio, tamPrimerFrame);
+	// 	escribirMemoria(posInicial, datos+offset, tamPrimerFrame, pid, tamanio);
+	// 	offset += tamPrimerFrame;
+	// 	pagActual = obtenerPaginaConMarco(frameQueCorresponde);
+	// 	frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual+1);
+	// 	posInicial = frameQueCorresponde * TAM_PAGINA;
+	// 	tamanio = tamanio - tamPrimerFrame;
+	// 	tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
+	// 	log_trace(trace_logger, "escribo en la siguiente pagina");
+	// }
+	// escribirMemoria(posInicial, datos+offset, tamanio, pid, tamanio);
 	return;
 }
 
 void realizarPedidoEscritura(int cliente_socket){		//Vale para io y cpu. Les manda ESCRITURA_REALIZADA
-    t_datos* unosDatos = malloc(sizeof(t_datos));
-    t_list* listaInts = recibirListaIntsYDatos(cliente_socket, unosDatos);
-    uint32_t* pid = list_get(listaInts,0);
-    uint32_t* posicion = list_get(listaInts,1);
-    uint32_t* tamanio = list_get(listaInts,2);
+    //t_datos* unosDatos = malloc(sizeof(t_datos));
+    //t_list* listaInts = recibirListaIntsYDatos(cliente_socket, unosDatos);
+	t_list* listaInts = recibirListaUint32_t(cliente_socket);
+    uint32_t* pid = list_get(listaInts, 0);
+    uint32_t* posicion = list_get(listaInts, 1);
+    uint32_t* tamanio = list_get(listaInts, 2);
+	uint32_t* valor = list_get(listaInts, 3);
 
     pthread_mutex_lock(&mutex_espacioContiguo);
-    log_trace(trace_logger,"me llego pid %d, pos %d y tamanio %d y valor %s", *pid, *posicion, *tamanio, unosDatos->datos);
+    log_trace(trace_logger,"me llego pid %d, pos %d y tamanio %d y valor %d", *pid, *posicion, *tamanio, *valor);
 	//manejarEscritura(*posicion, unosDatos->datos, unosDatos->tamanio, *pid, *tamanio);
-	manejarEscritura(*posicion, unosDatos->datos, unosDatos->tamanio, *pid, *tamanio);
+	manejarEscritura(*posicion, *valor, *pid, *tamanio);
     //log_trace(trace_logger,"Se accedio a Espacio de Usuario correctamente");
-    free(unosDatos->datos);
-    free(unosDatos);
+    //free(unosDatos->datos);
+    //free(unosDatos);
     list_clean_and_destroy_elements(listaInts, free);
     list_destroy(listaInts);
     pthread_mutex_unlock(&mutex_espacioContiguo);
