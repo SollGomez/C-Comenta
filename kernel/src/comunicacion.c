@@ -484,7 +484,7 @@ void escucharCPU (void) {
 				actualizarPcbEjecucion(pcbRecibida);
 				PCB* pcbActualizada = obtenerPcbExec();
 				moverProceso_ExecExit(pcbActualizada);//Antes exec ready
-				log_info(info_logger, "PID <%d> Out Of Memory", pcbActualizada->id);
+				log_info(info_logger,"Finaliza el proceso <%d> - Motivo: <OUT_OF_MEMORY>",pcbActualizada->id);
 				break;
 			}
 			case -1:

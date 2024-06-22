@@ -81,7 +81,7 @@ void COPY_STRING(char* tamanio){
     uint32_t direccionFisicaOrigen = traducir_direccion_logica(direccionLogicaOrigen);
     uint32_t direccionFisicaDestino = traducir_direccion_logica(direccionLogicaDestino);
 
-    char* valor;
+    uint32_t valor;
     valor = leer_valor_de_memoria(direccionFisicaOrigen, tam);
     escribir_valor_en_memoria(direccionFisicaDestino, tam, valor);
     //free(valor);
@@ -121,13 +121,15 @@ void ejecutar_MOV_IN(char* registro, int direccion_logica) {
 	int direccion_fisica = traducir_direccion_logica(direccion_logica);
 
     if (!(direccion_fisica < 0)) {
-    	   char* valor;
-           valor = leer_valor_de_memoria(direccion_fisica, cantidad_bytes);
-           log_info(info_logger, "LEI: %s", valor);
-           log_info(info_logger, "Pongo valor %s en el registro  %s", valor, registro);
-           cambiar_valor_del_registroCPU(registro,valor);
-           //free(valor);
-           PCB_Actual->program_counter++;
+
+        uint32_t valor = leer_valor_de_memoria(direccion_fisica, cantidad_bytes);
+        char buffer[20];
+        sprintf(buffer, "%d", valor);
+        log_info(info_logger, "LEI: %s", buffer);
+        log_info(info_logger, "Pongo valor %s en el registro %s", buffer, registro);
+        cambiar_valor_del_registroCPU(registro,buffer);
+        //free(valor);
+        PCB_Actual->program_counter++;
     }
 }
 
@@ -138,11 +140,11 @@ void ejecutar_MOV_OUT(int direccion_logica, char* registro) {
 	int valorDelRegistro = obtener_valor_registroCPU(registro);
     int direccion_fisica = traducir_direccion_logica(direccion_logica);
 
-    char buffer[20];
-	sprintf(buffer, "%d", valorDelRegistro);
+    // char buffer[20];
+	// sprintf(buffer, "%d", valorDelRegistro);
 
     if (!(direccion_fisica < 0)) {
-        escribir_valor_en_memoria(direccion_fisica,cantidad_bytes, buffer);
+        escribir_valor_en_memoria(direccion_fisica,cantidad_bytes, valorDelRegistro);
         PCB_Actual->program_counter++;
     }
     //free(valorDelRegistro);
@@ -309,7 +311,7 @@ void ejecutar_EXIT(){
     cicloInstrucciones = false;
 }
 
-char* leer_valor_de_memoria(int direccion_fisica, int bytesRegistro) {
+uint32_t leer_valor_de_memoria(int direccion_fisica, int bytesRegistro) {
 
     t_list* listaInts = list_create();
     uint32_t uint32t_dir_fis = direccion_fisica;
@@ -320,19 +322,19 @@ char* leer_valor_de_memoria(int direccion_fisica, int bytesRegistro) {
     list_add(listaInts, &uint32t_tamanio);
 
     enviarListaUint32_t(listaInts,memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA); //pid, direccion, tamanio
-    char* valor = recibir_valor_de_memoria();
-    log_warning(warning_logger, "VALOR LEIDO DE MEMORIA2: %d", valor);
+    uint32_t valor = recibir_valor_de_memoria();
+    log_warning(warning_logger, "VALOR LEIDO DE MEMORIA: %d", valor);
 
     list_clean(listaInts);
     list_destroy(listaInts);
-    log_info(info_logger, "PID: <%d> - Acción: <LEER> - Dirección Fisica: <%d> - Valor: <%s", PCB_Actual->id, direccion_fisica, valor);
+    log_info(info_logger, "PID: <%d> - Acción: <LEER> - Dirección Fisica: <%d> - Valor: <%d", PCB_Actual->id, direccion_fisica, valor);
 
     return valor;
 }
 
-char* recibir_valor_de_memoria(){
+uint32_t recibir_valor_de_memoria(){
 
-        char* valor;
+        uint32_t valor;
         int cod_op = recibir_operacion(memoria_fd);
 
 		switch (cod_op) {
@@ -341,14 +343,14 @@ char* recibir_valor_de_memoria(){
             t_list* listaInts = recibirListaIntsYDatos(memoria_fd,unosDatos);
             //t_list* listaInts = recibirListaUint32_t(memoria_fd); //pid, direcicon, tamanio, valor
             uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);
-            //valor = *(uint32_t*)list_get(listaInts,3);
             log_info(info_logger, "TAMANIO LEIDO DE MEMORIA: %d", tamanio);
-            valor = malloc(unosDatos->tamanio+1);
-            memcpy(valor,unosDatos->datos,tamanio);
-            log_info(info_logger, "VALOR LEIDO DE MEMORIA: %s", valor);
-            valor[tamanio] = '\0';
-            free(unosDatos->datos);
-            free(unosDatos);
+            valor = *(uint32_t*)list_get(listaInts,3);
+            //valor = malloc(unosDatos->tamanio+1);
+            //memcpy(valor,unosDatos->datos,tamanio);
+            log_info(info_logger, "VALOR LEIDO DE MEMORIA: %d", valor);
+            // valor[tamanio] = '\0';
+            // free(unosDatos->datos);
+            // free(unosDatos);
             list_clean_and_destroy_elements(listaInts,free);
             list_destroy(listaInts);
 
@@ -361,27 +363,27 @@ char* recibir_valor_de_memoria(){
     return valor;
 }
 
-void escribir_valor_en_memoria(int direccion_fisica, int cantidad_bytes, char* valor) {
-    // t_list* listaInts = list_create();
+void escribir_valor_en_memoria(int direccion_fisica, int cantidad_bytes, uint32_t valor) {
+    t_list* listaInts = list_create();
     // t_datos* unosDatos = malloc(sizeof(t_datos));
     // unosDatos->tamanio = strlen(valor);
     // unosDatos->datos = &valor;
-    // list_add(listaInts, &PCB_Actual->id);
-    // list_add(listaInts, &direccion_fisica);
-    // list_add(listaInts, &cantidad_bytes);
-    //list_add(listaInts, &valor);
-    enviar_uint32_y_uint32_y_uint32_y_char(valor, PCB_Actual->id, direccion_fisica, cantidad_bytes, memoria_fd, ACCESO_PEDIDO_ESCRITURA, info_logger);
-    log_warning(warning_logger, "MANDO A LEER: %s", valor);
+    list_add(listaInts, &PCB_Actual->id);
+    list_add(listaInts, &direccion_fisica);
+    list_add(listaInts, &cantidad_bytes);
+    list_add(listaInts, &valor);
+    //enviar_uint32_y_uint32_y_uint32_y_char(valor, PCB_Actual->id, direccion_fisica, cantidad_bytes, memoria_fd, ACCESO_PEDIDO_ESCRITURA, info_logger);
+    log_warning(warning_logger, "MANDO A ESCRIBIR: %d", valor);
 
     //enviarListaIntsYDatos(listaInts, unosDatos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
-    //enviarListaUint32_t(listaInts, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
+    enviarListaUint32_t(listaInts, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
 
-    // list_clean(listaInts);
-    // list_destroy(listaInts);
+    list_clean(listaInts);
+    list_destroy(listaInts);
 
     char* valor2 = recibir_confirmacion_de_escritura();
     if (strcmp(valor2, "OK") == 0) 
-        log_info(info_logger, "PID: <%d> - Accion: <ESCRIBIR> - Dirección Fisica: <%d> - Valor: <%s>", PCB_Actual->id, direccion_fisica, valor);
+        log_info(info_logger, "PID: <%d> - Accion: <ESCRIBIR> - Dirección Fisica: <%d> - Valor: <%d>", PCB_Actual->id, direccion_fisica, valor);
     //free(unosDatos);
 }
 

@@ -197,7 +197,7 @@ void* finalizarProceso (void* pid) {
 	}
 
 	if (numCola != 3) {
-		log_info(info_logger,"Finaliza el proceso <%d> - Motivo: <SUCCESS>",pcbBuscado->id);
+		log_info(info_logger,"Finaliza el proceso <%d> - Motivo: <INTERRUPTED_BY_USER>",pcbBuscado->id);
 		sem_post(&sem_cpuLibre);
 
 		pthread_mutex_lock(&mutex_colaExit);
