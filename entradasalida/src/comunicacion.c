@@ -329,19 +329,22 @@ void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede ca
 	int conexion = *((int*) cliente_socket);
 	char* textoAMostrar = malloc(sizeof(char*));
 
-	t_datos* datitos = malloc(sizeof(t_datos));
 
-	t_list* listaInts;
+	t_list* listaInts = list_create();
 
-	list_create(listaInts);
+	listaInts = recibirListaUint32_t(conexion);
 
-	listaInts = recibirListaIntsYDatos(conexion, datitos);
+	uint32_t pid = *(uint32_t*) list_get(listaInts, 0);
+	uint32_t tamanio = *(uint32_t*) list_get(listaInts, 2);
+	uint32_t datos = *(uint32_t*)list_get(listaInts, 3);
 
-	uint32_t pid = list_get(listaInts, 0);
+	char datosLeidos[tamanio];
+
+	memcpy(&datosLeidos, &datos, tamanio);
 
 	usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 10000);
 
-	printf("\n\n PID <%d> - <%s>\n\n", pid, datitos->datos);
+	printf("\n\n PID <%d> - <%s>\n\n", pid, datosLeidos);
 
 	enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd, info_logger);
 	return NULL;
@@ -371,9 +374,10 @@ void *solicitudIO_STDIN_READ(void* cliente_socket) {
 	listaEnteros = recibirListaUint32_t(conexion);	// 0 pid, 1 dirfisica, 2 tamanio
 	uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0); 
 	uint32_t direccionFisica = *(uint32_t*)list_get(listaEnteros, 1);
+	uint32_t tamanio = *(uint32_t*)list_get(listaEnteros, 2);
 
 	logOperacion(pid, "IO_STDIN_READ");
-	manejarInterfazStdin(direccionFisica, pid);
+	manejarInterfazStdin(direccionFisica, pid, tamanio);
 
 	return NULL;
 }

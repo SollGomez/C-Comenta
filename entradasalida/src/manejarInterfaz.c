@@ -31,21 +31,27 @@ void manejarInterfazGenerica(uint32_t unidadesDeTrabajo) {
         printf("SLEEP TERMINADO\n");
 }
 
-void manejarInterfazStdin(uint32_t direccionFisicaAEscribir, uint32_t pid) {
+void manejarInterfazStdin(uint32_t direccionFisicaAEscribir, uint32_t pid, uint32_t tamanio) {
 
-    t_datos* datos = malloc(sizeof(t_datos));
-    datos->datos = readline(">");
+    char* datosLeidos = readline(">");
+
+    uint32_t datosAEnviar;
+
+    memcpy(&datosAEnviar, &datosAEnviar, tamanio);
 
     t_list* listaEnteros;
     listaEnteros = list_create();
 
-    list_add(listaEnteros, &pid);
+    list_add(listaEnteros, &pid);               
     list_add(listaEnteros, &direccionFisicaAEscribir);
+    list_add(listaEnteros, &tamanio);
+    list_add(listaEnteros, &datosAEnviar);
 
-    log_trace(trace_logger, "El texto ingresado fue: %s", datos->datos);
+    log_trace(trace_logger, "El texto ingresado fue: %s", datosLeidos);
     
-    enviarListaIntsYDatos(listaEnteros, datos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
+    enviarListaUint32_t(listaEnteros, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
 
+    free(datosLeidos);
 
 }
 
