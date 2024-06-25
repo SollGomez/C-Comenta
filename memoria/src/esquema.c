@@ -91,20 +91,25 @@ uint32_t obtenerMarcoDePagina(uint32_t pid, uint32_t numeroPagina){
 		return pagina->marco;
 	}
 	else{
+		log_trace(trace_logger,"No encontre frame de la pag %d", numeroPagina); //log obligatorio
 		return -1;//HAY QUE VER QUE PASA SI HAY OUT OF MEMORY
     }
 }
 
 uint32_t obtenerPaginaConMarco(uint32_t marco){
+    log_trace(trace_logger, "busco marco %d", marco);
+
     for (int i = 0; i < list_size(tablaGeneral); i++) {
         TablaDePaginas* tabla = list_get(tablaGeneral, i);
         for (int j = 0; j < list_size(tabla->paginas); j++) {
             Pagina* pagina = list_get(tabla->paginas, j);
-            if (pagina->marco == marco)
+            if (pagina->marco == marco){
+                log_trace(trace_logger, "Encontre pag %d", j);
                 return j;
+            }
         }
     }
-    log_trace(trace_logger, "El marco solicitado está vacío");
+    log_trace(trace_logger, "El marco %d solicitado está vacío", marco);
     return NULL;
 }
 

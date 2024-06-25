@@ -226,15 +226,21 @@ uint32_t manejarLectura(uint32_t posInicial, uint32_t tamanio, uint32_t pid) {
 	uint32_t lei = 0;
 	uint32_t frameQueCorresponde = posInicial / TAM_PAGINA;
 	uint32_t tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial; //cuanto puedo leer en el frame actual
-	uint32_t pagActual;
 
 	while(tamanio > tamPrimerFrame) {
 		memcpy(datosPuntero+lei, leerMemoria(posInicial, tamPrimerFrame, pid), tamPrimerFrame);
-		lei += tamPrimerFrame;
-		pagActual = obtenerPaginaConMarco(frameQueCorresponde);
-		frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual+1);
+		uint32_t frameQueCorresponde2 = posInicial / TAM_PAGINA;
+		uint32_t pagActual2 = obtenerPaginaConMarco(frameQueCorresponde2); 
+		lei = lei + tamPrimerFrame;
+		log_trace(trace_logger, "Pag Actual: %d", pagActual2);
+		log_trace(trace_logger, "Frame a buscar: %d", frameQueCorresponde2);
+		uint32_t tamPrimerFrame2 = TAM_PAGINA * (frameQueCorresponde2 + 1) - posInicial; //cuanto puedo leer en el frame actual
+
+		frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual2+1);
 		posInicial = frameQueCorresponde * TAM_PAGINA;
-		tamanio -= tamPrimerFrame;
+		log_trace(trace_logger, "Tamanio antes: %d", tamanio);
+		tamanio = tamanio - tamPrimerFrame2;
+		log_trace(trace_logger, "Tamanio despues: %d", tamanio);
 		tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
 	}
 	memcpy(datosPuntero+lei, leerMemoria(posInicial, tamanio, pid), tamanio);
@@ -250,15 +256,17 @@ void manejarEscritura(uint32_t posInicial, uint32_t datos, uint32_t pid, uint32_
 	uint32_t pagActual;
 
 	while(tamanio > tamPrimerFrame) {
-		log_trace(trace_logger, "tamanio a leer %d, tamanio que puedo leer en esta pag %d", tamanio, tamPrimerFrame);
+		log_trace(trace_logger, "tamanio a escribir %d, tamanio que puedo leer en esta pag %d", tamanio, tamPrimerFrame);
 		escribirMemoria(posInicial, punteroDatos+escribi, tamPrimerFrame, pid);
 		escribi += tamPrimerFrame;
+
+		log_trace(trace_logger, "frameQueCorresponde: %d ", frameQueCorresponde);
 		pagActual = obtenerPaginaConMarco(frameQueCorresponde);
 		frameQueCorresponde = obtenerMarcoDePagina(pid, pagActual+1);
 		posInicial = frameQueCorresponde * TAM_PAGINA;
 		tamanio = tamanio - tamPrimerFrame;
 		tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
-		log_trace(trace_logger, "escribo en la siguiente pagina");
+		log_trace(trace_logger, "escribo en la siguiente pagina(%d)", pagActual+1);
 	}
 	escribirMemoria(posInicial, punteroDatos+escribi, tamanio, pid);
 	return;

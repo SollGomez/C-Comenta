@@ -20,7 +20,7 @@ void manejarInterfazStdin(t_list* listaInts) {
 	uint32_t* direccionFisica = list_get(listaInts, 1);
     uint32_t* tamanio = list_get(listaInts, 2);
 
-    memcpy(&datosAEnviar, &datosAEnviar, tamanio);
+    memcpy(&datosAEnviar, &datosAEnviar, tamanio); //ESTA MAL QUE SEA DATOS A ENVIAR 2 VECES PERO ROMPE SINO 
 
    
 
