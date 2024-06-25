@@ -29,7 +29,7 @@ extern pthread_mutex_t mutexFS;
 
 int recibirConexion(char *);
 void *recibirCPU(void);
-void *recibirIO(int);
+void* recibirIO (void* interfaz_fd);
 void *recibirKernel();
 void cualInterfaz(int tipoInterfaz);
 

@@ -104,11 +104,7 @@ int conectarKernel(char *modulo){
 		recv(kernel_fd, listaDeArchivos, sizeof(tamanioLista), MSG_WAITALL);			//recibo lista de archivos
 	}
 
-	pthread_t tid;
-
-	pthread_create(&tid, NULL, recibirKernel, NULL);
-	pthread_join(tid, NULL);
-	
+	cualInterfaz();
 	log_destroy(loggerIOKernel);
 
 	return kernel_fd;
@@ -147,6 +143,38 @@ void paquete(int conexion, t_log* logger)
 	return;
 }
 
+void cualInterfaz() {
+	pthread_t tid;
+    switch (cfg_entradaSalida->TIPO_INTERFAZ_INT)
+    {
+    case 0:{
+		pthread_create(&tid, NULL, recibirKernelStdout, NULL);
+		pthread_join(tid, NULL);
+        break;
+	}
+    case 1:{
+		pthread_create(&tid, NULL, recibirKernelStdin, NULL);
+		pthread_join(tid, NULL);
+        break;
+	}
+    case 2:{
+		pthread_create(&tid, NULL, recibirKernelDialfs, NULL);
+		pthread_join(tid, NULL);
+        break;
+	}
+    case 3:{
+		pthread_create(&tid, NULL, recibirKernelGenerica, NULL);
+		pthread_join(tid, NULL);
+        break;
+	}
+    default:
+        printf("Esa interfaz no existe :/");
+        break;
+    }
+
+    return;
+}
+
 void terminar_programa(int conexion, t_log* logger){
 	log_destroy(logger);
 	liberar_conexion(conexion);
@@ -160,26 +188,24 @@ void *recibirMemoria() {
 	while(1) {
 		int cod_op = recibir_operacion(memoria_fd);
 
-			switch (cod_op)
-			{
+		switch (cod_op){
+
 			case LECTURA_REALIZADA:{
 				devolucionIO_STDOUT_WRITE(&memoria_fd);
 				break;
 
 			}
-				
 			case ESCRITURA_REALIZADA:{
+				log_info(info_logger, "Solicitud IO Cumplida");
 				enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd, info_logger);
 				break;
 			}
-
 			case -1:{
 
 				log_error(info_logger, "El cliente se desconecto");
 				return NULL;
 				break;
 			}
-			
 			default:{
 				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
 				break;
@@ -190,139 +216,115 @@ void *recibirMemoria() {
 	}
 }
 
-void *recibirKernel() {
 
+void* recibirKernelStdin() {
+	while(1) {
 
-	switch (cfg_entradaSalida->TIPO_INTERFAZ_INT)
-    {
-		case 0:{
+		int cod_op = recibir_operacion(kernel_fd);
 
-			while(1) {
-
-			int cod_op = recibir_operacion(kernel_fd);
-
-			switch (cod_op)
-			{
-				case IO_STDOUT_WRITE:{
-					solicitudIO_STDOUT_WRITE(&kernel_fd);
-					break;
-
-				}
-
-				case -1:{
-					log_error(info_logger, "El cliente se desconecto");
-					return NULL;
-					break;
-					
-				}
-				
-				default:{
-					log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-					break;
-
-				}
-			}
-		}
+		switch (cod_op)
+		{
+		case IO_STDIN_READ:
+			solicitudIO_STDIN_READ(&kernel_fd);
 			break;
-		}  					//STDOUT
-		case 1: {
-
-			while(1) {
-
-			int cod_op = recibir_operacion(kernel_fd);
-
-			switch (cod_op)
-			{
-				case IO_STDIN_READ:
-					solicitudIO_STDIN_READ(&kernel_fd);
-					break;
-				
-				case -1:
-					log_error(info_logger, "El cliente se desconecto");
-					return NULL;
-					break;
-				
-				default:
-					log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-					break;
-			}
-		}
+		
+		case -1:
+			log_error(info_logger, "El cliente se desconecto");
+			return NULL;
 			break;
-		} 						//STDIN
-		case 2:{
-
-			while(1) {
-
-			int cod_op = recibir_operacion(kernel_fd);
-
-			switch (cod_op)
-			{
-				case IO_FS_CREATE:
-
-					break;
-
-				case IO_FS_DELETE:
-			
-					break;
-
-				case IO_FS_READ:
-					
-					break;
-
-				case IO_FS_TRUNCATE:
-			
-					break;
-
-				case IO_FS_WRITE:
-
-					break;
-				
-				case -1:
-					log_error(info_logger, "El cliente se desconecto");
-					return NULL;
-					break;
-				
-				default:
-					log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-					break;
-			}
-		}
-			break;
-		} 					 	//DIALFS
-		case 3:{
-
-			while(1) {
-
-					int cod_op = recibir_operacion(kernel_fd);
-
-				switch (cod_op)
-				{
-					case IO_GEN_SLEEP: 	
-						solicitudIO_GEN_SLEEP(&kernel_fd);
-						break;
-					
-					case -1:
-						log_error(info_logger, "El cliente se desconecto");
-						return NULL;
-						break;
-					
-					default:
-						log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
-							break;
-				}
-		}
-			break;
-		}  						//GENERICA
-		default:{
-
-			printf("Esa interfaz no existe :/");
+		
+		default:
+			log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
 			break;
 		}
-    }
-
-
-	return NULL;
+	}
 }
+
+void* recibirKernelStdout() {
+	while(1) {		
+
+		int cod_op = recibir_operacion(kernel_fd);
+
+		switch (cod_op)
+		{
+		case IO_STDOUT_WRITE:
+			solicitudIO_STDOUT_WRITE(&kernel_fd);
+			break;
+
+		case -1:
+			log_error(info_logger, "El cliente se desconecto");
+			return NULL;
+			break;
+		
+		default:
+			log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+			break;
+		}
+	}
+}
+
+void* recibirKernelGenerica() {
+	while(1) {
+	
+		int cod_op = recibir_operacion(kernel_fd);
+
+		switch (cod_op)
+		{
+		case IO_GEN_SLEEP: 	
+			solicitudIO_GEN_SLEEP(&kernel_fd);
+			break;
+		
+		case -1:
+			log_error(info_logger, "El cliente se desconecto");
+			return NULL;
+			break;
+		
+		default:
+			log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+				break;
+		}
+	}
+}
+
+void* recibirKernelDialfs() {
+	while(1) {
+
+		int cod_op = recibir_operacion(kernel_fd);
+
+		switch (cod_op)
+		{
+		case IO_FS_CREATE:
+
+			break;
+
+		case IO_FS_DELETE:
+	
+			break;
+
+		case IO_FS_READ:
+			
+			break;
+
+		case IO_FS_TRUNCATE:
+	
+			break;
+
+		case IO_FS_WRITE:
+
+			break;
+		
+		case -1:
+			log_error(info_logger, "El cliente se desconecto");
+			return NULL;
+			break;
+		
+		default:
+			log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+			break;
+		}
+	}
+}
+
 
 void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede causar problemas. Estar al tanto.
 
@@ -373,12 +375,11 @@ void *solicitudIO_STDIN_READ(void* cliente_socket) {
 	t_list* listaEnteros = list_create();
 	listaEnteros = recibirListaUint32_t(conexion);	// 0 pid, 1 dirfisica, 2 tamanio
 	uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0); 
-	uint32_t direccionFisica = *(uint32_t*)list_get(listaEnteros, 1);
-	uint32_t tamanio = *(uint32_t*)list_get(listaEnteros, 2);
+
 
 	logOperacion(pid, "IO_STDIN_READ");
-	manejarInterfazStdin(direccionFisica, pid, tamanio);
-
+	manejarInterfazStdin(listaEnteros);
+	
 	return NULL;
 }
 

@@ -1,57 +1,38 @@
 #include <manejarInterfaz.h>
 
 
-void cualInterfaz() {
 
-    switch (cfg_entradaSalida->TIPO_INTERFAZ_INT)
-    {
-    case 0:  //STDOUT
-        /* code */
-        break;
-    case 1:  //STDIN
-        /* code */
-        break;
-    case 2:  //DIALFS
-        /* code */
-        break;
-    case 3:  //GENERICA
-        break;
-    default:
-        printf("Esa interfaz no existe :/");
-        break;
-    }
-
-    return;
-}
 
 
 void manejarInterfazGenerica(uint32_t unidadesDeTrabajo) {    
-        sleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO+4);               //DESPUES VER SI ES USLEEP O SLEEP
-        // usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 100000);
-        printf("SLEEP TERMINADO\n");
+
+    sleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO+4);               //DESPUES VER SI ES USLEEP O SLEEP
+    // usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 100000);
+    printf("SLEEP TERMINADO\n");
 }
 
-void manejarInterfazStdin(uint32_t direccionFisicaAEscribir, uint32_t pid, uint32_t tamanio) {
+void manejarInterfazStdin(t_list* listaInts) {
 
     char* datosLeidos = readline(">");
 
     uint32_t datosAEnviar;
+    uint32_t* pid = list_get(listaInts, 0); 
+	uint32_t* direccionFisica = list_get(listaInts, 1);
+    uint32_t* tamanio = list_get(listaInts, 2);
 
     memcpy(&datosAEnviar, &datosAEnviar, tamanio);
 
-    t_list* listaEnteros;
-    listaEnteros = list_create();
+   
 
-    list_add(listaEnteros, &pid);               
-    list_add(listaEnteros, &direccionFisicaAEscribir);
-    list_add(listaEnteros, &tamanio);
-    list_add(listaEnteros, &datosAEnviar);
+    list_add(listaInts, &datosAEnviar);
+
+    log_info(info_logger ,"Mandando PID %d - direccion Fisica %d - tamanio %d", *pid, *direccionFisica, *tamanio);
 
     log_trace(trace_logger, "El texto ingresado fue: %s", datosLeidos);
     
-    enviarListaUint32_t(listaEnteros, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
+    enviarListaUint32_t(listaInts, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
 
-    free(datosLeidos);
+    //free(datosLeidos);
 
 }
 

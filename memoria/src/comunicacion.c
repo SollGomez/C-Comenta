@@ -4,6 +4,10 @@
 int memoria_fd;
 int cpu_fd;
 int interfazIO_fd[4];
+int stdout_fd;
+int stdin_fd;
+int dialfs_fd;
+int generica_fd;
 int kernel_fd;
 t_log* logger;
 
@@ -30,7 +34,9 @@ int recibirConexion(char *puerto) {
 		recv(entradasalida_fd, &tipoInterfaz, sizeof(int32_t), MSG_WAITALL);
 		interfazIO_fd[tipoInterfaz] = entradasalida_fd;
 		cualInterfaz(tipoInterfaz);
-		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, interfazIO_fd[tipoInterfaz]);
+		void* fdDeIo = &interfazIO_fd[tipoInterfaz];
+		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, fdDeIo);
+		pthread_detach(tid[tipoInterfaz]);
 	}
 	//pthread_join(tid[0], NULL);
 	//pthread_join(tid[1], NULL);
@@ -49,15 +55,12 @@ void cualInterfaz(int tipoInterfaz){
 	{
 	case 0: //STDOUT
 		log_info(logger, "Interfaz STDOUT conectada");
-		recibirIO(tipoInterfaz);
 		break;
 	case 1: //STDIN
 		log_info(logger, "Interfaz STDIN conectada");
-		recibirIO(tipoInterfaz);
 		break;
 	case 2: //DIAL_FS
 		log_info(logger, "Interfaz DIAL_FS conectada");
-		recibirIO(tipoInterfaz);
 		break;
 	default:
 		break;
@@ -126,16 +129,19 @@ void cualInterfaz(int tipoInterfaz){
 	}
 }
 
-void *recibirIO(int interfaz_fd) {
+void *recibirIO(void* interfaz_fd) {
+
+	int conexion = *((int*) interfaz_fd);
+	log_info(info_logger, "Conecto con una interfaz");
   	while(1) {
-  		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex;
+  		int cod_op = recibir_operacion(conexion); //seguro se necesita un mutex;
   		switch (cod_op) {
- 			case IO_STDIN_READ_DONE:{
-				realizarPedidoEscritura(interfaz_fd);
+ 			case ACCESO_PEDIDO_ESCRITURA:{
+				realizarPedidoEscritura(conexion);
  				break;
 			} //ACCESO_PEDIDO_ESCRITURA
- 			case IO_STDOUT_WRITE_LEER_DIRECCION_EN_MEMORIA:{
-				realizarPedidoLectura(interfaz_fd);
+ 			case ACCESO_PEDIDO_LECTURA:{
+				realizarPedidoLectura(conexion);
  				break;
 			} //ACCESO_PEDIDO_LECTURA
   			case -1:{

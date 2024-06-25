@@ -4,6 +4,7 @@ int cpuDispatch_fd;
 int cpuInterrupt_fd;
 int memoria_fd;
 int kernel_fd;
+int stdin_fd;
 int vectorIO[4];
 
 int recibirConexion (char* puerto) {
@@ -20,7 +21,9 @@ int recibirConexion (char* puerto) {
 		recv(entradasalida_fd, &tipoInterfaz, sizeof(int32_t), MSG_WAITALL);
 		vectorIO[tipoInterfaz] = entradasalida_fd;
 		cualInterfaz(tipoInterfaz);
-		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, vectorIO[tipoInterfaz]);
+		void* fdDeIo = &vectorIO[tipoInterfaz];
+		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, fdDeIo);
+		pthread_detach(tid[tipoInterfaz]);
 	}
 
 	return EXIT_SUCCESS;
@@ -156,12 +159,16 @@ int conectarModuloMemoria(char *modulo){
 	return memoria_fd;
 }
 
-void* recibirIO (int interfaz_fd) {
+void* recibirIO (void* interfaz_fd) {
+
+	int conexion = *((int*) interfaz_fd);
+
 	while (1) {
 		t_log* logger;
 		logger = iniciar_logger("recibirIO.log");
 
-		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex
+
+		int cod_op = recibir_operacion(conexion); //seguro se necesita un mutex
 		// pthread_mutex_lock(&mutexFS);
 
 		t_list *lista = list_create();
@@ -214,15 +221,15 @@ void* recibirIO (int interfaz_fd) {
 				moverProceso_BloqReady(pcbBuscado);
 				break;
 			}
-			 case -1:
-				 log_error(logger, "el cliente se desconecto.");
-
-				 log_error(logger, "Terminando servidor ENTRADASALIDA");
-				 return NULL;
-
-			 default:
+			case -1:{
+				log_error(logger, "el cliente se desconecto.");
+				log_error(logger, "Terminando servidor ENTRADASALIDA");
+				return NULL;
+			}
+			default:{
 				log_warning(logger,"Operacion desconocida. No quieras meter la pata %d ", cod_op);
 				break;
+			}
 		}
 		//pthread_mutex_unlock(&mutexFS);
 	}
@@ -380,12 +387,12 @@ void escucharCPU (void) {
 				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
 
 				t_list* listaInts = list_create();
-
+				log_info(info_logger, "PID %d - dir fisica %d - tamanio %d", pcbActualizada->id, direccion_fisica, tamanio);
 				list_add(listaInts, &pcbActualizada->id);
 				list_add(listaInts, &direccion_fisica);
 				list_add(listaInts, &tamanio);
 
-				enviarListaUint32_t(listaInts,vectorIO[interfaz], info_logger, IO_STDIN_READ);
+				enviarListaUint32_t(listaInts, vectorIO[interfaz], info_logger, IO_STDIN_READ);
 				list_clean(listaInts);
 				list_destroy(listaInts);
 

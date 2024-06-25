@@ -4,9 +4,8 @@
 
 
 
-void cualInterfaz();
 void manejarInterfazGenerica(uint32_t unidadesDeTrabajo);
-void manejarInterfazStdin(uint32_t direccionFisica, uint32_t pid, uint32_t tamanio);
+void manejarInterfazStdin(t_list* listaInts);
 void crearArchivo(char* nombreArchivo);
 void eliminarArchivo(char* nombreArchivo);
 void truncarArchivo (char* nombreArchivo, uint32_t tamanio);
