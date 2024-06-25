@@ -98,13 +98,13 @@ int conectarKernel(char *modulo){
 
 	list_create(listaDeArchivos);
 	int32_t tamanioLista;
+	cualInterfaz();
 
 	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS") == 0){		// HABLAR CON AXO
 		recv(kernel_fd, &tamanioLista, sizeof(int32_t), MSG_WAITALL);				//sizeof(lista)
 		recv(kernel_fd, listaDeArchivos, sizeof(tamanioLista), MSG_WAITALL);			//recibo lista de archivos
 	}
 
-	cualInterfaz();
 	log_destroy(loggerIOKernel);
 
 	return kernel_fd;
@@ -197,7 +197,8 @@ void *recibirMemoria() {
 			}
 			case ESCRITURA_REALIZADA:{
 				log_info(info_logger, "Solicitud IO Cumplida");
-				enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd, info_logger);
+				uint32_t valor = recibirValor_uint32(memoria_fd);
+				enviarValor_uint32(valor, kernel_fd, SOLICITUD_IO_CUMPLIDA, info_logger);
 				break;
 			}
 			case -1:{

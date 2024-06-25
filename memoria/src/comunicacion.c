@@ -276,10 +276,11 @@ void realizarPedidoEscritura(int cliente_socket){		//Vale para io y cpu. Les man
     log_trace(trace_logger,"me llego pid %d, pos %d y tamanio %d y valor %d", *pid, *posicion, *tamanio, *valor);
 	manejarEscritura(*posicion, *valor, *pid, *tamanio);
 
+    pthread_mutex_unlock(&mutex_espacioContiguo);
+	enviarValor_uint32(*pid, cliente_socket, ESCRITURA_REALIZADA, info_logger);
+    //enviarOrden(ESCRITURA_REALIZADA, cliente_socket, info_logger);	// Memoria tiene que darle el pid a IO
     list_clean_and_destroy_elements(listaInts, free);
     list_destroy(listaInts);
-    pthread_mutex_unlock(&mutex_espacioContiguo);
-    enviarOrden(ESCRITURA_REALIZADA, cliente_socket, info_logger);
 }
 
 void inicializarProceso(int cliente_socket){
