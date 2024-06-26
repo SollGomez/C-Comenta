@@ -13,24 +13,14 @@ void manejarInterfazGenerica(uint32_t unidadesDeTrabajo) {
 
 void manejarInterfazStdin(t_list* listaInts) {
 
-    char* datosLeidos = readline(">");
+    t_datos* datos = malloc(sizeof(t_datos));
+    datos->datos = (void*)readline(">");
+    uint32_t tamanio = *(uint32_t*)list_get(listaInts, 1);
+    datos->tamanio = tamanio;
 
-    uint32_t datosAEnviar;
-    uint32_t* pid = list_get(listaInts, 0); 
-	uint32_t* direccionFisica = list_get(listaInts, 1);
-    uint32_t* tamanio = list_get(listaInts, 2);
-
-    memcpy(&datosAEnviar, &datosAEnviar, tamanio); //ESTA MAL QUE SEA DATOS A ENVIAR 2 VECES PERO ROMPE SINO 
-
-   
-
-    list_add(listaInts, &datosAEnviar);
-
-    log_info(info_logger ,"Mandando PID %d - direccion Fisica %d - tamanio %d", *pid, *direccionFisica, *tamanio);
-
-    log_trace(trace_logger, "El texto ingresado fue: %s", datosLeidos);
+    //log_trace(trace_logger, "El texto ingresado fue: %s", datos->datos);
     
-    enviarListaUint32_t(listaInts, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
+    enviarListaIntsYDatos(listaInts, datos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
 
     //free(datosLeidos);
 

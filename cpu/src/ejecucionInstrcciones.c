@@ -123,6 +123,7 @@ void ejecutar_MOV_IN(char* registro, int direccion_logica) {
     if (!(direccion_fisica < 0)) {
 
         uint32_t valor = leer_valor_de_memoria(direccion_fisica, cantidad_bytes);
+        log_info(info_logger, "LEI EN UINT: %d", valor);
         char buffer[20];
         sprintf(buffer, "%d", valor);
         log_info(info_logger, "LEI: %s", buffer);
@@ -340,17 +341,11 @@ uint32_t recibir_valor_de_memoria(){
 		switch (cod_op) {
 		case LECTURA_REALIZADA:{
             t_datos* unosDatos = malloc(sizeof(t_datos));
-            t_list* listaInts = recibirListaIntsYDatos(memoria_fd,unosDatos);
-            //t_list* listaInts = recibirListaUint32_t(memoria_fd); //pid, direcicon, tamanio, valor
+            t_list* listaInts = recibirListaUint32_t(memoria_fd); //pid, direcicon, tamanio, valor
             uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);
             log_info(info_logger, "TAMANIO LEIDO DE MEMORIA: %d", tamanio);
             valor = *(uint32_t*)list_get(listaInts,3);
-            //valor = malloc(unosDatos->tamanio+1);
-            //memcpy(valor,unosDatos->datos,tamanio);
             log_info(info_logger, "VALOR LEIDO DE MEMORIA: %d", valor);
-            // valor[tamanio] = '\0';
-            // free(unosDatos->datos);
-            // free(unosDatos);
             list_clean_and_destroy_elements(listaInts,free);
             list_destroy(listaInts);
 
@@ -365,18 +360,15 @@ uint32_t recibir_valor_de_memoria(){
 
 void escribir_valor_en_memoria(int direccion_fisica, int cantidad_bytes, uint32_t valor) {
     t_list* listaInts = list_create();
-    // t_datos* unosDatos = malloc(sizeof(t_datos));
-    // unosDatos->tamanio = strlen(valor);
-    // unosDatos->datos = &valor;
+    t_datos* unosDatos = malloc(sizeof(t_datos));
+    unosDatos->tamanio = cantidad_bytes;
+    unosDatos->datos = &valor;
     list_add(listaInts, &PCB_Actual->id);
     list_add(listaInts, &direccion_fisica);
     list_add(listaInts, &cantidad_bytes);
-    list_add(listaInts, &valor);
-    //enviar_uint32_y_uint32_y_uint32_y_char(valor, PCB_Actual->id, direccion_fisica, cantidad_bytes, memoria_fd, ACCESO_PEDIDO_ESCRITURA, info_logger);
     log_warning(warning_logger, "MANDO A ESCRIBIR: %d", valor);
 
-    //enviarListaIntsYDatos(listaInts, unosDatos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
-    enviarListaUint32_t(listaInts, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
+    enviarListaIntsYDatos(listaInts, unosDatos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
 
     list_clean(listaInts);
     list_destroy(listaInts);
