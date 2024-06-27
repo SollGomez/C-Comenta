@@ -349,8 +349,7 @@ void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede ca
 
 	printf("\n\n PID <%d> - <%s>\n\n", pid, datosLeidos);
 
-	enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd, info_logger);
-	enviarValor_uint32(pid, kernel_fd, info_logger);
+	enviarValor_uint32(pid, kernel_fd, SOLICITUD_IO_CUMPLIDA, info_logger);
 	return NULL;
 }
 
