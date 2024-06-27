@@ -438,7 +438,7 @@ t_list* recibirListaIntsYDatos(int socket_cliente,t_datos* datos){
     desplazamiento+=sizeof(uint8_t);
 
     for (int i = 0; i < cantidad_ints; ++i) {
-        uint32_t* nuevoEntero = malloc(sizeof(uint32_t));
+        uint32_t* nuevoEntero = malloc(sizeof(uint32_t));//Nunca se libera
         memcpy(nuevoEntero, buffer + desplazamiento, sizeof (uint32_t));
         desplazamiento+=sizeof(uint32_t);
         list_add(listaInts, nuevoEntero);
@@ -446,7 +446,7 @@ t_list* recibirListaIntsYDatos(int socket_cliente,t_datos* datos){
 
     memcpy(&datos->tamanio, buffer + desplazamiento, sizeof (uint32_t));
     desplazamiento+=sizeof(uint32_t);
-    datos->datos = malloc(datos->tamanio);
+    datos->datos = malloc(datos->tamanio);//Se libera?
     memcpy(datos->datos, buffer + desplazamiento, datos->tamanio);
 
     free(buffer);
@@ -455,30 +455,35 @@ t_list* recibirListaIntsYDatos(int socket_cliente,t_datos* datos){
 }
 
 void enviarOrden(op_code_cliente orden, int socket, t_log *logger) {
-    t_paquete * paquete= crear_paquete(orden, logger);
-    paquete->buffer->size+=sizeof (uint32_t);
+    t_paquete* paquete = crear_paquete(orden, logger);
+    paquete->buffer->size += sizeof(uint32_t);
     void* stream = malloc(paquete->buffer->size);
     uint32_t valor = 0;
-    int offset= 0;
-    memcpy(stream + offset, &valor, sizeof(uint32_t));
-    paquete->buffer->stream = stream;
-
-    enviar_paquete(paquete,socket);
-    eliminar_paquete(paquete);
-    free(valor);
-    free(offset);
-}
-
-void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger) {
-    t_paquete * paquete= crear_paquete(orden, logger);
-    paquete->buffer->size = sizeof(uint32_t);
-    void* stream = malloc(paquete->buffer->size);
     int offset = 0;
     memcpy(stream + offset, &valor, sizeof(uint32_t));
     paquete->buffer->stream = stream;
+
+    enviar_paquete(paquete,socket);
+    eliminar_paquete(paquete);
+    //free(valor);//Este creo que tambien rompe
+    //free(offset);//Esta bien este free?
+    //Habria que liberar el stream
+}
+
+void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger) {
+    t_paquete * paquete = crear_paquete(orden, logger);
+    paquete->buffer->size = sizeof(uint32_t);
+    void* stream = malloc(paquete->buffer->size);
+    int offset = 0;
+
+    memcpy(stream + offset, &valor, sizeof(uint32_t));
+    paquete->buffer->stream = stream;
+
     enviar_paquete(paquete,socket);
     log_info(logger, "se envio el paquete");
+
     eliminar_paquete(paquete);
+    //free(stream);
 }
 
 void* recibir_stream(int* size, uint32_t cliente_socket) {

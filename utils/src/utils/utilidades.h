@@ -18,6 +18,8 @@ void liberarPcbCpu(PCB* pcb);
 void enviar_uint32_y_uint32_y_char(char* path, uint32_t valor1, uint32_t valor2, int socket, op_code_cliente orden, t_log *logger);
 void recibirOrden(int socket);
 void enviarOrden(op_code_cliente orden, int socket, t_log *logger);
+(uint32_t pid, int kernel_fd, t_log* info_logger);
+
 void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger);
 void* recibir_stream(int* size, uint32_t cliente_socket);
 PCB* recibir_contextoEjecucion_y_char(int conexion);

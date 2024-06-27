@@ -350,6 +350,7 @@ void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede ca
 	printf("\n\n PID <%d> - <%s>\n\n", pid, datosLeidos);
 
 	enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd, info_logger);
+	enviarValor_uint32(pid, kernel_fd, info_logger);
 	return NULL;
 }
 
@@ -376,7 +377,7 @@ void *solicitudIO_STDIN_READ(void* cliente_socket) {
 	t_list* listaEnteros = list_create();
 	listaEnteros = recibirListaUint32_t(conexion);	// 0 pid, 1 dirfisica, 2 tamanio
 	uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0); 
-
+	//enviarListaUint32_t(listaEnteros, memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA);
 
 	logOperacion(pid, "IO_STDIN_READ");
 	manejarInterfazStdin(listaEnteros);
