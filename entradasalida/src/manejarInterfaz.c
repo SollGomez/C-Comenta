@@ -15,11 +15,11 @@ void manejarInterfazStdin(t_list* listaInts) {
 
     t_datos* datos = malloc(sizeof(t_datos));
     datos->datos = (void*)readline(">");
-    uint32_t tamanio = *(uint32_t*)list_get(listaInts, 1);
+    uint32_t tamanio = *(uint32_t*)list_get(listaInts, 2);
     datos->tamanio = tamanio;
 
-    //log_trace(trace_logger, "El texto ingresado fue: %s", datos->datos);
-    
+    log_trace(trace_logger, "El texto ingresado fue: %s", datos->datos);
+
     enviarListaIntsYDatos(listaInts, datos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
 
     //free(datosLeidos);

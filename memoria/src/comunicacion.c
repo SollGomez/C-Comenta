@@ -249,6 +249,7 @@ void* manejarLectura(uint32_t posInicial, uint32_t tamanio, uint32_t pid) {
 		log_trace(trace_logger, "frame 2: %d", frameQueCorresponde2);
 	}
 	memcpy(datos+lei, leerMemoria(posInicial, tamanio, pid), tamanio);
+
 	return datos;
 }
 
@@ -257,6 +258,8 @@ void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32
 	uint32_t frameQueCorresponde = posInicial / TAM_PAGINA;
 	uint32_t tamPrimerFrame = TAM_PAGINA * (frameQueCorresponde + 1) - posInicial;
 	uint32_t pagActual;
+
+	log_trace(trace_logger, "ME MANDARON A ESCRIBIR: %s", datos);
 	
 	while(tamanio > tamPrimerFrame) {
 		log_trace(trace_logger, "tamanio a leer %d, tamanio que puedo leer en esta pag %d", tamanio, tamPrimerFrame);
