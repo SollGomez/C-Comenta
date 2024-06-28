@@ -349,9 +349,7 @@ void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede ca
 	return NULL;
 }
 
-
 void* solicitudIO_STDOUT_WRITE(void* cliente_socket) {
-	
 	int conexion = *((int*) cliente_socket);
 
 	t_list* listaEnteros = list_create();
