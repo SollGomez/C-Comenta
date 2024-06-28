@@ -74,7 +74,7 @@ void resize(char* tamanio){
 	list_destroy(listaInts);
 }
 
-void COPY_STRING(char* tamanio){
+void COPY_STRING(char* tamanio) {
     uint32_t tam = atoi(tamanio);
     uint32_t direccionLogicaOrigen = registroCPU_SI;
     uint32_t direccionLogicaDestino = registroCPU_DI;
@@ -86,7 +86,6 @@ void COPY_STRING(char* tamanio){
     escribir_valor_en_memoria(direccionFisicaDestino, tam, valor);
     //free(valor);
     
-
     PCB_Actual->program_counter++;
 }
 
@@ -313,7 +312,6 @@ void ejecutar_EXIT(){
 }
 
 uint32_t leer_valor_de_memoria(int direccion_fisica, int bytesRegistro) {
-
     t_list* listaInts = list_create();
     uint32_t uint32t_dir_fis = direccion_fisica;
     uint32_t uint32t_tamanio = bytesRegistro; 

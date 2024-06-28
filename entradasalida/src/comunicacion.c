@@ -330,29 +330,24 @@ void* recibirKernelDialfs() {
 
 
 void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede causar problemas. Estar al tanto.
-
 	int conexion = *((int*) cliente_socket);
 	char* textoAMostrar = malloc(sizeof(char*));
 
+	t_datos* datitos = malloc(sizeof(t_datos));
 
-	t_list* listaInts = list_create();
+	t_list* listaInts;
 
-	listaInts = recibirListaUint32_t(conexion);
+	list_create(listaInts);
 
-	uint32_t pid = *(uint32_t*) list_get(listaInts, 0);
-	uint32_t tamanio = *(uint32_t*) list_get(listaInts, 2);
-	uint32_t datos = *(uint32_t*)list_get(listaInts, 3);
+	listaInts = recibirListaIntsYDatos(conexion, datitos);
 
-	char datosLeidos[tamanio];
-
-	memcpy(&datosLeidos, &datos, tamanio);
+	uint32_t pid = *(uint32_t*)list_get(listaInts, 0);
 
 	usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 10000);
 
-	printf("\n\n PID <%d> - <%s>\n\n", pid, datosLeidos);
+	printf("\n\n PID <%d> - <%s>\n\n", pid, datitos->datos);
 
-	enviarListaUint32_t(listaInts, conexion, log_info, SOLICITUD_IO_CUMPLIDA);
-
+	enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
 	return NULL;
 }
 
@@ -400,7 +395,7 @@ void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 	logOperacion(pid, "IO_GEN_SLEEP");
 	manejarInterfazGenerica(unidadesDeTrabajo);
 
-	enviarValor_uint32(pid, kernel_fd, SOLICITUD_IO_CUMPLIDA, info_logger);
+	enviarListaUint32_t(listaEnteros, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
 
 	return NULL;
 }

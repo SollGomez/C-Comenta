@@ -160,7 +160,6 @@ int conectarModuloMemoria(char *modulo){
 }
 
 void* recibirIO (void* interfaz_fd) {
-
 	int conexion = *((int*) interfaz_fd);
 
 	while (1) {
@@ -171,7 +170,6 @@ void* recibirIO (void* interfaz_fd) {
 		// pthread_mutex_lock(&mutexFS);
 
 		log_info(info_logger, "Me llego el cod_op %d", cod_op);
-
 
 		t_list *lista = list_create();
 	    switch (cod_op) {
