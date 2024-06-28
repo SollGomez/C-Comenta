@@ -198,7 +198,9 @@ void *recibirMemoria() {
 			case ESCRITURA_REALIZADA:{
 				log_info(info_logger, "Solicitud IO Cumplida");
 				uint32_t valor = recibirValor_uint32(memoria_fd);
-				enviarValor_uint32(valor, kernel_fd, SOLICITUD_IO_CUMPLIDA, info_logger);
+				t_list* listaInts = list_create();
+				list_add(listaInts, &valor);
+				enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
 				break;
 			}
 			case -1:{
@@ -332,25 +334,31 @@ void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede ca
 	int conexion = *((int*) cliente_socket);
 	char* textoAMostrar = malloc(sizeof(char*));
 
-	t_datos* datitos = malloc(sizeof(t_datos));
 
-	t_list* listaInts;
+	t_list* listaInts = list_create();
 
-	list_create(listaInts);
+	listaInts = recibirListaUint32_t(conexion);
 
-	listaInts = recibirListaIntsYDatos(conexion, datitos);
+	uint32_t pid = *(uint32_t*) list_get(listaInts, 0);
+	uint32_t tamanio = *(uint32_t*) list_get(listaInts, 2);
+	uint32_t datos = *(uint32_t*)list_get(listaInts, 3);
 
-	uint32_t pid = *(uint32_t*)list_get(listaInts, 0);
+	char datosLeidos[tamanio];
+
+	memcpy(&datosLeidos, &datos, tamanio);
 
 	usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 10000);
 
-	printf("\n\n PID <%d> - <%s>\n\n", pid, datitos->datos);
+	printf("\n\n PID <%d> - <%s>\n\n", pid, datosLeidos);
 
-	enviarValor_uint32(pid, kernel_fd, SOLICITUD_IO_CUMPLIDA, info_logger);
+	enviarListaUint32_t(listaInts, conexion, log_info, SOLICITUD_IO_CUMPLIDA);
+
 	return NULL;
 }
 
+
 void* solicitudIO_STDOUT_WRITE(void* cliente_socket) {
+	
 	int conexion = *((int*) cliente_socket);
 
 	t_list* listaEnteros = list_create();
@@ -392,9 +400,7 @@ void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 	logOperacion(pid, "IO_GEN_SLEEP");
 	manejarInterfazGenerica(unidadesDeTrabajo);
 
-	enviarListaUint32_t(listaEnteros, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
-
-	log_info(info_logger, "PID <%d>", pid);
+	enviarValor_uint32(pid, kernel_fd, SOLICITUD_IO_CUMPLIDA, info_logger);
 
 	return NULL;
 }
