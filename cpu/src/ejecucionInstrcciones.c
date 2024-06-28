@@ -81,9 +81,15 @@ void COPY_STRING(char* tamanio) {
     uint32_t direccionFisicaOrigen = traducir_direccion_logica(direccionLogicaOrigen);
     uint32_t direccionFisicaDestino = traducir_direccion_logica(direccionLogicaDestino);
 
-    uint32_t valor;
-    valor = leer_valor_de_memoria(direccionFisicaOrigen, tam);
-    escribir_valor_en_memoria(direccionFisicaDestino, tam, valor);
+    t_list* listaInts = list_create();
+    list_add(listaInts, &PCB_Actual->id);
+    list_add(listaInts, &direccionFisicaOrigen);
+    list_add(listaInts, &tam);
+    list_add(listaInts, &direccionFisicaDestino);
+
+    enviarListaUint32_t(listaInts, memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA); //pid, dirLeer, tamanio, dirEscribir
+    //leer_char_de_memoria(direccionFisicaOrigen, tam);
+    //escribir_valor_en_memoria(direccionFisicaDestino, tam, valor);
     //free(valor);
     
     PCB_Actual->program_counter++;
@@ -320,7 +326,7 @@ uint32_t leer_valor_de_memoria(int direccion_fisica, int bytesRegistro) {
     list_add(listaInts, &uint32t_dir_fis);
     list_add(listaInts, &uint32t_tamanio);
 
-    enviarListaUint32_t(listaInts,memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA); //pid, direccion, tamanio
+    enviarListaUint32_t(listaInts,memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA_UINT); //pid, direccion, tamanio
     uint32_t valor = recibir_valor_de_memoria();
     log_warning(warning_logger, "VALOR LEIDO DE MEMORIA: %d", valor);
 
@@ -337,7 +343,24 @@ uint32_t recibir_valor_de_memoria(){
         int cod_op = recibir_operacion(memoria_fd);
 
 		switch (cod_op) {
-		case LECTURA_REALIZADA:{
+        case LECTURA_REALIZADA : {
+            t_datos* datitos = malloc(sizeof(t_datos));
+            t_list* listaInts = recibirListaIntsYDatos(memoria_fd, datitos); //pid, dirLeer, tamanio, dirEscribir
+            uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);
+            uint32_t dirFisica = *(uint32_t*)list_get(listaInts,3); //PORQUE ES DIR A ESCRIBIR
+
+            enviarListaIntsYDatos(listaInts, datitos->datos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
+
+            //PCB_Actual->program_counter++;
+            
+            char* valor2 = recibir_confirmacion_de_escritura();
+            if (strcmp(valor2, "OK") == 0) 
+                log_info(info_logger, "PID: <%d> - Accion: <ESCRIBIR> - Dirección Fisica: <%d> - Valor: <%s>", PCB_Actual->id, dirFisica, datitos->datos);
+            //free(unosDatos);
+
+            break;
+        }
+		case LECTURA_REALIZADA_UINT: {
             //t_datos* unosDatos = malloc(sizeof(t_datos));
             t_list* listaInts = recibirListaUint32_t(memoria_fd); //pid, direcicon, tamanio, valor
             uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);

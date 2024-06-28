@@ -13,6 +13,7 @@ t_list* tablaGeneral;
 char* PATH_INSTRUCCIONES;
 t_list *instruccionesDeProcesos;
 
+void pruebaLectoEscrituraCOmbinada();
 
 
 int main(int argc, char* argv[]) {
@@ -35,18 +36,41 @@ int main(int argc, char* argv[]) {
 	PUERTO = config_get_string_value(config, "PUERTO_ESCUCHA");
 
 	tablaGeneral = list_create();
-	//instruccionesDeProcesos = list_create();
+	instruccionesDeProcesos = list_create();
 	
 	iniciarMemoria();
+    //bool comp2 = crearEspacioContiguoDeMemoria();
 
+	//pruebaLectoEscrituraCOmbinada();
 	
     pthread_create(&tid, NULL, recibir, NULL);
 	pthread_join(tid, NULL);
 
-	//config_destroy(config);
+	config_destroy(config);
 
     return 0;
 }
+
+void pruebaLectoEscrituraCOmbinada(){
+	void* prueba = (void*)readline(">");
+	escribirMemoria(1, prueba, 3, 5);
+	char* numeroC = readline(">");
+	printf("\nnumero: %s\n", numeroC);
+	uint8_t numero = atoi(numeroC);
+	printf("\nnumero: %d\n", numero);
+	void* numeroPuntero = &numero;
+	escribirMemoria(0, numeroPuntero, 1, 5);
+	
+	void* result = leerMemoria(0, 4, 5);
+	char* result2 = (char*)leerMemoria(0, 1, 5);
+
+	printf("\nAber: %s\n", (char*)result);
+
+	printf("\nAber: %d\n", *result2);
+
+}
+
+
 
 void *recibir(){
 	recibirConexion(PUERTO);

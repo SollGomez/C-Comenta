@@ -86,8 +86,11 @@ void cualInterfaz(int tipoInterfaz){
 //					list_clean(lista);
 				// list_destroy_and_destroy_elements(lista, free); //LINEA MODIFICADA
 				break;
-				
 			case ACCESO_PEDIDO_LECTURA:
+				realizarPedidoLectura(cpu_fd);
+				break;
+
+			case ACCESO_PEDIDO_LECTURA_UINT:
 				//realizarPedidoLectura(cpu_fd);
 				realizarPedidoLecturaCpu();
 				break;
@@ -107,14 +110,19 @@ void cualInterfaz(int tipoInterfaz){
 				lista = recibirListaUint32_t(cpu_fd);
 				t_paquete* paquete = crear_paquete(SOLICITUDINSTRUCCION, info_logger);
 				Instruccion* instruccion;
-				log_trace(trace_logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
 				instruccion = retornarInstruccionACPU(*(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1)); // pid y pc
+				log_trace(trace_logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
 				//log_trace(trace_logger, "Instruccion: %s %s %s", instruccion->id, instruccion->param1, instruccion->param2);
 				usleep(RETARDO_RESPUESTA*1000); //ver si cambiar a sleep
 				// log_info(info_logger, "instruccion: %s %s %s %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2
 				// 														, instruccion->param3, instruccion->param4, instruccion->param5);
+				log_trace(trace_logger, "1");
 				agregar_instruccion_a_paquete(paquete, instruccion);
+				log_trace(trace_logger, "2");
+
 				enviar_paquete(paquete, cpu_fd);
+				log_trace(trace_logger, "3");
+
 				eliminar_paquete(paquete);
 //					list_clean(lista);
 //					list_destroy_and_destroy_elements(lista, free); // ESTO ERA SOLO LIST_DESTRO
@@ -336,7 +344,7 @@ void realizarPedidoLecturaCpu(){
     log_trace(trace_logger,"MANDO A CPU: %d", datos);
 
 	list_add(listaInts,&datos);
-    enviarListaUint32_t(listaInts, cpu_fd, info_logger, LECTURA_REALIZADA);
+    enviarListaUint32_t(listaInts, cpu_fd, info_logger, LECTURA_REALIZADA_UINT);
 }
 
 
