@@ -98,13 +98,13 @@ int conectarKernel(char *modulo){
 
 	list_create(listaDeArchivos);
 	int32_t tamanioLista;
+	cualInterfaz();
 
 	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS") == 0){		// HABLAR CON AXO
 		recv(kernel_fd, &tamanioLista, sizeof(int32_t), MSG_WAITALL);				//sizeof(lista)
 		recv(kernel_fd, listaDeArchivos, sizeof(tamanioLista), MSG_WAITALL);			//recibo lista de archivos
 	}
 
-	cualInterfaz();
 	log_destroy(loggerIOKernel);
 
 	return kernel_fd;
@@ -197,7 +197,8 @@ void *recibirMemoria() {
 			}
 			case ESCRITURA_REALIZADA:{
 				log_info(info_logger, "Solicitud IO Cumplida");
-				enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd, info_logger);
+				uint32_t valor = recibirValor_uint32(memoria_fd);
+				enviarValor_uint32(valor, kernel_fd, SOLICITUD_IO_CUMPLIDA, info_logger);
 				break;
 			}
 			case -1:{
@@ -345,7 +346,7 @@ void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede ca
 
 	printf("\n\n PID <%d> - <%s>\n\n", pid, datitos->datos);
 
-	enviarOrden(SOLICITUD_IO_CUMPLIDA, kernel_fd, info_logger);
+	enviarValor_uint32(pid, kernel_fd, SOLICITUD_IO_CUMPLIDA, info_logger);
 	return NULL;
 }
 
@@ -370,7 +371,7 @@ void *solicitudIO_STDIN_READ(void* cliente_socket) {
 	t_list* listaEnteros = list_create();
 	listaEnteros = recibirListaUint32_t(conexion);	// 0 pid, 1 dirfisica, 2 tamanio
 	uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0); 
-
+	//enviarListaUint32_t(listaEnteros, memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA);
 
 	logOperacion(pid, "IO_STDIN_READ");
 	manejarInterfazStdin(listaEnteros);
