@@ -338,7 +338,7 @@ uint32_t recibir_valor_de_memoria(){
 
 		switch (cod_op) {
 		case LECTURA_REALIZADA:{
-            t_datos* unosDatos = malloc(sizeof(t_datos));
+            //t_datos* unosDatos = malloc(sizeof(t_datos));
             t_list* listaInts = recibirListaUint32_t(memoria_fd); //pid, direcicon, tamanio, valor
             uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);
             log_info(info_logger, "TAMANIO LEIDO DE MEMORIA: %d", tamanio);
