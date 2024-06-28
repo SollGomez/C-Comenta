@@ -392,7 +392,9 @@ void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 	logOperacion(pid, "IO_GEN_SLEEP");
 	manejarInterfazGenerica(unidadesDeTrabajo);
 
-	enviarValor_uint32(pid, kernel_fd, SOLICITUD_IO_CUMPLIDA, info_logger);
+	enviarListaUint32_t(listaEnteros, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
+
+	log_info(info_logger, "PID <%d>", pid);
 
 	return NULL;
 }

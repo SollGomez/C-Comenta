@@ -287,8 +287,8 @@ void realizarPedidoEscritura(int cliente_socket){		//Vale para io y cpu. Les man
     uint32_t* pid = list_get(listaInts,0);
 	uint32_t* tamanio = list_get(listaInts, 2);
     pthread_mutex_lock(&mutex_espacioContiguo);
-    log_trace(trace_logger,"Accediendo a Espacio de Usuario para Escritura en la Direccion: <%d> para el Proceso con PID: <%d>", posicion, pid);
-    log_trace(trace_logger,"me llego pid %d, pos %d y tamanio %d y valor %d", pid, posicion, tamanio, unosDatos->datos);
+    log_trace(trace_logger,"Accediendo a Espacio de Usuario para Escritura en la Direccion: <%d> para el Proceso con PID: <%d>", *posicion, *pid);
+    log_trace(trace_logger,"me llego pid %d, pos %d y tamanio %d y valor %d", *pid, *posicion, *tamanio, unosDatos->datos);
 	manejarEscritura(*posicion, unosDatos->datos, *tamanio, *pid);
     log_trace(trace_logger,"Se accedio a Espacio de Usuario correctamente");
     free(unosDatos->datos);

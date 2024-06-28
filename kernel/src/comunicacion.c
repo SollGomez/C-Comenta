@@ -166,57 +166,21 @@ void* recibirIO (void* interfaz_fd) {
 	while (1) {
 		t_log* logger;
 		logger = iniciar_logger("recibirIO.log");
-
-
+		
 		int cod_op = recibir_operacion(conexion); //seguro se necesita un mutex
 		// pthread_mutex_lock(&mutexFS);
 
+		log_info(info_logger, "Me llego el cod_op %d", cod_op);
+
+
 		t_list *lista = list_create();
 	    switch (cod_op) {
-			case IO_STDIN_READ:{
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
-			case IO_STDOUT_WRITE:{
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
-			case IO_FS_CREATE:{
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
-			case IO_FS_DELETE:{
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
-			case IO_FS_TRUNCATE:{
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
-			case IO_FS_WRITE:{
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
-			case IO_FS_READ: {
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
 			case SOLICITUD_IO_CUMPLIDA: {
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
+				t_list* listaEnteros = list_create();
+				listaEnteros = recibirListaUint32_t(conexion);
+				uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0);
+	
+				log_info(info_logger, "Me llego el pid %d", pid);
 				PCB* pcbBuscado = buscarProcesoBloq(pid);
 				moverProceso_BloqReady(pcbBuscado);
 				break;
@@ -598,5 +562,5 @@ PCB* buscarProcesoBloq(uint32_t pid) {
 		if(pcbBuscado->id == pid)
 			return pcbBuscado;
 	}
-	log_error(info_logger, "No se encontró el proceso bloqueado");
+	log_error(info_logger, "No se encontro el proceso bloqueado");
 }
