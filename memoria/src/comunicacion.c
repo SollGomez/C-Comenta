@@ -116,13 +116,8 @@ void cualInterfaz(int tipoInterfaz){
 				usleep(RETARDO_RESPUESTA*1000); //ver si cambiar a sleep
 				// log_info(info_logger, "instruccion: %s %s %s %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2
 				// 														, instruccion->param3, instruccion->param4, instruccion->param5);
-				log_trace(trace_logger, "1");
 				agregar_instruccion_a_paquete(paquete, instruccion);
-				log_trace(trace_logger, "2");
-
 				enviar_paquete(paquete, cpu_fd);
-				log_trace(trace_logger, "3");
-
 				eliminar_paquete(paquete);
 //					list_clean(lista);
 //					list_destroy_and_destroy_elements(lista, free); // ESTO ERA SOLO LIST_DESTRO
@@ -213,16 +208,14 @@ void PaqueteHand(int conexion, t_log* logger){
 	free(paquete);
 }
 
-void realizarPedidoLectura(int cliente_socket){			//Vale para io y cpu. Les manda LECTURA_REALIZADA
+void realizarPedidoLectura(int cliente_socket){			//envia LECTURA_REALIZADA
     t_list* listaInts = recibirListaUint32_t(cliente_socket);	// 0 pid, 1 dirfisica, 2 tamanio
     uint32_t pid = *(uint32_t*)list_get(listaInts,0);
     uint32_t posicion = *(uint32_t*)list_get(listaInts,1);
     uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);
 
-    //log_trace(trace_logger,"Accediendo a Espacio de Usuario para Lectura en la Dirección: <%d> de Tamanio: <%d> para el Proceso con PID: <%d>", posicion, tamanio, pid);
     void* datos = malloc(tamanio);
 	datos = manejarLectura(posicion, tamanio, pid);
-    //log_trace(trace_logger,"Se accedió a Espacio de Usuario correctamente");
     t_datos* unosDatos = malloc(sizeof (t_datos));
     unosDatos->datos = datos;
     unosDatos->tamanio = tamanio;
@@ -297,8 +290,6 @@ void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32
 		tamanio = tamanio - *tamPrimerFrame;
 		*tamPrimerFrame = TAM_PAGINA;
 		log_trace(trace_logger, "escribo en la siguiente pagina");
-		log_trace(trace_logger, "tam frame 2: %d", *tamPrimerFrame);
-		log_trace(trace_logger, "frame 2: %d", *frameQueCorresponde);
 	}
 	pthread_mutex_lock(&mutex_espacioContiguo);
 	escribirMemoria(posInicial, datos+*offset, tamanio, pid);
@@ -367,7 +358,7 @@ uint32_t manejarLecturaCpu(uint32_t posInicial, uint32_t tamanio, uint32_t pid) 
 
 		*frameQueCorresponde = posInicial / TAM_PAGINA;
 
-		*lei += *tamPrimerFrame;										///LINEA CONFLICTIVA 
+		*lei += *tamPrimerFrame;										
 
 		*pagActual = obtenerPaginaConMarco(*frameQueCorresponde);
 		*frameQueCorresponde = obtenerMarcoDePagina(pid, *pagActual+1);
