@@ -343,7 +343,6 @@ void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede ca
 
 	uint32_t pid = *(uint32_t*)list_get(listaInts, 0);
 
-	usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 10000);
 
 	printf("\n\n PID <%d> - <%s>\n\n", pid, datitos->datos);
 

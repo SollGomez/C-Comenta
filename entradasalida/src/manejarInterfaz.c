@@ -6,8 +6,8 @@
 
 void manejarInterfazGenerica(uint32_t unidadesDeTrabajo) {    
 
-    sleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO+4);               //DESPUES VER SI ES USLEEP O SLEEP
-    // usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * 100000);
+    //sleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO+4);               //DESPUES VER SI ES USLEEP O SLEEP
+    usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * unidadesDeTrabajo);
     printf("SLEEP TERMINADO\n");
     
 }
@@ -363,6 +363,9 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
     for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
        log_info(info_logger, "%d", bitarray_test_bit(bitmap, i));
     }
+
+    //Retraso compactacion
+    usleep(cfg_entradaSalida->RETRASO_COMPACTACION);
 
     //agrandarArchivo(nombreArchivo, tamanio, archivoATruncar);
 
