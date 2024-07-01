@@ -3,6 +3,8 @@
 
 #include "main.h"
 
+extern pthread_mutex_t semaforo2;
+
 extern int planificadorLargoAvance;
 extern int planificadorCortoAvance;
 

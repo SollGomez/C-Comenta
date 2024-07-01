@@ -1,6 +1,7 @@
 #include "consola.h"
 
 pthread_mutex_t semaforo;
+pthread_mutex_t semaforo2;
 
 char* path;
 
@@ -9,6 +10,7 @@ int planificadorCortoAvance;
 
 void* iniciarConsola () {
 	pthread_mutex_init(&semaforo, NULL);
+
 	while (1) {
 	    char* linea = readline(">");
 	    log_info(info_logger,"linea: %s",linea);
@@ -125,7 +127,7 @@ void* inicializarProceso (void* parametros) {
 	log_info(info_logger, "voy a iniciar proceso");
 	pthread_mutex_lock(&semaforo);
     char* pathptr = (char*) parametros;
-	PCB *pcb = crearPcb(pathptr);
+	PCB* pcb = crearPcb(pathptr);
 
     queue_push(colaNew,pcb);
 

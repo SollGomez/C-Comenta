@@ -8,6 +8,7 @@ void planificadorLargoPlazo() {
         pthread_mutex_lock(&planificacionLargo);
 
         sem_wait(&sem_procesosEnNew);
+
         if (!planificacionFlag)
         	planificadorLargoAvance = 1;
 
@@ -30,7 +31,9 @@ void planificadorLargoPlazo() {
             }
             log_info(info_logger,"PID <%d> Enviado a memoria para ser cargado", pcbAReady->id);
         }
+
         pthread_mutex_unlock(&planificacionLargo);
+
     }
 }
 
