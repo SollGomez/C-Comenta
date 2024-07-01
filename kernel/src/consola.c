@@ -81,11 +81,22 @@ void ejecutar_script (char* linea) {
 }
 
 void* ejecutar_script_operaciones (void* parametros) {
-    char* pathptr = (char*) parametros;
+	char* directory = "/home/utnso/scripts-pruebas";
+    char* file = (char*) parametros;
+	
+	log_info(info_logger, "Ruta a buscar: %s", directory);
+
+	size_t total_length = strlen(directory) + strlen(file) + 1;
+    char path[total_length];
+
+	strcpy(path, directory);
+    strcat(path, file);
+
+	log_info(info_logger, "Archivo a buscar: %s", path);
 
 	FILE* fptr;
 
-	fptr = fopen(pathptr, "r");
+	fptr = fopen(path, "r");
 	char instruccion[100];
 	
 	if (fptr == NULL)
@@ -101,7 +112,6 @@ void* ejecutar_script_operaciones (void* parametros) {
 	}
 	        
 	fclose(fptr);
-    //free(pathptr);
 
 	return NULL;
 }
