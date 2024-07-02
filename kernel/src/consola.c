@@ -80,7 +80,7 @@ void ejecutar_script (char* linea) {
     pthread_create(&(tid), NULL, ejecutar_script_operaciones, path);
 	log_info(info_logger, "pthread_create del ejecutar_script_operaciones ejecutado exitosamente");//DEBUGGING
     pthread_join(tid, NULL);
-	log_info(info_logger, "pthread_join del ejecutar_script_operaciones ejecutado exitosamente");//DEBUGGING
+	log_info(info_logger, "pthread_join del ejecutar_script_operaciones ejecutado exitosamente");//DEBUGGING//
     //free(saveptr);
 	log_info(info_logger, "ree(saveptr) ejecutado exitosamente");//DEBUGGING
 	pthread_mutex_unlock(&mutex_iniciarProceso);
