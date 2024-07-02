@@ -16,7 +16,7 @@ void* iniciarConsola () {
 	    log_info(info_logger,"linea: %s",linea);
 
 		if (!strncmp(linea, ":q", 2)) {
-			//free(linea);
+			free(linea);//Estaba comentado cuando andaba
 			break;
 		}
 
@@ -25,7 +25,7 @@ void* iniciarConsola () {
 		else
 			funcionesDeLaConsola(linea);
 
-	    //free(linea);
+	    free(linea);//Estaba comentado cuando andaba
 	}
 }
 
@@ -33,7 +33,6 @@ void funcionesDeLaConsola(char* linea) {
 	if (!strncmp(linea,"INICIAR_PROCESO", strlen("INICIAR_PROCESO"))){
 		log_info(info_logger, "lei iniciar proceso");
 		iniciar_proceso(linea);
-		log_info(info_logger, "iniciar_proceso");//DEBUGGING
 	}
 
 	if (!strncmp(linea, "FINALIZAR_PROCESO", strlen("FINALIZAR_PROCESO"))) {
@@ -78,11 +77,9 @@ void ejecutar_script (char* linea) {
 	pthread_mutex_lock(&mutex_iniciarProceso);
     pthread_t tid;
     pthread_create(&(tid), NULL, ejecutar_script_operaciones, path);
-	log_info(info_logger, "pthread_create del ejecutar_script_operaciones ejecutado exitosamente");//DEBUGGING
     pthread_join(tid, NULL);
-	log_info(info_logger, "pthread_join del ejecutar_script_operaciones ejecutado exitosamente");//DEBUGGING//
-    //free(saveptr);
-	log_info(info_logger, "ree(saveptr) ejecutado exitosamente");//DEBUGGING
+    free(saveptr);//Estaba comentado cuando andaba
+	free(path);//Estaba comentado cuando andaba
 	pthread_mutex_unlock(&mutex_iniciarProceso);
 
     return;
@@ -117,11 +114,9 @@ void* ejecutar_script_operaciones (void* parametros) {
 		log_info(info_logger, "ESTOY LEYENDO UN ARCHIVO. Instruccion <%s>", instruccion);
 
 		funcionesDeLaConsola(instruccion);
-		log_info(info_logger, "funcionesDeLaConsola, linea: %s", instruccion);//DEBUGGING
 	}
 	
 	fclose(fptr);
-	log_info(info_logger, "fclose(fptr)");//DEBUGGING
 
 	return;
 }
@@ -137,10 +132,9 @@ void iniciar_proceso (char* linea) {
 
     pthread_t tid;
     pthread_create(&(tid), NULL, inicializarProceso, path);
-	log_info(info_logger, "pthread_create");//DEBUGGING
     pthread_join(tid, NULL);
-	log_info(info_logger, "pthread_join");//DEBUGGING
-    //free(saveptr);
+	free(saveptr);//ESTABA COMENTADO CUANDO ANDABA
+	free(path);//ESTABA COMENTADO CUANDO ANDABA
 
     return;
 }
@@ -155,9 +149,7 @@ void* inicializarProceso (void* parametros) {
 
     sem_post(&sem_procesosEnNew);
     log_info(info_logger, "Se crea el proceso <%d> en NEW", pcb->id);
-	//free(pathptr);
     pthread_mutex_unlock(&semaforo);
-	log_info(info_logger, "Se libera el semaforo");//DEBUGGING
 
 	return;
 }
