@@ -38,6 +38,7 @@ extern pthread_mutex_t mutex_listaPeticionesArchivos;
 extern pthread_mutex_t mutex_contadorPeticionesFs;
 extern pthread_mutex_t mutex_debug_logger;
 extern pthread_mutex_t mutex_TGAA;
+extern pthread_mutex_t mutex_iniciarProceso;
 
 extern pthread_mutex_t* semaforos_io;
 
@@ -52,6 +53,7 @@ extern t_list* colaReady;
 extern t_list* tablaGlobal_ArchivosAbiertos;
 extern t_list* listaPeticionesArchivos;
 extern t_list* colaReadyVRR;
+extern t_list* archivosAbiertos;
 
 extern pthread_t hilo_planificador_LP;
 extern pthread_t hilo_planificador_corto;

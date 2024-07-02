@@ -8,18 +8,25 @@ void planificadorLargoPlazo() {
         pthread_mutex_lock(&planificacionLargo);
 
         sem_wait(&sem_procesosEnNew);
+	
+        //pthread_mutex_lock(&mutex_iniciarProceso);
 
         if (!planificacionFlag)
         	planificadorLargoAvance = 1;
 
         if (procesosTotales_MP < GRADO_MAX_MULTIPROGRAMACION && queue_size(colaNew) > 0 && planificacionFlag) {
+            log_info(info_logger, "Antes del mutex_lock_colaNew");//DEBUGGING
             pthread_mutex_lock(&mutex_colaNew);
             PCB* pcbAReady = queue_peek(colaNew);
             pthread_mutex_unlock(&mutex_colaNew);
             aumentarGradoMP();
+            log_info(info_logger, "Despues de aumentar grado MP");//DEBUGGING
+
             
             enviar_uint32_y_uint32_y_char(pcbAReady->nombreRecurso,pcbAReady->id, pcbAReady->size, memoria_fd, INICIALIZAR_PROCESO_MEMORIA, info_logger);
+            log_info(info_logger, "Despues de enviar_uint32: PATH <%s>", pcbAReady->nombreRecurso);//DEBUGGING
             int cod_op = recibir_operacion(memoria_fd);
+            log_info(info_logger, "Despues de recibir_operacion, MEMORIA_FD: %d", memoria_fd);//DEBUGGING
 
             if (cod_op == INICIALIZAR_PROCESO_MEMORIA) {
             	recibirOrden(memoria_fd);
@@ -32,8 +39,9 @@ void planificadorLargoPlazo() {
             log_info(info_logger,"PID <%d> Enviado a memoria para ser cargado", pcbAReady->id);
         }
 
-        pthread_mutex_unlock(&planificacionLargo);
+        //pthread_mutex_unlock(&mutex_iniciarProceso);
 
+        pthread_mutex_unlock(&planificacionLargo);
     }
 }
 
@@ -84,13 +92,16 @@ void liberar_procesos() {
 }
 
 void liberarPcb (PCB* pcb) {
-    free(pcb->registros);
+    //free(pcb->registros);
 
     list_destroy(pcb->listaInstrucciones);
     list_destroy(pcb->tablaPaginas);
     list_destroy(pcb->recursosTomados);
 
-    free(pcb);
+    log_info(info_logger, "antes del free(pcb)");//DEBUGGING
+    //free(pcb);
+    log_info(info_logger, "despues del free(pcb)");//DEBUGGING
+
 }
 
 void mandarPaquetePCB(PCB *pcb){

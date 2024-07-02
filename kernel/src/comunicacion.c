@@ -208,28 +208,7 @@ t_log* iniciar_logger(char *nombre){
 	return nuevo_logger;
 }
 
-void leer_consola(t_log* logger) {
-	char* leido;
 
-	leido = readline("> ");
-
-	while(*leido != '\0'){
-		log_info(logger, "%s\n", leido);
-		free(leido);
-		leido = readline("> ");
-	}
-
-	free(leido);
-}
-
-void paquete(t_log* logger, char* parametro) {
-	t_paquete* paquete = crear_paquete(PAQUETECLIENTE,logger);
-
-   agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
-
-	//enviar_paquete(paquete, kernel_fd);
-	free(paquete);
-}
 
 void terminar_programa(int conexion, t_log* logger) {
 	(logger);

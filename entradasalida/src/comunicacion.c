@@ -400,7 +400,6 @@ void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 }
 
 void* solicitudIO_FS_CREATE (void* cliente_socket) {
-
 	int conexion = *((int*) cliente_socket);
 	char* nombreArch = malloc(10);
 	uint32_t pid;

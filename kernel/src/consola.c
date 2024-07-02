@@ -16,7 +16,7 @@ void* iniciarConsola () {
 	    log_info(info_logger,"linea: %s",linea);
 
 		if (!strncmp(linea, ":q", 2)) {
-			free(linea);
+			//free(linea);
 			break;
 		}
 
@@ -33,6 +33,7 @@ void funcionesDeLaConsola(char* linea) {
 	if (!strncmp(linea,"INICIAR_PROCESO", strlen("INICIAR_PROCESO"))){
 		log_info(info_logger, "lei iniciar proceso");
 		iniciar_proceso(linea);
+		log_info(info_logger, "iniciar_proceso");//DEBUGGING
 	}
 
 	if (!strncmp(linea, "FINALIZAR_PROCESO", strlen("FINALIZAR_PROCESO"))) {
@@ -60,22 +61,29 @@ void funcionesDeLaConsola(char* linea) {
 		log_info(info_logger, "lei mostrar procesos");
 		PROCESO_ESTADO(linea);
 	}
+
+	return;
 }
 
 void ejecutar_script (char* linea) {
 	log_info(info_logger, "RECONOCI LA LINEA %s", linea);
 
-	path = malloc(sizeof(linea));
-	char* saveptr = malloc(sizeof(linea));
+	path = malloc(strlen(linea) + 1);
+	char* saveptr = malloc(strlen(linea) + 1);
 
 	saveptr[0] =' \0';
 	path[0] = '\0';
 	sscanf(linea,"%s %s",saveptr, path);
 
+	pthread_mutex_lock(&mutex_iniciarProceso);
     pthread_t tid;
     pthread_create(&(tid), NULL, ejecutar_script_operaciones, path);
+	log_info(info_logger, "pthread_create del ejecutar_script_operaciones ejecutado exitosamente");//DEBUGGING
     pthread_join(tid, NULL);
-    free(saveptr);
+	log_info(info_logger, "pthread_join del ejecutar_script_operaciones ejecutado exitosamente");//DEBUGGING
+    //free(saveptr);
+	log_info(info_logger, "ree(saveptr) ejecutado exitosamente");//DEBUGGING
+	pthread_mutex_unlock(&mutex_iniciarProceso);
 
     return;
 }
@@ -87,17 +95,17 @@ void* ejecutar_script_operaciones (void* parametros) {
 	log_info(info_logger, "Ruta a buscar: %s", directory);
 
 	size_t total_length = strlen(directory) + strlen(file) + 1;
-    char path[total_length];
+    char pathInstrucciones[total_length];
 
-	strcpy(path, directory);
-    strcat(path, file);
+	strcpy(pathInstrucciones, directory);
+    strcat(pathInstrucciones, file);
 
-	log_info(info_logger, "Archivo a buscar: %s", path);
+	log_info(info_logger, "Archivo a buscar: %s", pathInstrucciones);
 
 	FILE* fptr;
 
-	fptr = fopen(path, "r");
-	char instruccion[100];
+	fptr = fopen(pathInstrucciones, "r");
+	char instruccion[200];
 	
 	if (fptr == NULL)
 		log_info(info_logger, "NO ENCONTRE EL ARCHIVO");
@@ -109,17 +117,19 @@ void* ejecutar_script_operaciones (void* parametros) {
 		log_info(info_logger, "ESTOY LEYENDO UN ARCHIVO. Instruccion <%s>", instruccion);
 
 		funcionesDeLaConsola(instruccion);
+		log_info(info_logger, "funcionesDeLaConsola, linea: %s", instruccion);//DEBUGGING
 	}
-	        
+	
 	fclose(fptr);
+	log_info(info_logger, "fclose(fptr)");//DEBUGGING
 
-	return NULL;
+	return;
 }
 
 void iniciar_proceso (char* linea) {
 	log_info(info_logger, "funcion iniciar");
-	path = malloc(sizeof(linea));
-	char* saveptr = malloc(sizeof(linea));
+	path = malloc(strlen(linea) + 1);
+	char* saveptr = malloc(strlen(linea) + 1);
 
 	saveptr[0] =' \0';
 	path[0] = '\0';
@@ -127,7 +137,9 @@ void iniciar_proceso (char* linea) {
 
     pthread_t tid;
     pthread_create(&(tid), NULL, inicializarProceso, path);
+	log_info(info_logger, "pthread_create");//DEBUGGING
     pthread_join(tid, NULL);
+	log_info(info_logger, "pthread_join");//DEBUGGING
     //free(saveptr);
 
     return;
@@ -145,8 +157,9 @@ void* inicializarProceso (void* parametros) {
     log_info(info_logger, "Se crea el proceso <%d> en NEW", pcb->id);
 	//free(pathptr);
     pthread_mutex_unlock(&semaforo);
+	log_info(info_logger, "Se libera el semaforo");//DEBUGGING
 
-	return NULL;
+	return;
 }
 
 void finalizar_proceso (char* linea) {
