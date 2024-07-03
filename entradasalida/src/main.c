@@ -7,7 +7,11 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
     cargar_configuracion();
+	crearEstructurasFs();
 
+	crearArchivo("duhndaud.txt");
+	
+	log_info(info_logger, "Ya cree todo");
 	//manejarInterfazStdin(2, 30);
 	/*crearEstructurasFs();
 

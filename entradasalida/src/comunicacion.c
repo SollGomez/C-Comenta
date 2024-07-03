@@ -4,7 +4,6 @@ int contadorDispositivosIO = 0;
 int memoria_fd;
 int kernel_fd;
 
-t_list* listaDeArchivos;
 
 void* iniciarMemoria () {
 	conectarMemoria("MEMORIA");
@@ -304,23 +303,6 @@ void* recibirKernelDialfs() {
 		case IO_FS_WRITE:
 
 			break;
-
-		case LISTA_DE_ARCHIVOS : {
-			listaDeArchivos = list_create();
-			uint32_t tamanioLista = 0;
-
-			listaDeArchivos = recibirListaString(kernel_fd);
-
-			if (list_is_empty(listaDeArchivos))
-				log_info(info_logger, "Me pasaron una TGAA vacia :,(");
-			else {
-				tamanioLista = list_size(listaDeArchivos);
-				for(uint32_t i=0; i<tamanioLista; i++) 
-					log_info(info_logger, "Elemento %d de la lista: %s", i, list_get(listaDeArchivos, i));
-			}
-
-			break;
-		}
 		
 		case -1:
 			log_error(info_logger, "El cliente se desconecto");

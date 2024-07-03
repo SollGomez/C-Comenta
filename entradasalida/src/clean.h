@@ -9,6 +9,7 @@ extern t_log* info_logger;
 extern t_log* error_logger;
 extern t_config* configuracionEntradasalida;
 extern t_config_entradaSalida* cfg_entradaSalida;
+extern t_config* configFs;
 extern bool logsCreados;
 
 void cerrarPrograma();

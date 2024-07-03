@@ -49,6 +49,30 @@ void crearArchivo(char* nombreArchivo) {
     if(f == NULL) {
         log_info(info_logger, "No se creo el archivo");
     }
+
+    char* path = string_new();
+    string_append(&path, cfg_entradaSalida->PATH_BASE_DIALFS);
+    string_append(&path, "/");
+    string_append(&path, "nom-arch-fs.txt");
+
+    FILE* fbe = fopen(path, "wb");
+
+    log_info(info_logger ,"No rompe despues de abrir");
+
+    int posArch = list_size(listaDeArchivos);
+
+    char* numArchivo = string_new();
+
+    string_append(&numArchivo, "F-");
+    string_append(&numArchivo, string_itoa(posArch));
+    config_set_value(configFs, numArchivo, nombreArchivo);
+    list_add(listaDeArchivos, nombreArchivo);
+
+    config_save(configFs);
+    fclose(fbe);
+
+    log_trace(trace_logger, "Todo bien aca");
+    
   
     t_archivo_metadata* archivoCreado = malloc(sizeof(t_archivo_metadata));
     
@@ -222,7 +246,7 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
         return;
     }
 
-    //TODO COMPACTACION :'(
+
     compactar(nombreArchivo, tamanio, archivoATruncar);
     
     return;

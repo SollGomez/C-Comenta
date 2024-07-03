@@ -25,7 +25,6 @@ extern int contadorDispositivosIO;
 extern int memoria_fd;
 extern int kernel_fd;
 
-extern t_list* listaDeArchivos;
 
 int conectarKernel(char *modulo);
 int conectarMemoria(char *modulo);

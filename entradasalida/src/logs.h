@@ -11,6 +11,7 @@
 #include <semaphore.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <stdlib.h>
 
 typedef struct 
 {
@@ -50,6 +51,7 @@ int init_loggers_config(char* path);
 void crearArchivoBloques();
 void crearBitmap();
 void crearEstructurasFs();
+void cargarListaDialfs();
 
 t_config_entradaSalida *cfg_entradaSalida_start();
 void logOperacion(uint32_t pid, char* operacionARealizar);
@@ -62,7 +64,7 @@ void logEscribirArchivo(uint32_t pid, char* nombreArchivo, uint32_t tamanioAEscr
 extern t_bitarray* bitmap;
 extern archBloques* archivoBloques;
 extern void* bitarraycontent;
-extern t_list* lista_archivos;
+extern t_list* listaDeArchivos;
 
 
 #endif /* LOGS_H_ */
