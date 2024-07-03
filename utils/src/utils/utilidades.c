@@ -164,10 +164,54 @@ void liberarInstruccion(Instruccion * instruccion) {
     free(instruccion->id);
     free(instruccion);
 }
+ 
+bool enviarListaUint32_t(t_list* listaInts, int socket_cliente, t_log* logger, op_code_cliente codigo) {
+    t_paquete* paquete = crear_paquete(codigo, logger);
+    if(!agregarUint32_tsAPaquete(listaInts, paquete)){
+        log_error(logger, "Hubo un error cuando se intento agregar las instrucciones al paquete");
+        return false;
+    }
+    enviar_paquete(paquete, socket_cliente);
+    log_info(logger, "Se envio el paquete");
+    eliminar_paquete(paquete);
+    return true;
+}
 
-bool agregarUint32_tsAPaquete(t_list* listaInts, t_paquete* paquete)
-{
+bool enviarListaString(t_list* listaStrings, int socket_cliente, t_log* logger, op_code_cliente codigo) {//POR FAVOR CHEQUEAR
+    t_paquete* paquete = crear_paquete(codigo, logger);
+    if(!agregarStringsAPaquete(listaStrings, paquete)){
+        log_error(logger, "Hubo un error cuando se intento agregar las instrucciones al paquete");
+        return false;
+    }
+    enviar_paquete(paquete, socket_cliente);
+    log_info(logger, "Se envio el paquete");
+    eliminar_paquete(paquete);
+    return true;
+}
 
+bool agregarStringsAPaquete(t_list* listaStrings, t_paquete* paquete) {//Creo que el error esta aca
+    paquete->buffer->size += 100*list_size(listaStrings);//HARDCODEADO EL 100
+    paquete->buffer->size += sizeof(uint8_t);
+
+    void* stream = malloc(paquete->buffer->size);
+    int offset=0;
+
+    void copiarElementos(char* unString){//Seguramente aca
+        memcpy(stream + offset, unString, strlen(unString + 1));
+        offset += strlen(unString + 3);
+    }
+
+    int cantidad_strings = list_size(listaStrings);
+
+    memcpy(stream + offset, &cantidad_strings, sizeof(uint8_t));
+    offset += sizeof(uint8_t);
+
+    list_iterate(listaStrings,copiarElementos);
+    paquete->buffer->stream = stream;
+    return true;
+}
+
+bool agregarUint32_tsAPaquete(t_list* listaInts, t_paquete* paquete) {
     paquete->buffer->size+= sizeof(uint32_t)*list_size(listaInts);
     paquete->buffer->size += sizeof(uint8_t);
 
@@ -184,19 +228,6 @@ bool agregarUint32_tsAPaquete(t_list* listaInts, t_paquete* paquete)
 
     list_iterate(listaInts,copiarElementos);
     paquete->buffer->stream = stream;
-    return true;
-}
-
-bool enviarListaUint32_t(t_list* listaInts, int socket_cliente, t_log* logger, op_code_cliente codigo)
-{
-    t_paquete* paquete = crear_paquete(codigo, logger);
-    if(!agregarUint32_tsAPaquete(listaInts, paquete)){
-        log_error(logger, "Hubo un error cuando se intento agregar las instrucciones al paquete");
-        return false;
-    }
-    enviar_paquete(paquete, socket_cliente);
-    log_info(logger, "Se envio el paquete");
-    eliminar_paquete(paquete);
     return true;
 }
 
@@ -293,16 +324,18 @@ void liberarPcbCpu(PCB* pcb) {
 
 t_list* recibirListaUint32_t(int socket_cliente){
     int tamanio;
-    int desplazamiento = 0;
+    int desplazamiento = 0;//Raro este 0
     void *buffer = recibir_stream(&tamanio, socket_cliente);
+
     t_list* listaInts = list_create();
     int cantidad_ints = 0;
+
     memcpy(&cantidad_ints, buffer + desplazamiento, sizeof(uint8_t));
     desplazamiento+=sizeof(uint8_t);
 
     for (int i = 0; i < cantidad_ints; ++i) {
         uint32_t* nuevoEntero = malloc(sizeof(uint32_t));
-        memcpy(nuevoEntero, buffer + desplazamiento, sizeof (uint32_t));
+        memcpy(nuevoEntero, buffer + desplazamiento, sizeof(uint32_t));
         desplazamiento+=sizeof(uint32_t);
         list_add(listaInts, nuevoEntero);
     }
@@ -310,8 +343,59 @@ t_list* recibirListaUint32_t(int socket_cliente){
     return listaInts;
 }
 
-uint32_t recibirValor_uint32(int socket) {
+t_list* recibirListaString(int socket_cliente) {
+    int tamanio;
+    int desplazamiento = 0;
+    void *buffer = recibir_stream(&tamanio, socket_cliente);
 
+    t_list* listaStrings = list_create();
+    int cantidad_strings = 0;
+
+    memcpy(&cantidad_strings, buffer + desplazamiento, sizeof(uint8_t));
+    //memcpy(&tamanioString, buffer + desplazamiento, sizeof(uint8_t));
+
+    desplazamiento += sizeof(uint8_t);
+
+    for (int i = 0; i < cantidad_strings; ++i) {
+        char* nuevoString = malloc(100 + 1);//Revisar en nombre de jesucristo
+        memcpy(nuevoString, buffer + desplazamiento, sizeof (uint32_t));
+        desplazamiento += sizeof(uint32_t);
+        list_add(listaStrings, nuevoString);
+    }
+
+    free(buffer);
+    return listaStrings;
+}
+
+char* recibirString(int socket_cliente){
+    //int tamanio;
+    /*int desplazamiento = 0;
+    void *buffer = recibir_stream(&desplazamiento, socket_cliente);
+
+    uint8_t tamanioString = 0;
+    char* string;
+
+    memcpy(&tamanioString, buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    string= malloc(tamanioString);
+    memcpy(string, buffer + desplazamiento, tamanioString);
+    free(buffer);
+    return string;*/
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    paquete->buffer = malloc(sizeof(t_buffer));
+    paquete->buffer->size = 0;
+    paquete->buffer->stream = recibir_stream(&paquete->buffer->size, socket);
+    char* valor;
+    valor = malloc(100);//HARDCODEADO el 100
+    memcpy(&valor, paquete->buffer->stream, sizeof(uint32_t));
+    eliminar_paquete(paquete);
+
+    return valor;
+}
+
+
+uint32_t recibirValor_uint32(int socket) {
     t_paquete *paquete = malloc(sizeof (t_paquete));
     paquete->buffer = malloc(sizeof(t_buffer));
     paquete->buffer->size = 0;

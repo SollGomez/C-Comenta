@@ -23,10 +23,7 @@ t_queue* colaReady_FIFO;
 t_list* listaRecursos;
 t_list* colaReady;
 t_list* colaReadyVRR;
-t_list* archivosAbiertos;
-
-
-t_list* tablaGlobal_ArchivosAbiertos; //Archivos hechos
+t_list* tablaGlobal_ArchivosAbiertos;
 t_list* listaPeticionesArchivos;
 
 pthread_mutex_t mutex_colaNew;
@@ -57,7 +54,7 @@ pthread_t hilo_planificador_LP;
 pthread_t hilo_planificador_corto;
 pthread_t hilo_liberador_procesos;
 
-void iniciarNecesidades(){
+void iniciarNecesidades() {
     loggerInfo=iniciar_logger("kernel.log");
 	tablaGlobal_ArchivosAbiertos = list_create();
 	listaPeticionesArchivos = list_create();
@@ -67,7 +64,10 @@ void iniciarNecesidades(){
     colaExec = list_create();
     colaBloq = list_create();
     colaExit = queue_create();
-    archivosAbiertos = list_create();
+
+    list_add(tablaGlobal_ArchivosAbiertos, "nombreLoco");
+    list_add(tablaGlobal_ArchivosAbiertos, "otroNombreLocoperomaslargoparaprobarquepasa");
+
 
     pthread_mutex_init(&mutex_colaExec, NULL);
     pthread_mutex_init(&mutex_colaNew, NULL);
@@ -81,7 +81,6 @@ void iniciarNecesidades(){
     pthread_mutex_init(&mutex_debug_logger, NULL);
     pthread_mutex_init(&mutex_TGAA, NULL);
     pthread_mutex_init(&mutex_iniciarProceso, NULL);
-
 
     sem_init(&sem_procesosEnNew,0,0);
     sem_init(&sem_procesosReady,0,0);

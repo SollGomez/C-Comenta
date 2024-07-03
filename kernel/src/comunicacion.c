@@ -20,7 +20,7 @@ int recibirConexion (char* puerto) {
 		entradasalida_fd = esperar_cliente(kernel_fd);
 		recv(entradasalida_fd, &tipoInterfaz, sizeof(int32_t), MSG_WAITALL);
 		vectorIO[tipoInterfaz] = entradasalida_fd;
-		cualInterfaz(tipoInterfaz);
+		cualInterfaz(tipoInterfaz);		
 		void* fdDeIo = &vectorIO[tipoInterfaz];
 		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, fdDeIo);
 		pthread_detach(tid[tipoInterfaz]);
@@ -34,7 +34,7 @@ void cualInterfaz (int tipoInterfaz) {
 	t_log* logger;
 	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
 
-	switch (tipoInterfaz){
+	switch (tipoInterfaz) {
 	case 0:
 		log_info(logger, "Interfaz STDOUT conectada");
 		break;
@@ -43,6 +43,13 @@ void cualInterfaz (int tipoInterfaz) {
 		break;
 	case 2:
 		log_info(logger, "Interfaz DIAL_FS conectada");
+
+		uint32_t sizeTablaGlobal;
+		sizeTablaGlobal = list_size(tablaGlobal_ArchivosAbiertos);
+
+		log_info(logger, "tablaGlobal_ArchivosAbiertos: <%s>", list_get(tablaGlobal_ArchivosAbiertos, 0));
+		enviarListaString(tablaGlobal_ArchivosAbiertos, vectorIO[2], info_logger, LISTA_DE_ARCHIVOS);
+
 		break;
 	case 3:
 		log_info(logger, "Interfaz GENERICA conectada");
@@ -125,7 +132,6 @@ int conectarModuloCPUInterrupt(char *modulo){
 }
 
 int conectarModuloMemoria(char *modulo){
-
 	char *ip;
 	char *puerto;
 	char charAux[50];
@@ -171,7 +177,7 @@ void* recibirIO (void* interfaz_fd) {
 
 		log_info(info_logger, "Me llego el cod_op %d", cod_op);
 
-		t_list *lista = list_create();
+		//t_list *lista = list_create();//No se usaba
 	    switch (cod_op) {
 			case SOLICITUD_IO_CUMPLIDA: {
 				t_list* listaEnteros = list_create();
@@ -197,7 +203,7 @@ void* recibirIO (void* interfaz_fd) {
 	}
 }
 
-t_log* iniciar_logger(char *nombre){
+t_log* iniciar_logger(char *nombre) {
 	t_log* nuevo_logger;
 	nuevo_logger = log_create(nombre, "tp", 1, LOG_LEVEL_INFO);
 	if(nuevo_logger == NULL){
@@ -207,8 +213,6 @@ t_log* iniciar_logger(char *nombre){
 
 	return nuevo_logger;
 }
-
-
 
 void terminar_programa(int conexion, t_log* logger) {
 	(logger);
@@ -222,7 +226,7 @@ PCB* obtenerPcbExec() {
     return unaPcb;
 }
 
-void moverProceso_BloqrecursoReady(Recurso* recurso){
+void moverProceso_BloqrecursoReady(Recurso* recurso) {
     pthread_mutex_lock(&semaforos_io[recurso->indiceSemaforo]);
     PCB* pcbLiberada = list_remove(recurso->cola,0);
     pthread_mutex_unlock(&semaforos_io[recurso->indiceSemaforo]);
@@ -364,6 +368,7 @@ void escucharCPU (void) {
 				uint32_t interfaz;
 				PCB* pcbRecibida = recibir_contextoEjecucion_y_char_y_uint32(cpuDispatch_fd, &interfaz);
 				char* nombreArchivo=pcbRecibida->nombreRecurso;
+				list_add(tablaGlobal_ArchivosAbiertos, nombreArchivo);
 				actualizarPcbEjecucion(pcbRecibida);
 				PCB* pcbActualizada = obtenerPcbExec();
 				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI

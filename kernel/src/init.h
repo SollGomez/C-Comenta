@@ -53,7 +53,6 @@ extern t_list* colaReady;
 extern t_list* tablaGlobal_ArchivosAbiertos;
 extern t_list* listaPeticionesArchivos;
 extern t_list* colaReadyVRR;
-extern t_list* archivosAbiertos;
 
 extern pthread_t hilo_planificador_LP;
 extern pthread_t hilo_planificador_corto;

@@ -11,7 +11,7 @@ void* iniciarMemoria () {
 	return NULL;
 }
 
-int conectarMemoria(char *modulo){
+int conectarMemoria(char *modulo) {
 	char *ip;
 	char *puerto;
 	char charAux[50];
@@ -49,7 +49,9 @@ int conectarMemoria(char *modulo){
 
 	pthread_t tid;
 
+
 	pthread_create(&tid, NULL, recibirMemoria, NULL);
+
 	pthread_join(tid, NULL);
 
 	log_destroy(loggerIOMem);
@@ -62,7 +64,7 @@ void* iniciarKernel () {
 	return NULL;
 }
 
-int conectarKernel(char *modulo){
+int conectarKernel(char *modulo) {
 	char *ip;
 	char *puerto;
 	char charAux[50];
@@ -96,23 +98,16 @@ int conectarKernel(char *modulo){
 
 	send(kernel_fd, &handshakeEntradasalida, sizeof(int32_t), 0);
 
-	list_create(listaDeArchivos);
-	int32_t tamanioLista;
-	cualInterfaz();
+	log_info(info_logger, "ANTES DE cualInterfaz");
 
-	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS") == 0){		// HABLAR CON AXO
-		recv(kernel_fd, &tamanioLista, sizeof(int32_t), MSG_WAITALL);				//sizeof(lista)
-		recv(kernel_fd, listaDeArchivos, sizeof(tamanioLista), MSG_WAITALL);			//recibo lista de archivos
-	}
+	cualInterfaz();
 
 	log_destroy(loggerIOKernel);
 
 	return kernel_fd;
 }
 
-
-t_log* iniciar_logger(char *nombre)
-{
+t_log* iniciar_logger(char *nombre) {
 	t_log* nuevo_logger;
 	nuevo_logger = log_create(nombre, "tp", 1, LOG_LEVEL_INFO);
 	if(nuevo_logger == NULL)
@@ -124,9 +119,8 @@ t_log* iniciar_logger(char *nombre)
 	return nuevo_logger;
 }
 
-
-void paquete(int conexion, t_log* logger)
-{	char *leido;
+void paquete(int conexion, t_log* logger) {	
+	char *leido;
 	t_paquete* paquete = crear_paquete(PAQUETECLIENTE,logger);
 
 	leido = readline("> ");
@@ -145,8 +139,8 @@ void paquete(int conexion, t_log* logger)
 
 void cualInterfaz() {
 	pthread_t tid;
-    switch (cfg_entradaSalida->TIPO_INTERFAZ_INT)
-    {
+
+    switch (cfg_entradaSalida->TIPO_INTERFAZ_INT) {
     case 0:{
 		pthread_create(&tid, NULL, recibirKernelStdout, NULL);
 		pthread_join(tid, NULL);
@@ -159,7 +153,9 @@ void cualInterfaz() {
 	}
     case 2:{
 		pthread_create(&tid, NULL, recibirKernelDialfs, NULL);
+
 		pthread_join(tid, NULL);
+
         break;
 	}
     case 3:{
@@ -175,7 +171,7 @@ void cualInterfaz() {
     return;
 }
 
-void terminar_programa(int conexion, t_log* logger){
+void terminar_programa(int conexion, t_log* logger) {
 	log_destroy(logger);
 	liberar_conexion(conexion);
 
@@ -183,17 +179,14 @@ void terminar_programa(int conexion, t_log* logger){
 }
 
 void *recibirMemoria() {
-
 	log_info(info_logger, "Entro a recibir memoria");
 	while(1) {
 		int cod_op = recibir_operacion(memoria_fd);
 
-		switch (cod_op){
-
+		switch (cod_op) {
 			case LECTURA_REALIZADA:{
 				devolucionIO_STDOUT_WRITE(&memoria_fd);
 				break;
-
 			}
 			case ESCRITURA_REALIZADA:{
 				log_info(info_logger, "Solicitud IO Cumplida");
@@ -204,17 +197,15 @@ void *recibirMemoria() {
 				break;
 			}
 			case -1:{
-
 				log_error(info_logger, "El cliente se desconecto");
 				return NULL;
 				break;
 			}
 			default:{
-				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);
+				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);//DialFS cae siempre aca
 				break;
 
-			}
-		
+			}		
 		}
 	}
 }
@@ -291,11 +282,9 @@ void* recibirKernelGenerica() {
 
 void* recibirKernelDialfs() {
 	while(1) {
-
 		int cod_op = recibir_operacion(kernel_fd);
 
-		switch (cod_op)
-		{
+		switch (cod_op) {
 		case IO_FS_CREATE:
 
 			break;
@@ -315,6 +304,23 @@ void* recibirKernelDialfs() {
 		case IO_FS_WRITE:
 
 			break;
+
+		case LISTA_DE_ARCHIVOS : {
+			listaDeArchivos = list_create();
+			uint32_t tamanioLista = 0;
+
+			listaDeArchivos = recibirListaString(kernel_fd);
+
+			if (list_is_empty(listaDeArchivos))
+				log_info(info_logger, "Me pasaron una TGAA vacia :,(");
+			else {
+				tamanioLista = list_size(listaDeArchivos);
+				for(uint32_t i=0; i<tamanioLista; i++) 
+					log_info(info_logger, "Elemento %d de la lista: %s", i, list_get(listaDeArchivos, i));
+			}
+
+			break;
+		}
 		
 		case -1:
 			log_error(info_logger, "El cliente se desconecto");

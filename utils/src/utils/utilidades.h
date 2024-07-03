@@ -49,4 +49,9 @@ char* recibirEnteroEnteroEnteroEnteroChar(int socket_cliente, uint32_t* entero1,
 void enviar_uint32_y_uint32_y_uint32_y_char(char* path, uint32_t valor1, uint32_t valor2, uint32_t valor3, int socket, op_code_cliente orden, t_log *logger);
 char* recibirEnteroEnteroEnteroChar(int socket_cliente, uint32_t* entero1, uint32_t* entero2, uint32_t* entero3);
 
+bool enviarListaString(t_list* listaStrings, int socket_cliente, t_log* logger, op_code_cliente codigo);
+bool agregarStringsAPaquete(t_list* listaStrings, t_paquete* paquete);
+char* recibirString(int socket_cliente);
+t_list* recibirListaString(int socket_cliente);
+
 #endif
