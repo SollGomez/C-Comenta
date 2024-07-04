@@ -572,13 +572,13 @@ int obtener_valor_registroCPU(char* registro) {
 uint32_t obtenerInterfaz(char* interfaz){
     uint32_t numeroInterfaz = 0;
 
-    if(!strcmp(interfaz,"STDOUT"))
+    if(!strcmp(interfaz,"STDOUT") || !strcmp(interfaz,"MONITOR"))
         numeroInterfaz=0;
-    if(!strcmp(interfaz,"STDIN"))
+    if(!strcmp(interfaz,"STDIN") || !strcmp(interfaz,"TECLADO"))
         numeroInterfaz=1;
-    if(!strcmp(interfaz,"DIAL_FS"))
+    if(!strcmp(interfaz,"DIAL_FS") || !strcmp(interfaz,"FS") || !strcmp(interfaz,"DIALFS") ||  ||)
         numeroInterfaz=2;
-    if(!strcmp(interfaz,"GENERICA"))
+    if(!strcmp(interfaz,"GENERICA") || !strcmp(interfaz,"ESPERA") || !strcmp(interfaz,"SLP1") || !strcmp(in erfaz,"SLP2"))
         numeroInterfaz=3;
 
     return numeroInterfaz;
