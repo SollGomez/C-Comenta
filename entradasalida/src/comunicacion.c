@@ -4,6 +4,8 @@ int contadorDispositivosIO = 0;
 int memoria_fd;
 int kernel_fd;
 
+char* archivoAEscribir;
+
 
 void* iniciarMemoria () {
 	conectarMemoria("MEMORIA");
@@ -181,32 +183,69 @@ void *recibirMemoria() {
 	log_info(info_logger, "Entro a recibir memoria");
 	while(1) {
 		int cod_op = recibir_operacion(memoria_fd);
+		if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS") ) {
+				switch (cod_op) {
+				case LECTURA_REALIZADA:{
+					log_info(info_logger, "Solicitud IO DIALFS Cumplida");
+					t_datos* datos = malloc(sizeof(t_datos));
+					t_list* listaInts = list_create();
+					listaInts = *(uint32_t*) recibirListaIntsYDatos(memoria_fd, datos);
+					uint32_t pid = *(uint32_t*) list_get(listaInts, 0);
+					uint32_t tamanio = *(uint32_t*) list_get(listaInts, 1);
+					uint32_t puntero = *(uint32_t*) list_get(listaInts, 3);
+					logEscribirArchivo(pid, archivoAEscribir, tamanio, puntero);
+					escribirArchivo(archivoAEscribir, datos->datos, puntero, tamanio);
+					enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
+					break;
+				}
+				case ESCRITURA_REALIZADA:{
+					log_info(info_logger, "Solicitud IO DIALFS Cumplida");
+					uint32_t valor = recibirValor_uint32(memoria_fd);
+					t_list* listaInts = list_create();
+					list_add(listaInts, &valor);
+					enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
+					break;
+				}
+				case -1:{
+					log_error(info_logger, "El cliente se desconecto");
+					return NULL;
+					break;
+				}
+				default:{
+					log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);//DialFS cae siempre aca
+					break;
 
-		switch (cod_op) {
-			case LECTURA_REALIZADA:{
-				devolucionIO_STDOUT_WRITE(&memoria_fd);
-				break;
+				}		
 			}
-			case ESCRITURA_REALIZADA:{
-				log_info(info_logger, "Solicitud IO Cumplida");
-				uint32_t valor = recibirValor_uint32(memoria_fd);
-				t_list* listaInts = list_create();
-				list_add(listaInts, &valor);
-				enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
-				break;
-			}
-			case -1:{
-				log_error(info_logger, "El cliente se desconecto");
-				return NULL;
-				break;
-			}
-			default:{
-				log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);//DialFS cae siempre aca
-				break;
+		} else {
+				switch (cod_op) {
+				case LECTURA_REALIZADA:{
+					devolucionIO_STDOUT_WRITE(&memoria_fd);
+					break;
+				}
+				case ESCRITURA_REALIZADA:{
+					log_info(info_logger, "Solicitud IO STDIN Cumplida");
+					uint32_t valor = recibirValor_uint32(memoria_fd);
+					t_list* listaInts = list_create();
+					list_add(listaInts, &valor);
+					enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
+					break;
+				}
+				case -1:{
+					log_error(info_logger, "El cliente se desconecto");
+					return NULL;
+					break;
+				}
+				default:{
+					log_warning(info_logger, "Operacion desconocida, cuidado: %d", cod_op);//DialFS cae siempre aca
+					break;
 
-			}		
+				}		
+			}
 		}
 	}
+
+	return NULL;
 }
 
 
@@ -231,6 +270,8 @@ void* recibirKernelStdin() {
 			break;
 		}
 	}
+
+	return NULL;
 }
 
 void* recibirKernelStdout() {
@@ -254,6 +295,8 @@ void* recibirKernelStdout() {
 			break;
 		}
 	}
+	
+	return NULL;
 }
 
 void* recibirKernelGenerica() {
@@ -277,6 +320,8 @@ void* recibirKernelGenerica() {
 				break;
 		}
 	}
+
+	return NULL;
 }
 
 void* recibirKernelDialfs() {
@@ -284,26 +329,66 @@ void* recibirKernelDialfs() {
 		int cod_op = recibir_operacion(kernel_fd);
 
 		switch (cod_op) {
-		case IO_FS_CREATE:
-
+		case IO_FS_CREATE:{
+			uint32_t pid;
+			char* nombreArchivo = recibirEnteroYString(kernel_fd, pid);
+			crearArchivo(nombreArchivo);
+			logCrearArchivo(pid, nombreArchivo);
+			t_list* listaInts = list_create();
+			list_add(listaInts, &pid);
+			enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
 			break;
-
-		case IO_FS_DELETE:
-	
+		}
+		case IO_FS_DELETE:{
+			uint32_t pid;
+			char* nombreArchivo = recibirEnteroYString(kernel_fd, pid);
+			eliminarArchivo(nombreArchivo);
+			logEliminarArchivo(pid, nombreArchivo);
+			t_list* listaInts = list_create();
+			list_add(listaInts, &pid);
+			enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
 			break;
-
-		case IO_FS_READ:
-			
+		}
+		case IO_FS_READ:{
+			t_list* listaInts = list_create();
+			t_datos* datos = malloc(sizeof(t_datos));
+			uint32_t pid;
+			uint32_t dirFisica;
+			uint32_t tamanio;
+			uint32_t puntero;
+			char* nombreArchivo = recibirEnteroEnteroEnteroEnteroChar(kernel_fd, &pid, &tamanio, &puntero, &dirFisica);
+			datos->datos = leerArchivo(nombreArchivo, tamanio, tamanio);
+			list_add(listaInts, &pid);
+			list_add(listaInts, &dirFisica);
+			list_add(listaInts, &tamanio);
+			enviarListaIntsYDatos(listaInts, datos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
 			break;
-
-		case IO_FS_TRUNCATE:
-	
+		}
+		case IO_FS_TRUNCATE:{
+			uint32_t pid;
+			uint32_t tamanio;
+			char* nombreArchivo = recibirEnteroEnteroChar(kernel_fd, &pid, &tamanio);
+			truncarArchivo(nombreArchivo, tamanio);
+			logTruncarArchivo(pid, nombreArchivo, tamanio);
+			t_list* listaInts = list_create();
+			list_add(listaInts, &pid);
+			enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
 			break;
-
-		case IO_FS_WRITE:
-
+		}
+		case IO_FS_WRITE:{
+			uint32_t pid;
+			uint32_t tamanio;
+			uint32_t punteroArchivo;
+			uint32_t direccionFisica;
+			archivoAEscribir = recibirEnteroEnteroEnteroEnteroChar(kernel_fd, &pid, &tamanio, &punteroArchivo, &direccionFisica);
+			t_list* listaInts = list_create();
+			list_add(listaInts, &pid);
+			list_add(listaInts, &direccionFisica);
+			list_add(listaInts, &tamanio);
+			list_add(listaInts, &punteroArchivo);
+			enviarListaUint32_t(listaInts, memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA);
 			break;
-		
+		}
 		case -1:
 			log_error(info_logger, "El cliente se desconecto");
 			return NULL;
@@ -314,18 +399,19 @@ void* recibirKernelDialfs() {
 			break;
 		}
 	}
+
+	return NULL;
 }
 
 
 void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede causar problemas. Estar al tanto.
 	int conexion = *((int*) cliente_socket);
-	char* textoAMostrar = malloc(sizeof(char*));
 
 	t_datos* datitos = malloc(sizeof(t_datos));
 
 	t_list* listaInts;
 
-	list_create(listaInts);
+	listaInts = list_create();
 
 	listaInts = recibirListaIntsYDatos(conexion, datitos);
 
@@ -387,44 +473,3 @@ void* solicitudIO_GEN_SLEEP (void* cliente_socket) {
 	return NULL;
 }
 
-void* solicitudIO_FS_CREATE (void* cliente_socket) {
-	int conexion = *((int*) cliente_socket);
-	char* nombreArch = malloc(10);
-	uint32_t pid;
-	strcpy(nombreArch, recibirEnteroYString(conexion, &pid));
-
-	crearArchivo(nombreArch);
-	logCrearArchivo(pid, nombreArch);
-
-	return NULL;
-}
-
-void* solicitudIO_FS_DELETE (void* cliente_socket) {
-	int conexion = *((int*) cliente_socket);
-	char* nombreArch = malloc(10);
-	uint32_t pid;
-	strcpy(nombreArch, recibirEnteroYString(conexion, &pid));
-
-	eliminarArchivo(nombreArch);
-	logEliminarArchivo(pid, nombreArch);
-	
-	return NULL;
-}
-
-void* solicitudIO_FS_TRUNCATE (void* cliente_socket) {
-
-	int conexion = *((int*) cliente_socket);
-	return NULL;
-}
-
-void* solicitudIO_FS_WRITE (void* cliente_socket) {
-
-	int conexion = *((int*) cliente_socket);
-	return NULL;
-}
-
-void* solicitudIO_FS_READ (void* cliente_socket) {
-	
-	int conexion = *((int*) cliente_socket);
-	return NULL;
-}
