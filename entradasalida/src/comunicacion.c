@@ -326,24 +326,23 @@ void* recibirKernelGenerica() {
 
 void* recibirKernelDialfs() {
 	while(1) {
-		
 		int cod_op = recibir_operacion(kernel_fd);
 		log_trace(trace_logger, "ENTRE A RECIBIR KERNEL");
 
 		switch (cod_op) {
 		case IO_FS_CREATE:{
-			uint32_t pid;
+			uint32_t* pid;
 			char* nombreArchivo = recibirEnteroYString(kernel_fd, pid);
 			crearArchivo(nombreArchivo);
-			logCrearArchivo(pid, nombreArchivo);
+			logCrearArchivo(*pid, nombreArchivo);
 			t_list* listaInts = list_create();
-			list_add(listaInts, &pid);
+			list_add(listaInts, pid);
 			enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
 			break;
 		}
 		case IO_FS_DELETE:{
 			uint32_t pid;
-			char* nombreArchivo = recibirEnteroYString(kernel_fd, pid);
+			char* nombreArchivo = recibirEnteroYString(kernel_fd, &pid);
 			eliminarArchivo(nombreArchivo);
 			logEliminarArchivo(pid, nombreArchivo);
 			t_list* listaInts = list_create();

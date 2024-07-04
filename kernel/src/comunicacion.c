@@ -360,11 +360,11 @@ void escucharCPU (void) {
 				uint32_t interfaz;
 				PCB* pcbRecibida = recibir_contextoEjecucion_y_char_y_uint32(cpuDispatch_fd, &interfaz);
 				char* nombreArchivo=pcbRecibida->nombreRecurso;
-				list_add(tablaGlobal_ArchivosAbiertos, nombreArchivo);
 				actualizarPcbEjecucion(pcbRecibida);
 				PCB* pcbActualizada = obtenerPcbExec();
 				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
 
+				log_info(info_logger, "PCB->id: <%d>", pcbActualizada->id);
 				enviarEnteroYString(pcbActualizada->id, nombreArchivo, vectorIO[interfaz], info_logger, IO_FS_CREATE);
 
 				break;
