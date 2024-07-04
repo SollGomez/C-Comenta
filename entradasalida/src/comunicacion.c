@@ -154,7 +154,6 @@ void cualInterfaz() {
 	}
     case 2:{
 		pthread_create(&tid, NULL, recibirKernelDialfs, NULL);
-
 		pthread_join(tid, NULL);
 
         break;
@@ -181,6 +180,7 @@ void terminar_programa(int conexion, t_log* logger) {
 
 void *recibirMemoria() {
 	log_info(info_logger, "Entro a recibir memoria");
+
 	while(1) {
 		int cod_op = recibir_operacion(memoria_fd);
 		if(!strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS")) {
@@ -326,7 +326,9 @@ void* recibirKernelGenerica() {
 
 void* recibirKernelDialfs() {
 	while(1) {
+		
 		int cod_op = recibir_operacion(kernel_fd);
+		log_trace(trace_logger, "ENTRE A RECIBIR KERNEL");
 
 		switch (cod_op) {
 		case IO_FS_CREATE:{
