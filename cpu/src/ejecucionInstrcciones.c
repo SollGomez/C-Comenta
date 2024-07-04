@@ -328,7 +328,13 @@ uint32_t leer_valor_de_memoria(int direccion_fisica, int bytesRegistro) {
     list_add(listaInts, &uint32t_tamanio);
 
     enviarListaUint32_t(listaInts,memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA_UINT); //pid, direccion, tamanio
-    uint32_t valor = (uint32_t)recibir_valor_de_memoria();
+    void* leido = recibir_valor_de_memoria();
+    uint32_t valor = 0;
+    if(bytesRegistro == 4)
+        memcpy(&valor, leido, 4);
+    else   
+        memcpy(&valor, leido, 1);
+
     log_warning(warning_logger, "VALOR LEIDO DE MEMORIA: %d", valor);
 
     list_clean(listaInts);
@@ -383,9 +389,10 @@ void* recibir_valor_de_memoria(){
 		case LECTURA_REALIZADA_UINT: {
             t_list* listaInts = recibirListaUint32_t(memoria_fd); //pid, direcicon, tamanio, valor
             uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);
-            uint32_t* puntero = list_get(listaInts,3);
-            valor = (void*)puntero;
-            log_info(info_logger, "VALOR LEIDO DE MEMORIA: %d", *puntero);
+            uint32_t puntero = *(uint32_t*)list_get(listaInts,3);
+            //valor = (void*)puntero;
+            valor = &puntero;
+            log_info(info_logger, "VALOR LEIDO DE MEMORIA ABER?: %d", puntero);
 
             list_clean_and_destroy_elements(listaInts,free);
             list_destroy(listaInts);
