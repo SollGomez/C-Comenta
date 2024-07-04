@@ -57,7 +57,6 @@ void crearArchivo(char* nombreArchivo) {
 
     FILE* fbe = fopen(path, "wb");
 
-    log_info(info_logger ,"No rompe despues de abrir");
 
     int posArch = list_size(listaDeArchivos);
 
@@ -132,6 +131,27 @@ void eliminarArchivo(char* nombreArchivo) {
     } else {
         log_info(info_logger, "Error al borrar el archivo");
     }
+
+    char* path = string_new();
+    string_append(&path, cfg_entradaSalida->PATH_BASE_DIALFS);
+    string_append(&path, "/");
+    string_append(&path, "nom-arch-fs.txt");
+
+    FILE* fbe = fopen(path, "wb");
+
+    int posArch = list_size(listaDeArchivos);
+    for(int i=0; i<list_size(listaDeArchivos); i++) {
+        if(strcmp(list_get(listaDeArchivos, i), nombreArchivo)) {
+            char* numArchivo = string_new();
+            string_append(&numArchivo, "F-");
+            string_append(&numArchivo, string_itoa(posArch));
+            config_remove_key(configFs, numArchivo);
+            config_save(configFs);
+        }
+    }
+
+   
+    fclose(fbe);
 }
 
 void truncarArchivo (char* nombreArchivo, uint32_t tamanio) {

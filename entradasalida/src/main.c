@@ -9,9 +9,11 @@ int main(int argc, char* argv[]) {
     cargar_configuracion();
 	crearEstructurasFs();
 
-	crearArchivo("duhndaud.txt");
+	//crearArchivo("duhndaud.txt");
 	
 	log_info(info_logger, "Ya cree todo");
+
+	//eliminarArchivo("duhndaud.txt");
 	//manejarInterfazStdin(2, 30);
 	/*crearEstructurasFs();
 
