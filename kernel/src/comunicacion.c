@@ -43,13 +43,6 @@ void cualInterfaz (int tipoInterfaz) {
 		break;
 	case 2:
 		log_info(logger, "Interfaz DIALFS conectada");
-
-		uint32_t sizeTablaGlobal;
-		sizeTablaGlobal = list_size(tablaGlobal_ArchivosAbiertos);
-
-		log_info(logger, "tablaGlobal_ArchivosAbiertos: <%s>", list_get(tablaGlobal_ArchivosAbiertos, 0));
-		enviarListaString(tablaGlobal_ArchivosAbiertos, vectorIO[2], info_logger, LISTA_DE_ARCHIVOS);
-
 		break;
 	case 3:
 		log_info(logger, "Interfaz GENERICA conectada");
