@@ -7,7 +7,7 @@
 void manejarInterfazGenerica(uint32_t unidadesDeTrabajo) {    
 
     //sleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO+4);               //DESPUES VER SI ES USLEEP O SLEEP
-    usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * unidadesDeTrabajo);
+    usleep(cfg_entradaSalida->TIEMPO_UNIDAD_TRABAJO * unidadesDeTrabajo * 5000);
     printf("SLEEP TERMINADO\n");
     
 }
