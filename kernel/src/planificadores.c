@@ -114,13 +114,13 @@ void* esperarRR (void* pcbReady) {
 		if (pcb->tiempoEjecutando >= QUANTUM) {
             if(list_size(colaExec)){
                 PCB* pcbExec = obtenerPcbExec();
-                if (list_size(colaExec) && pcb->id == pcbExec->id) {
+                if (pcb->id == pcbExec->id) {
                     enviarValor_uint32(pcbExec->id, cpuInterrupt_fd, INTERRUPCIONCPU, info_logger);
                     log_info(info_logger, "PID: <%d> - Desalojado por fin de Quantum", pcbExec->id);
                 }
             }
             pcb->tiempoEjecutando = 0;
-			return NULL;
+            return NULL;
 		}
 	}
 }
@@ -134,22 +134,10 @@ void* esperarVRR(void* pcbReady) {
 
 		pcb->tiempoEjecutando++;
 
-        if (pcb->tiempoEjecutando < QUANTUM) {
-            if(list_size(colaExec)){
-                PCB* pcbExec = obtenerPcbExec();
-                if (list_size(colaExec) && pcb->id != pcbExec->id) {//sacar list_size
-                    pcb->quantum = QUANTUM - pcb->tiempoEjecutando;
-                    log_info(info_logger, "PID: <%d> - Proceso con <%d> de quantum sobrante", pcbExec->id, pcbExec->quantum);
-                    pcb->tiempoEjecutando = 0;
-			        return NULL;
-                }
-            }
-        }
-
-		if (pcb->tiempoEjecutando >= QUANTUM) {//DESALOJO
+        if (pcb->tiempoEjecutando >= QUANTUM) {//DESALOJO
             if (list_size(colaExec)) {
                 PCB* pcbExec = obtenerPcbExec();
-                if (list_size(colaExec) && pcb->id == pcbExec->id) {
+                if (pcb->id == pcbExec->id) {
                     pcb->quantum = 0;
                     enviarValor_uint32(pcbExec->id, cpuInterrupt_fd, INTERRUPCIONCPU, info_logger);
                     log_info(info_logger, "PID: <%d> - Desalojado por fin de Quantum", pcbExec->id);
@@ -158,6 +146,18 @@ void* esperarVRR(void* pcbReady) {
             pcb->tiempoEjecutando = 0;
 			return NULL;
 		}
+
+        if (pcb->tiempoEjecutando < QUANTUM) {
+            if (list_size(colaExec)) {
+                PCB* pcbExec = obtenerPcbExec();
+                if (pcb->id != pcbExec->id) {
+                    pcb->quantum = QUANTUM - pcb->tiempoEjecutando;
+                    log_info(info_logger, "PID: <%d> - Proceso con <%d> de quantum sobrante", pcbExec->id, pcbExec->quantum);
+                    pcb->tiempoEjecutando = 0;
+			        return NULL;
+                }
+            }
+        }
 	}
 }
 
@@ -168,7 +168,7 @@ void moverProceso_readyExec(){
         if (list_size(colaReadyVRR)) {
             pthread_mutex_lock(&mutex_colaVRR);
             pcbReady = list_remove(colaReadyVRR,0);
-            list_add(colaReadyVRR,pcbReady);
+            list_add(colaExec,pcbReady);
             pthread_mutex_unlock(&mutex_colaVRR);
         }
         else if (list_size(colaReady)) {
@@ -197,6 +197,7 @@ void moverProceso_readyExec(){
         mandarPaquetePCB(pcbReady);
         log_info(info_logger, "PID: [%d] - Estado Anterior: READY - Estado Actual: EXEC.", pcbReady->id);
 }
+
 
 void moverProceso_NewReady(){
     pthread_mutex_lock(&mutex_colaNew);
