@@ -42,7 +42,7 @@ void cualInterfaz (int tipoInterfaz) {
 		log_info(logger, "Interfaz STDIN conectada");
 		break;
 	case 2:
-		log_info(logger, "Interfaz DIAL_FS conectada");
+		log_info(logger, "Interfaz DIALFS conectada");
 
 		uint32_t sizeTablaGlobal;
 		sizeTablaGlobal = list_size(tablaGlobal_ArchivosAbiertos);

@@ -183,7 +183,7 @@ void *recibirMemoria() {
 	log_info(info_logger, "Entro a recibir memoria");
 	while(1) {
 		int cod_op = recibir_operacion(memoria_fd);
-		if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS") ) {
+		if(!strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS")) {
 				switch (cod_op) {
 				case LECTURA_REALIZADA:{
 					log_info(info_logger, "Solicitud IO DIALFS Cumplida");

@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
     cargar_configuracion();
-	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS")){
+	if(!strncmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS", strlen("DIAL_FS"))){
 		crearEstructurasFs();
 	}
 

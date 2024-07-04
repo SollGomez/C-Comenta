@@ -1,6 +1,5 @@
 #include <logs.h>
 
-
 t_log* info_logger;
 t_log* trace_logger;
 t_log* error_logger;
@@ -14,14 +13,11 @@ void* bitarraycontent;
 t_bitarray* bitmap;
 t_list* listaDeArchivos;
 
-
 void crearEstructurasFs() {
-
     crearBitmap();
 
     crearArchivoBloques();
 }
-
 
 void crearBitmap() {
     char* path = string_new();
