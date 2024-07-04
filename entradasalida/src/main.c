@@ -7,28 +7,30 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
     cargar_configuracion();
-	crearEstructurasFs();
+	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS")){
+		crearEstructurasFs();
+	}
 
 	//crearArchivo("duhndaud.txt");
-	
-	log_info(info_logger, "Ya cree todo");
-
 	//eliminarArchivo("duhndaud.txt");
 	//manejarInterfazStdin(2, 30);
-	/*crearEstructurasFs();
-
-	listaDeArchivos = list_create();
+	
+/*
+	//listaDeArchivos = list_create();
 	crearArchivo("pruebaLoca.txt");
-	list_add(listaDeArchivos, "pruebaLoca.txt");
+	//list_add(listaDeArchivos, "pruebaLoca.txt");
 	truncarArchivo("pruebaLoca.txt", 64); 
 	escribirArchivo("hola ", "HOLA COMO ESTAS HOLA COMO ESTAS HOLA COMO ESTAS HOLA COMO ESTAS", 0, 64);
 	crearArchivo("pruebaLoca2.txt");
-	list_add(listaDeArchivos, "pruebaLoca2.txt");
+	//list_add(listaDeArchivos, "pruebaLoca2.txt");
 
 	//msync(bitmap, cfg_entradaSalida->BLOCK_COUNT, MS_SYNC);
-	truncarArchivo("pruebaLoca2.txt", 65408);
+	truncarArchivo("pruebaLoca2.txt", 128);
 	truncarArchivo("pruebaLoca.txt", 128);
 	//truncarArchivo("pruebaLoca.txt", 0);
+	// for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
+    //    log_info(info_logger, "%d", bitarray_test_bit(bitmap, i));
+    // }
 */
 	
 	pthread_t kernel;
