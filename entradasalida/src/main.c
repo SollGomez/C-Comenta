@@ -3,14 +3,23 @@
 t_config* config;
 
 int main(int argc, char* argv[]) {
-  
-    config = crearConfig(argv[1]);
-    init_loggers_config(argv[1]);
+
+	char* nombreInterfaz = argv[1];
+	printf("%s \n", nombreInterfaz);
+	char* path = string_new();
+	string_append(&path, "/home/utnso/tp-2024-1c-CANCH/configs/");
+	string_append(&path, nombreInterfaz);
+	string_append(&path, ".config");
+	printf("\n %s", path);
+
+    config = crearConfig(path);
+    init_loggers_config(path);
     cargar_configuracion();
 	if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS")){
 		crearEstructurasFs();
 	}
 
+	log_info(info_logger, "AASASSAS %s", nombreInterfaz);
 	//crearArchivo("duhndaud.txt");
 	//eliminarArchivo("duhndaud.txt");
 	//manejarInterfazStdin(2, 30);

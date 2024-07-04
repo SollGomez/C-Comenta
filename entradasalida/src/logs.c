@@ -8,6 +8,7 @@ t_config* configuracionEntradasalida;
 bool logsCreados = false;
 bool configCreada = false;
 t_config_entradaSalida* cfg_entradaSalida;
+char* nombreInterfaz;
 t_config* configFs;
 archBloques* archivoBloques;
 void* bitarraycontent;

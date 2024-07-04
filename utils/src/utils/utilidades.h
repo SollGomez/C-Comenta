@@ -10,6 +10,9 @@ Instruccion* recibirInstruccion(int conexion);
 void liberarInstruccion(Instruccion * instruccion);
 bool agregarUint32_tsAPaquete(t_list*, t_paquete*);
 bool enviarListaUint32_t(t_list*, int, t_log*, op_code_cliente);
+bool agregarStringAPaquete(char* string, t_paquete* paquete);
+char* recibirString(int socket_cliente);
+bool enviarString(char* string, int socket_cliente, op_code_cliente codigoOperacion, t_log* logger);
 
 void agregar_registros_a_paquete(t_paquete* paquete, RegistrosCPU* registro);
 void agregar_ContextoEjecucion_a_paquete(t_paquete *paquete, PCB* pcb);

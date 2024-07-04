@@ -231,6 +231,45 @@ bool agregarUint32_tsAPaquete(t_list* listaInts, t_paquete* paquete) {
     return true;
 }
 
+
+bool enviarString(char* string, int socket_cliente, op_code_cliente codigoOperacion, t_log* logger){
+    t_paquete* paquete = crear_paquete(codigoOperacion, logger);
+    if(!agregarStringAPaquete(string, paquete)){
+        log_error(logger, "Hubo un error cuando se intento agregar las instrucciones al paquete");
+        return false;
+    }
+    enviar_paquete(paquete, socket_cliente);
+    log_info(logger, "Se envio el paquete");
+    eliminar_paquete(paquete);
+    return true;
+}
+
+bool agregarStringAPaquete(char* string, t_paquete* paquete){
+    int offset=0; //desplazamiento
+    uint8_t tamanio = strlen(string) + 1;
+    paquete->buffer->size+= tamanio + sizeof(uint8_t);
+    void* stream = malloc(paquete->buffer->size); //Reservo memoria para el stream
+    memcpy(stream + offset, &tamanio, sizeof(uint8_t));
+    offset += sizeof(uint8_t);
+    memcpy(stream + offset, string, tamanio);
+    paquete->buffer->stream = stream;
+    //log_info(logger, "Se agrego el paquete");
+    return true;
+}
+char* recibirString(int socket_cliente){
+    int tamanio;
+    int desplazamiento = 0;
+    void *buffer = recibir_stream(&tamanio, socket_cliente);
+    uint8_t tamanioString = 0;
+    char* string;
+    memcpy(&tamanioString, buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento+=sizeof(uint8_t);
+    string= malloc(tamanioString);
+    memcpy(string, buffer + desplazamiento, tamanioString);
+    free(buffer);
+    return string;
+}
+
 void agregar_registros_a_paquete(t_paquete* paquete, RegistrosCPU* registro) {
 
     //Los valores a almacenar en los registros siempre tendrán la misma longitud que el registro,

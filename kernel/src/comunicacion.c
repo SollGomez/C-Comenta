@@ -12,18 +12,34 @@ int recibirConexion (char* puerto) {
 	t_log* logger;
 	pthread_t tid[4];
 	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
-	int32_t tipoInterfaz;
 	
 	kernel_fd = iniciar_servidor(logger, "Server Kernel", puerto);
 
 	while (1) {
 		entradasalida_fd = esperar_cliente(kernel_fd);
-		recv(entradasalida_fd, &tipoInterfaz, sizeof(int32_t), MSG_WAITALL);
+		int cod_op = recibir_operacion(entradasalida_fd);
+		switch (cod_op)
+		{
+		case NUEVA_INTERFAZ:
+			uint32_t intInterfaz;
+			char* tipoInterfaz = recibirEnteroYString(entradasalida_fd, &intInterfaz);
+			cualInterfaz(intInterfaz);
+			vectorIO[tipoInterfaz] = entradasalida_fd;
+			pthread_create(&tid[tipoInterfaz], NULL, recibirIO, fdDeIo);
+			pthread_detach(tid[tipoInterfaz]);
+			break;
+		default:
+			log_info(info_logger, "watafac amigo");
+			break;
+		}
+
+		/*
 		vectorIO[tipoInterfaz] = entradasalida_fd;
 		cualInterfaz(tipoInterfaz);		
 		void* fdDeIo = &vectorIO[tipoInterfaz];
 		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, fdDeIo);
 		pthread_detach(tid[tipoInterfaz]);
+		*/
 	}
 
 	return EXIT_SUCCESS;

@@ -96,9 +96,8 @@ int conectarKernel(char *modulo) {
 	int32_t handshakeEntradasalida;
 
 	handshakeEntradasalida = cfg_entradaSalida->TIPO_INTERFAZ_INT;
-
-	send(kernel_fd, &handshakeEntradasalida, sizeof(int32_t), 0);
-
+	//send(kernel_fd, &nombreInterfaz, strlen(nombreInterfaz) + 1, 0);
+	enviarEnteroYString(handshakeEntradasalida, nombreInterfaz, kernel_fd, info_logger, NUEVA_INTERFAZ);
 	log_info(info_logger, "ANTES DE cualInterfaz");
 
 	cualInterfaz();
@@ -183,7 +182,7 @@ void *recibirMemoria() {
 	log_info(info_logger, "Entro a recibir memoria");
 	while(1) {
 		int cod_op = recibir_operacion(memoria_fd);
-		if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS") ) {
+		if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS")) {
 				switch (cod_op) {
 				case LECTURA_REALIZADA:{
 					log_info(info_logger, "Solicitud IO DIALFS Cumplida");
