@@ -29,7 +29,6 @@ int recibirConexion (char* puerto) {
 	return EXIT_SUCCESS;
 }
 
-
 void cualInterfaz (int tipoInterfaz) {
 	t_log* logger;
 	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
@@ -391,7 +390,7 @@ void escucharCPU (void) {
 				PCB* pcbActualizada = obtenerPcbExec();
 				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
 
-				enviar_uint32_y_uint32_y_char(nombreArchivo, &pcbActualizada->id, &tamanio, vectorIO[interfaz], IO_FS_TRUNCATE, info_logger); //NO ESTOY SEGURO SI VAN LOS "&"
+				enviar_uint32_y_uint32_y_char(nombreArchivo, pcbActualizada->id, tamanio, vectorIO[interfaz], IO_FS_TRUNCATE, info_logger); //NO ESTOY SEGURO SI VAN LOS "&"
 
 				break;
 			}

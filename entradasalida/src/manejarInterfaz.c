@@ -155,6 +155,7 @@ void eliminarArchivo(char* nombreArchivo) {
 }
 
 void truncarArchivo (char* nombreArchivo, uint32_t tamanio) {
+    log_info(info_logger, "TAMAÑO RECIBIDO <%d>", tamanio);
 
     log_trace(trace_logger, "Entre a truncar");
     char* base = string_new();
@@ -208,9 +209,6 @@ void truncarArchivo (char* nombreArchivo, uint32_t tamanio) {
 }
 
 void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar) {
-
-
-
     uint32_t bloquesASumar = (tamanio - archivoATruncar->tamArchivo) / cfg_entradaSalida->BLOCK_SIZE;
     uint32_t tamanioActual = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
     uint32_t posicionFinalActual;
@@ -469,9 +467,8 @@ bool tengoEspacioAMiLado(t_archivo_metadata* archivoATruncar, uint32_t tamanioNu
     return true;
 }
 
-void achicarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar) {
-    
-    uint32_t bloquesActuales = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE; 
+void achicarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar) {    
+    uint32_t bloquesActuales = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
 
     uint32_t bloquesARestar = (archivoATruncar->tamArchivo - tamanio) / cfg_entradaSalida->BLOCK_SIZE;
     

@@ -79,7 +79,6 @@ void ejecutar_script (char* linea) {
     pthread_create(&(tid), NULL, ejecutar_script_operaciones, path);
     pthread_join(tid, NULL);
     free(saveptr);//Estaba comentado cuando andaba
-	free(path);//Estaba comentado cuando andaba
 	pthread_mutex_unlock(&mutex_iniciarProceso);
 
     return;
@@ -134,7 +133,6 @@ void iniciar_proceso (char* linea) {
     pthread_create(&(tid), NULL, inicializarProceso, path);
     pthread_join(tid, NULL);
 	free(saveptr);//ESTABA COMENTADO CUANDO ANDABA
-	free(path);//ESTABA COMENTADO CUANDO ANDABA
 
     return;
 }
