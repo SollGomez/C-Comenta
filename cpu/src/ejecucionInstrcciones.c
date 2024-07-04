@@ -576,9 +576,9 @@ uint32_t obtenerInterfaz(char* interfaz){
         numeroInterfaz=0;
     if(!strcmp(interfaz,"STDIN") || !strcmp(interfaz,"TECLADO"))
         numeroInterfaz=1;
-    if(!strcmp(interfaz,"DIAL_FS") || !strcmp(interfaz,"FS") || !strcmp(interfaz,"DIALFS") ||  ||)
+    if(!strcmp(interfaz,"DIAL_FS") || !strcmp(interfaz,"FS") || !strcmp(interfaz,"DIALFS"))
         numeroInterfaz=2;
-    if(!strcmp(interfaz,"GENERICA") || !strcmp(interfaz,"ESPERA") || !strcmp(interfaz,"SLP1") || !strcmp(in erfaz,"SLP2"))
+    if(!strcmp(interfaz,"GENERICA") || !strcmp(interfaz,"ESPERA") || !strcmp(interfaz,"SLP1") || !strcmp(interfaz,"SLP2"))
         numeroInterfaz=3;
 
     return numeroInterfaz;
