@@ -189,7 +189,7 @@ void *recibirMemoria() {
 					log_info(info_logger, "Solicitud IO DIALFS Cumplida");
 					t_datos* datos = malloc(sizeof(t_datos));
 					t_list* listaInts = list_create();
-					listaInts = *(uint32_t*) recibirListaIntsYDatos(memoria_fd, datos);
+					listaInts = recibirListaIntsYDatos(memoria_fd, datos);
 					uint32_t pid = *(uint32_t*) list_get(listaInts, 0);
 					uint32_t tamanio = *(uint32_t*) list_get(listaInts, 1);
 					uint32_t puntero = *(uint32_t*) list_get(listaInts, 3);
