@@ -420,7 +420,7 @@ void escucharCPU (void) {
 				PCB* pcbActualizada = obtenerPcbExec();
 				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
 
-				enviar_uint32_y_uint32_y_uint32_y_uint32_y_char(nombreArchivo, &pcbActualizada->id, &tamanio, &punteroArchivo, &direccion_fisica, vectorIO[interfaz], IO_FS_READ, info_logger);
+				enviar_uint32_y_uint32_y_uint32_y_uint32_y_char(nombreArchivo, pcbActualizada->id, tamanio, punteroArchivo, direccion_fisica, vectorIO[interfaz], IO_FS_READ, info_logger);
 
 				break;
 			}

@@ -332,7 +332,9 @@ void* recibirKernelDialfs() {
 		switch (cod_op) {
 		case IO_FS_CREATE:{
 			uint32_t pid;
+			log_info(info_logger, "PID ANTES DE RECIBIR: %d", pid);
 			char* nombreArchivo = recibirEnteroYString(kernel_fd, &pid);
+			log_info(info_logger, "PID DSP DE RECIBIR: %d", pid);
 			crearArchivo(nombreArchivo);
 			logCrearArchivo(pid, nombreArchivo);
 			t_list* listaInts = list_create();
@@ -357,8 +359,12 @@ void* recibirKernelDialfs() {
 			uint32_t dirFisica;
 			uint32_t tamanio;
 			uint32_t puntero;
+			log_info(info_logger, "ANTES DE RECIBIR");
 			char* nombreArchivo = recibirEnteroEnteroEnteroEnteroChar(kernel_fd, &pid, &tamanio, &puntero, &dirFisica);
-			datos->datos = leerArchivo(nombreArchivo, tamanio, tamanio);
+			log_info(info_logger, "nombreArchivo: %s, tamanio: %d, puntero: %d", nombreArchivo, tamanio, puntero);
+			datos->datos = leerArchivo(nombreArchivo, puntero, tamanio);
+			datos->tamanio = tamanio;
+			logLeerArchivo(pid, nombreArchivo, tamanio, puntero);
 			list_add(listaInts, &pid);
 			list_add(listaInts, &dirFisica);
 			list_add(listaInts, &tamanio);

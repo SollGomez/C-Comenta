@@ -349,6 +349,14 @@ void* multiprogramacion (void* linea) {
 	log_info(info_logger, "Grado Anterior: <%d> - Grado Actual: <%d>", GRADO_MAX_MULTIPROGRAMACION, nuevoGradoMP);
 	GRADO_MAX_MULTIPROGRAMACION=nuevoGradoMP;
 
+	uint32_t tamLista = list_size(colaNew);
+
+	if(tamLista){
+		for(int i=0 ; i<tamLista ; i++){
+			sem_post(&sem_procesosEnNew);
+		}
+	}
+
 	pthread_mutex_unlock(&semaforo);
 
     return NULL;

@@ -824,10 +824,8 @@ char* recibirEnteroYString(int socket_cliente,uint32_t* entero) {
     int tamanio;
     int desplazamiento = 0;
     void *buffer = recibir_stream(&tamanio, socket_cliente);
-
-    memcpy(&entero, buffer + desplazamiento, sizeof(uint32_t));
+    memcpy(entero, buffer + desplazamiento, sizeof(uint32_t));
     desplazamiento+=sizeof(uint32_t);
-
     uint32_t tamanioString =0;
     memcpy(&tamanioString, buffer + desplazamiento, sizeof (uint32_t));
     desplazamiento+=sizeof(uint32_t);
