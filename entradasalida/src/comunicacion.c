@@ -331,12 +331,12 @@ void* recibirKernelDialfs() {
 
 		switch (cod_op) {
 		case IO_FS_CREATE:{
-			uint32_t* pid;
-			char* nombreArchivo = recibirEnteroYString(kernel_fd, pid);
+			uint32_t pid;
+			char* nombreArchivo = recibirEnteroYString(kernel_fd, &pid);
 			crearArchivo(nombreArchivo);
-			logCrearArchivo(*pid, nombreArchivo);
+			logCrearArchivo(pid, nombreArchivo);
 			t_list* listaInts = list_create();
-			list_add(listaInts, pid);
+			list_add(listaInts, &pid);
 			enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
 			break;
 		}
