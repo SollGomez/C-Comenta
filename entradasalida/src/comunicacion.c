@@ -327,14 +327,14 @@ void* recibirKernelGenerica() {
 void* recibirKernelDialfs() {
 	while(1) {
 		int cod_op = recibir_operacion(kernel_fd);
-		log_trace(trace_logger, "ENTRE A RECIBIR KERNEL");
+		//log_trace(trace_logger, "ENTRE A RECIBIR KERNEL");
 
 		switch (cod_op) {
 		case IO_FS_CREATE:{
 			uint32_t pid;
-			log_info(info_logger, "PID ANTES DE RECIBIR: %d", pid);
+			//log_info(info_logger, "PID ANTES DE RECIBIR: %d", pid);
 			char* nombreArchivo = recibirEnteroYString(kernel_fd, &pid);
-			log_info(info_logger, "PID DSP DE RECIBIR: %d", pid);
+			//log_info(info_logger, "PID DSP DE RECIBIR: %d", pid);
 			crearArchivo(nombreArchivo);
 			logCrearArchivo(pid, nombreArchivo);
 			t_list* listaInts = list_create();
@@ -359,9 +359,9 @@ void* recibirKernelDialfs() {
 			uint32_t dirFisica;
 			uint32_t tamanio;
 			uint32_t puntero;
-			log_info(info_logger, "ANTES DE RECIBIR");
+			//log_info(info_logger, "ANTES DE RECIBIR");
 			char* nombreArchivo = recibirEnteroEnteroEnteroEnteroChar(kernel_fd, &pid, &tamanio, &puntero, &dirFisica);
-			log_info(info_logger, "nombreArchivo: %s, tamanio: %d, puntero: %d", nombreArchivo, tamanio, puntero);
+			//log_info(info_logger, "nombreArchivo: %s, tamanio: %d, puntero: %d", nombreArchivo, tamanio, puntero);
 			datos->datos = leerArchivo(nombreArchivo, puntero, tamanio);
 			datos->tamanio = tamanio;
 			logLeerArchivo(pid, nombreArchivo, tamanio, puntero);

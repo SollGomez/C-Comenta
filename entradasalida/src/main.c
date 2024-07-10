@@ -3,6 +3,11 @@
 t_config* config;
 
 int main(int argc, char* argv[]) {
+
+	if (signal(SIGINT, sigint_handler) == SIG_ERR) {
+        perror("Error al configurar el manejador de señal");
+        return EXIT_FAILURE;
+    }
   
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
@@ -62,4 +67,10 @@ t_config *crearConfig(char* configPath){
 	exit(2);
 
 	return config;
+}
+
+void sigint_handler(int sig) {
+    printf("\nSe ha recibido la señal SIGINT (Ctrl+C). Cerrando sockets...\n");
+    // Aquí puedes cerrar tus sockets u realizar otras tareas necesarias
+    exit(EXIT_SUCCESS); // Puedes modificar esto según sea necesario
 }

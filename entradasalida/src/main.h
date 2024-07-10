@@ -13,5 +13,6 @@
 extern t_config* config;
 
 t_config *crearConfig(char* configPath);
+void sigint_handler(int sig);
 
 #endif /* MAIN_H_ */

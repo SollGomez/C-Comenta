@@ -15,7 +15,7 @@ void manejarInterfazGenerica(uint32_t unidadesDeTrabajo) {
 void manejarInterfazStdin(t_list* listaInts) {
 
     t_datos* datos = malloc(sizeof(t_datos));
-    datos->datos = (void*)readline(">");
+    datos->datos = (void*)readline("INSERTE TEXTO>");
     uint32_t tamanio = *(uint32_t*)list_get(listaInts, 2);
     datos->tamanio = tamanio;
 
@@ -70,7 +70,6 @@ void crearArchivo(char* nombreArchivo) {
     config_save(configFs);
     fclose(fbe);
 
-    log_trace(trace_logger, "Todo bien aca");
     
   
     t_archivo_metadata* archivoCreado = malloc(sizeof(t_archivo_metadata));
@@ -401,10 +400,6 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
     //         bloquesASumar--;
     // }
 
-
-    for(int i=0; i<bitarray_get_max_bit(bitmap); i++){
-       log_info(info_logger, "%d", bitarray_test_bit(bitmap, i));
-    }
 
     //Retraso compactacion
     usleep(cfg_entradaSalida->RETRASO_COMPACTACION);
