@@ -15,15 +15,14 @@ validate_ip() {
 
 read -p "Ingresa la IP de Kernel: " ipKernel
 read -p "Ingresa la IP de Memoria: " ipMemoria
-read -p "Ingresa la IP de FileSystem: " ipFS
 read -p "Ingresa la IP de CPU: " ipCPU
 
-if [[ $ipKernel == "" || $ipMemoria == "" || $ipFS == "" || $ipCPU == "" ]]; then
+if [[ $ipKernel == "" || $ipMemoria == "" || $ipCPU == "" ]]; then
   echo "Error: No ingresaste nada :0"
   exit 0
 fi
 
-if validate_ip "$ipKernel" && validate_ip "$ipMemoria" && validate_ip "$ipFS" && validate_ip "$ipCPU" ; then
+if validate_ip "$ipKernel" && validate_ip "$ipMemoria" && validate_ip "$ipCPU" ; then
   echo "Todas las IPs ingresadas son validas para actualizar los configs"
 else
   echo "Error: Pusiste cualquier cosa :/"
@@ -76,16 +75,26 @@ ioc0="./configs/GENERICA.config"
 ioc1="./configs/ESPERA.config"
 ioc2="./configs/SLP1.config"
 ioc3="./configs/IO_GEN_SLEEP.config"
-
+ioc4="./configs/MONITOR.config"
+ioc5="./configs/TECLADO.config"
+ioc6="./configs/FS.config"
 
 sed -E -i "s/$sMem/IP_MEMORIA=$ipMemoria/" $ioc0
-sed -E -i "s/$sFs/IP_FILESYSTEM=$ipFS/" $ioc0
 sed -E -i "s/$sMem/IP_MEMORIA=$ipMemoria/" $ioc1
-sed -E -i "s/$sFs/IP_FILESYSTEM=$ipFS/" $ioc1
 sed -E -i "s/$sMem/IP_MEMORIA=$ipMemoria/" $ioc2
-sed -E -i "s/$sFs/IP_FILESYSTEM=$ipFS/" $ioc2
 sed -E -i "s/$sMem/IP_MEMORIA=$ipMemoria/" $ioc3
-sed -E -i "s/$sFs/IP_FILESYSTEM=$ipFS/" $ioc3
+sed -E -i "s/$sMem/IP_MEMORIA=$ipMemoria/" $ioc4
+sed -E -i "s/$sMem/IP_MEMORIA=$ipMemoria/" $ioc5
+sed -E -i "s/$sMem/IP_MEMORIA=$ipMemoria/" $ioc6
+
+sed -E -i "s/$sKer/IP_KERNEL=$ipKernel/" $ioc0
+sed -E -i "s/$sKer/IP_KERNEL=$ipKernel/" $ioc1
+sed -E -i "s/$sKer/IP_KERNEL=$ipKernel/" $ioc2
+sed -E -i "s/$sKer/IP_KERNEL=$ipKernel/" $ioc3
+sed -E -i "s/$sKer/IP_KERNEL=$ipKernel/" $ioc4
+sed -E -i "s/$sKer/IP_KERNEL=$ipKernel/" $ioc5
+sed -E -i "s/$sKer/IP_KERNEL=$ipKernel/" $ioc6
+
 
 # CPU
 
