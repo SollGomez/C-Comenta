@@ -74,3 +74,29 @@ Ante cualquier duda, podés consultar la documentación en el repositorio de
 
 [so-commons-library]: https://github.com/sisoputnfrba/so-commons-library
 [so-deploy]: https://github.com/sisoputnfrba/so-deploy
+
+## Entrega para los pibes del grupo (Cortesia del mejor)
+```bash
+git clone https://github.com/sisoputnfrba/so-deploy.git
+cd so-deploy
+./deploy.sh -t=/home/utnso -p=utils -p=kernel -p=cpu -p=memoria -p=entradasalida "tp-2024-1c-CANCH"
+```
+ponen las credenciales de acceso:
+
+user: marrkbau
+pass: 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
+
+cuando se clone todo:
+```bash
+cd ..
+cd tp-2024-1c-CANCH
+./hacerDirs.sh
+./make.sh
+```
+
+nos fijamos las ips de cada maquina y modulo y:
+```bash
+./ips.sh
+```
+
+y configuramos las ips :D
