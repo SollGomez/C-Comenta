@@ -5,12 +5,12 @@ int cpuInterrupt_fd;
 int memoria_fd;
 int kernel_fd;
 int stdin_fd;
-int vectorIO[4];
+int vectorIO[10];
 
 int recibirConexion (char* puerto) {
 	int entradasalida_fd;
 	t_log* logger;
-	pthread_t tid[4];
+	pthread_t tid[10];
 	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
 	int32_t tipoInterfaz;
 	
@@ -44,7 +44,16 @@ void cualInterfaz (int tipoInterfaz) {
 		log_info(logger, "Interfaz DIALFS conectada");
 		break;
 	case 3:
+		log_info(logger, "Interfaz ESPERA conectada");
+		break;
+	case 4:
+		log_info(logger, "Interfaz SLP1 conectada");
+		break;
+	case 5:
 		log_info(logger, "Interfaz GENERICA conectada");
+		break;
+	case 6:
+		log_info(logger, "Interfaz IO_GEN_SLEEP conectada");
 		break;
 	default:
 		break;

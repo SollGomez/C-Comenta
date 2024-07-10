@@ -162,6 +162,18 @@ void cualInterfaz() {
 		pthread_create(&tid, NULL, recibirKernelGenerica, NULL);
 		pthread_join(tid, NULL);
         break;
+	} case 4:{
+		pthread_create(&tid, NULL, recibirKernelGenerica, NULL);
+		pthread_join(tid, NULL);
+		break;
+	} case 5:{
+		pthread_create(&tid, NULL, recibirKernelGenerica, NULL);
+		pthread_join(tid, NULL);
+		break;
+	} case 6:{
+		pthread_create(&tid, NULL, recibirKernelGenerica, NULL);
+		pthread_join(tid, NULL);
+		break;
 	}
     default:
         printf("Esa interfaz no existe :/");
@@ -183,7 +195,7 @@ void *recibirMemoria() {
 
 	while(1) {
 		int cod_op = recibir_operacion(memoria_fd);
-		if(!strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS")) {
+		if(!strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS")) {
 				switch (cod_op) {
 				case LECTURA_REALIZADA:{
 					log_info(info_logger, "Solicitud IO DIALFS Cumplida");

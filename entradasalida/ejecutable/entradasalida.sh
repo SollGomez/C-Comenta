@@ -17,4 +17,4 @@ directorioBin="$directorioModulo/bin/"
 # Cambiar al directorio
 cd "$directorioBin"
 # Ejecutar el programa con parámetros determinados
-./entradasalida "$directorioConfig/entradasalida$tipoEntradaSalida.config" 
+./entradasalida "$tipoEntradaSalida" 

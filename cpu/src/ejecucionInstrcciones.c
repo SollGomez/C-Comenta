@@ -578,8 +578,19 @@ uint32_t obtenerInterfaz(char* interfaz){
         numeroInterfaz=1;
     if(!strcmp(interfaz,"DIAL_FS") || !strcmp(interfaz,"FS") || !strcmp(interfaz,"DIALFS"))
         numeroInterfaz=2;
-    if(!strcmp(interfaz,"GENERICA") || !strcmp(interfaz,"ESPERA") || !strcmp(interfaz,"SLP1") || !strcmp(interfaz,"SLP2"))
+    if(!strcmp(interfaz,"ESPERA"))
         numeroInterfaz=3;
+    if (!strcmp(interfaz,"SLP1")){
+        numeroInterfaz = 4;
+    }
+    if (!strcmp(interfaz,"GENERICA")) {
+       numeroInterfaz = 5;
+    }
+    if (!strcmp(interfaz,"IO_GEN_SLEEP")) {
+        numeroInterfaz = 6;
+    }
+    
+    
 
     return numeroInterfaz;
 }

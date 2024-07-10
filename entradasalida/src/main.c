@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     init_loggers_config(argv[1]);
     cargar_configuracion();
-	if(!strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS")){
+	if(!strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS")){
 		crearEstructurasFs();
 	}
 
@@ -55,10 +55,22 @@ int main(int argc, char* argv[]) {
 	
 }
 
-t_config *crearConfig(char* configPath){
+t_config *crearConfig(char* configPath){		//Nombre interfaz
+	
+	nombreInterfaz = string_new();
+
+	string_append(&nombreInterfaz, configPath);
+
+	char* path = string_new();
+
+	string_append(&path, "/home/utnso/tp-2024-1c-CANCH/configs/");
+	string_append(&path, configPath);
+	string_append(&path, ".config");
+
+	printf("Path: %s\n", path);
 	t_config* config;
 
-	config = config_create(configPath);
+	config = config_create(path);
 
 	if(config != NULL)
 		return config;

@@ -7,6 +7,7 @@ t_config* configuracionEntradasalida;
 bool logsCreados = false;
 bool configCreada = false;
 t_config_entradaSalida* cfg_entradaSalida;
+char* nombreInterfaz;
 t_config* configFs;
 archBloques* archivoBloques;
 void* bitarraycontent;
@@ -87,7 +88,12 @@ void crearArchivoBloques() {
     close(archivoBloques->fd);
 }
 
-int init_loggers_config(char* path){
+int init_loggers_config(char* configPath){
+
+    char* path = string_new();
+	string_append(&path, "/home/utnso/tp-2024-1c-CANCH/configs/");
+	string_append(&path, configPath);
+	string_append(&path, ".config");
 
     trace_logger = log_create("trace_logger.log", "entradaSalida", true, LOG_LEVEL_TRACE);
     info_logger = log_create("info_logger.log", "entradaSalida", true, LOG_LEVEL_INFO);
@@ -204,18 +210,31 @@ int cargar_configuracion(){
     cfg_entradaSalida->RETRASO_COMPACTACION = config_get_int_value(configuracionEntradasalida, "RETRASO_COMPACTACION");
     log_trace(trace_logger, "RETRASO_COMPACTACION Cargado Correctamente: %d", cfg_entradaSalida->RETRASO_COMPACTACION);
 
-    if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDOUT") == 0)
+    if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDOUT") == 0) {
 		cfg_entradaSalida->TIPO_INTERFAZ_INT = 0;
-	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDIN") == 0)
+        return true;
+    } else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDIN") == 0) {
 		cfg_entradaSalida->TIPO_INTERFAZ_INT = 1;
-	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS") == 0) {
+        return true;
+    } else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS") == 0) {
 		cfg_entradaSalida->TIPO_INTERFAZ_INT = 2;
         cargarListaDialfs();
+        return true;
+    } else if (strcmp(nombreInterfaz, "ESPERA") == 0) {
+        cfg_entradaSalida->TIPO_INTERFAZ_INT = 3;
+        return true;
+    } else if(strcmp(nombreInterfaz, "SLP1") == 0) {
+        cfg_entradaSalida->TIPO_INTERFAZ_INT = 4;
+        return true;
+    } else if(strcmp(nombreInterfaz, "GENERICA") == 0) {
+        cfg_entradaSalida->TIPO_INTERFAZ_INT = 5;
+        return true;
+    } else if(strcmp(nombreInterfaz, "IO_GEN_SLEEP") == 0) {
+        cfg_entradaSalida->TIPO_INTERFAZ_INT = 6;
+        return true;
     }
-	else
-		cfg_entradaSalida->TIPO_INTERFAZ_INT = 3;
-
-    return true;
+    
+	return true;
 }
 
 
