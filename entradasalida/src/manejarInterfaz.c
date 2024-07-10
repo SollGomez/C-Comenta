@@ -241,11 +241,11 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
 
         void* datos = leerArchivo(nombreArchivo, dirASacarDatos, archivoATruncar->tamArchivo);
 
-        log_info(info_logger, "Estoy pasando cositas: %s", datos);  //TODO ver si cambiar a %p
+        //log_info(info_logger, "Estoy pasando cositas: %s", datos);  //TODO ver si cambiar a %p
 
         escribirArchivo(nombreArchivo, datos, direccionAPonerDatos, archivoATruncar->tamArchivo);
 
-        for(int i=archivoATruncar->bloqueInicial; i<posicionFinalActual; i++){
+        for(int i=archivoATruncar->bloqueInicial; i<=posicionFinalActual; i++){
             log_info(info_logger, "entre al for con inicial %d y final %d", archivoATruncar->bloqueInicial, posicionFinalActual);
             bitarray_clean_bit(bitmap, i);
         }
@@ -551,7 +551,7 @@ void* leerArchivo(char* nombreArchivo, uint32_t direccionALeer, uint32_t tamanio
     //msync(archivoBloques->archivo, archivoBloques->tamanio, MS_SYNC);
     memcpy(datos, archivoBloques->direccionArchivo + direccionALeer, tamanioALeer);
 
-    log_info(info_logger, "La data que lei es: %s", datos);
+    //log_info(info_logger, "La data que lei es: %s", datos);
 
     close(archivoBloques->fd);
     return datos;

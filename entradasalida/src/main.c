@@ -16,6 +16,12 @@ int main(int argc, char* argv[]) {
 		crearEstructurasFs();
 	}
 
+	crearArchivo("salida.txt");
+	crearArchivo("cronologico.txt");
+
+	truncarArchivo("salida.txt", 80);
+	truncarArchivo("cronologico.txt", 80);
+
 	//crearArchivo("duhndaud.txt");
 	//eliminarArchivo("duhndaud.txt");
 	//manejarInterfazStdin(2, 30);
