@@ -86,7 +86,7 @@ ponen las credenciales de acceso:
 user: marrkbau
 pass: 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
 
-cuando se clone todo:
+Antes de clonar las terminales de PuTTY
 ```bash
 cd ..
 cd tp-2024-1c-CANCH
