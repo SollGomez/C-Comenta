@@ -270,7 +270,7 @@ void execute(){
 }
 
 void checkInsterrupt(){
-    if(interrupciones && cicloInstrucciones)
+    if(interrupciones && cicloInstrucciones && !desalojo)
 	{
 		copiar_registrosCPU_a_los_registroPCB(PCB_Actual->registros);
 
