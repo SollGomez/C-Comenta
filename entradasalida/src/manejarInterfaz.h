@@ -1,6 +1,8 @@
 #include <clean.h>
 #include <utils/utilidades.h>
 #include <comunicacion.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 
 
@@ -21,3 +23,4 @@ void* leerArchivo(char* nombreArchivo, uint32_t direccionALeer, uint32_t tamanio
 uint32_t primerBitDisponible();
 uint32_t primerBitOcupado();
 void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar);
+int es_archivo_txt(const char *filename);
