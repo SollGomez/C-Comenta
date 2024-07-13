@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
 
     pthread_create(&kernel, NULL, iniciarKernel, NULL);
 
-	if(cfg_entradaSalida->TIPO_INTERFAZ_INT != 3) {
+	if(cfg_entradaSalida->TIPO_INTERFAZ_INT == 1 || cfg_entradaSalida->TIPO_INTERFAZ_INT == 2 || cfg_entradaSalida->TIPO_INTERFAZ_INT == 0){ {
 		pthread_create(&memoria, NULL, iniciarMemoria, NULL);
 		pthread_join(memoria, NULL);
 	}
