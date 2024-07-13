@@ -108,7 +108,7 @@ void* esperarRR (void* pcbReady) {
 			usleep(10000);
 		}*/
 
-        usleep(QUANTUM*2);
+        usleep(QUANTUM/2);
 
 		pcb->tiempoEjecutando++;
 		if (pcb->tiempoEjecutando >= QUANTUM) {
