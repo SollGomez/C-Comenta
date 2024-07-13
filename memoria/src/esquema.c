@@ -140,7 +140,10 @@ uint32_t resizeProceso(uint32_t pid, uint32_t tamanio) {
 
 	if(list_size(tabla->paginas)*TAM_PAGINA >= tamanio){
 		achicar(tabla, tamanio);
-        log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Reducir: <%d>", pid, tamOriginal, tamOriginal-tamanio); //log obligatorio
+        if(tamanio != 0) 
+            log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Reducir: <%d>", pid, tamOriginal, tamOriginal-tamanio); //log obligatorio
+        else
+            log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Reducir: <%d", pid, tamOriginal, tamanio);
 	}else{
 		respuesta = agrandar(tabla, tamanio);
         log_info(info_logger, "PID: <%d> - Tamaño Actual: <%d> - Tamaño a Ampliar: <%d>", pid, tamOriginal, tamanio-tamOriginal); //log obligatorio

@@ -278,6 +278,7 @@ int es_archivo_txt(const char *filename) {
 
 void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar) {
     log_trace(trace_logger, "Voy a compactar :)"); //CAMBIAR
+    log_info(info_logger, "Inicio compactacion");
     
     uint32_t tamanioActual = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
     uint32_t posicionFinalActual;
@@ -473,7 +474,7 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
 
     msync(bitmap, cfg_entradaSalida->BLOCK_COUNT/8, MS_SYNC);
 
-    log_info(info_logger, "Sali de compactacion");
+    log_info(info_logger, "Fin compactacion");
 
     // uint32_t bloquesASumar = (tamanio - archivoATruncar->tamArchivo) / cfg_entradaSalida->BLOCK_SIZE;
     // uint32_t tamanioActual2 = archivoATruncar->tamArchivo / cfg_entradaSalida->BLOCK_SIZE;
@@ -603,7 +604,7 @@ void escribirArchivo(char* nombreArchivo, void* datos, uint32_t direccionAEscrib
     //log_info(info_logger, "Offset: %d", offset);
     //uint32_t numeroDeBloque = encontrarNumeroBloque(direccionAEscribir); //no se usa porque damos por hecho que la dir es pasada en bytes    
 
-    log_info(info_logger, "Escribo esta data: %s del tam %d", datos, tamanioAEscribir);
+    //log_info(info_logger, "Escribo esta data: %s del tam %d", datos, tamanioAEscribir);
 
     char* pathArchivoBloques = string_new();
     string_append(&pathArchivoBloques, cfg_entradaSalida->PATH_BASE_DIALFS);
