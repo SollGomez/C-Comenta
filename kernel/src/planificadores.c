@@ -130,7 +130,7 @@ void* esperarVRR(void* pcbReady) {
 	pcb->tiempoEjecutando = 0;
     uint32_t numCola = 0;
 	while (1) {
-        usleep(QUANTUM);
+        usleep((QUANTUM/2 -450));
 
 		pcb->tiempoEjecutando++;
 
