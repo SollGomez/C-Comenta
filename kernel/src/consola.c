@@ -349,7 +349,7 @@ void* multiprogramacion (void* linea) {
 	log_info(info_logger, "Grado Anterior: <%d> - Grado Actual: <%d>", GRADO_MAX_MULTIPROGRAMACION, nuevoGradoMP);
 	GRADO_MAX_MULTIPROGRAMACION=nuevoGradoMP;
 
-	uint32_t tamLista = list_size(colaNew);
+	uint32_t tamLista = queue_size(colaNew);
 
 	if(tamLista){
 		for(int i=0 ; i<tamLista ; i++){

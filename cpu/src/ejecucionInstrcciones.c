@@ -1,8 +1,8 @@
 #include "ejecucionInstrucciones.h"
 
 void SET(char* registro, char* valor){
-	cambiar_valor_del_registroCPU(registro,valor);
     PCB_Actual->program_counter++;
+	cambiar_valor_del_registroCPU(registro,valor);
 }
 
 
