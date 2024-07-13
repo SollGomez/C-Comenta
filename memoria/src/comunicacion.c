@@ -274,7 +274,7 @@ void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32
 	*frameQueCorresponde = posInicial / TAM_PAGINA;
 	*tamPrimerFrame = TAM_PAGINA * (*frameQueCorresponde + 1) - posInicial;
 
-	log_trace(trace_logger, "ME MANDARON A ESCRIBIR: %s", datos);
+	//log_trace(trace_logger, "ME MANDARON A ESCRIBIR: %s", datos);
 	
 	while(tamanio > *tamPrimerFrame) {
 		log_trace(trace_logger, "tamanio a leer %d, tamanio que puedo leer en esta pag %d", tamanio, *tamPrimerFrame);
@@ -310,7 +310,7 @@ void realizarPedidoEscritura(int cliente_socket){		//Vale para io y cpu. Les man
     uint32_t* pid = list_get(listaInts,0);
 	uint32_t* tamanio = list_get(listaInts, 2);
     log_trace(trace_logger,"Accediendo a Espacio de Usuario para Escritura en la Direccion: <%d> para el Proceso con PID: <%d>", *posicion, *pid);
-    log_trace(trace_logger,"me llego pid %d, pos %d y tamanio %d y valor %d", *pid, *posicion, *tamanio, unosDatos->datos);
+   // log_trace(trace_logger,"me llego pid %d, pos %d y tamanio %d y valor %d", *pid, *posicion, *tamanio, unosDatos->datos);
 	manejarEscritura(*posicion, unosDatos->datos, *tamanio, *pid);
     log_trace(trace_logger,"Se accedio a Espacio de Usuario correctamente");
     free(unosDatos->datos);
@@ -332,7 +332,7 @@ void realizarPedidoLecturaCpu(){
 
 	uint32_t datos = manejarLecturaCpu(posicion, tamanio, pid);
     log_trace(trace_logger,"Se accedió a Espacio de Usuario correctamente");
-    log_trace(trace_logger,"MANDO A CPU: %d", datos);
+  //  log_trace(trace_logger,"MANDO A CPU: %d", datos);
 
 	list_add(listaInts,&datos);
     enviarListaUint32_t(listaInts, cpu_fd, info_logger, LECTURA_REALIZADA_UINT);
@@ -394,7 +394,7 @@ void inicializarProceso(int cliente_socket){
 }
 
 void finalizarProceso(int cliente_socket){
-	log_trace(trace_logger,"Tamaño de tabla General al llegar a finalizar Proceso: %d", list_size(tablaGeneral));
+	//log_trace(trace_logger,"Tamaño de tabla General al llegar a finalizar Proceso: %d", list_size(tablaGeneral));
     pthread_mutex_lock(&mutex_espacioContiguo);
     uint32_t pid = recibirValor_uint32(cliente_socket);
 	TablaDePaginas* tabla = obtenerTablaPorPID(pid);
@@ -423,6 +423,6 @@ void finalizarProceso(int cliente_socket){
     	liberarTablaDePaginas(pid);
     pthread_mutex_unlock(&mutex_espacioContiguo);
     enviarOrden(FINALIZAR_PROCESO_MEMORIA, cliente_socket, info_logger);
-    log_trace(trace_logger, "Proceso finalizado con éxito");
-    log_trace(trace_logger,"Tamaño de tablaGeneral al terminar finalizarProceso: %d", list_size(tablaGeneral));
+    log_trace(trace_logger, "PID: <%d> - Proceso finalizado con éxito", pid);
+    //log_trace(trace_logger,"Tamaño de tablaGeneral al terminar finalizarProceso: %d", list_size(tablaGeneral));
 }
