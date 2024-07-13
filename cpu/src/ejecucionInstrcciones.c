@@ -88,9 +88,9 @@ void COPY_STRING(char* tamanio) {
     // list_add(listaInts, &direccionFisicaDestino);
 
     //enviarListaUint32_t(listaInts, memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA); //pid, dirLeer, tamanio, dirEscribir
-    log_warning(warning_logger, "MANDO A LEER CPS");
+   // log_warning(warning_logger, "MANDO A LEER CPS");
     char* valor = leer_char_de_memoria(direccionFisicaOrigen, tam);
-    log_warning(warning_logger, "MANDO A ESC CPS");
+   // log_warning(warning_logger, "MANDO A ESC CPS");
     escribir_char_en_memoria(direccionFisicaDestino, tam, valor);
     //free(valor);
     
@@ -335,7 +335,7 @@ uint32_t leer_valor_de_memoria(int direccion_fisica, int bytesRegistro) {
     else   
         memcpy(&valor, leido, 1);
 
-    log_warning(warning_logger, "VALOR LEIDO DE MEMORIA: %d", valor);
+ //   log_warning(warning_logger, "VALOR LEIDO DE MEMORIA: %d", valor);
 
     list_clean(listaInts);
     list_destroy(listaInts);
@@ -353,12 +353,12 @@ char* leer_char_de_memoria(int direccion_fisica, int bytesRegistro) {
     list_add(listaInts, &uint32t_dir_fis);
     list_add(listaInts, &uint32t_tamanio);
 
-    log_warning(warning_logger, "PEDIDO LECTURA");
+    //log_warning(warning_logger, "PEDIDO LECTURA");
     enviarListaUint32_t(listaInts,memoria_fd, info_logger, ACCESO_PEDIDO_LECTURA); //pid, direccion, tamanio
     //char* valor = recibir_char_de_memoria();
     char* valor = (char*)recibir_valor_de_memoria();
 
-    log_warning(warning_logger, "VALOR LEIDO DE MEMORIA: %d", valor);
+   // log_warning(warning_logger, "VALOR LEIDO DE MEMORIA: %d", valor);
 
     list_clean(listaInts);
     list_destroy(listaInts);
@@ -440,7 +440,7 @@ void escribir_valor_en_memoria(int direccion_fisica, int cantidad_bytes, uint32_
     list_add(listaInts, &PCB_Actual->id);
     list_add(listaInts, &direccion_fisica);
     list_add(listaInts, &cantidad_bytes);
-    log_warning(warning_logger, "MANDO A ESCRIBIR: %d", valor);
+    //log_warning(warning_logger, "MANDO A ESCRIBIR: %d", valor);
 
     enviarListaIntsYDatos(listaInts, unosDatos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
 
@@ -461,7 +461,7 @@ void escribir_char_en_memoria(int direccion_fisica, int cantidad_bytes, void* va
     list_add(listaInts, &PCB_Actual->id);
     list_add(listaInts, &direccion_fisica);
     list_add(listaInts, &cantidad_bytes);
-    log_warning(warning_logger, "MANDO A ESCRIBIR: %s", valor);
+ //   log_warning(warning_logger, "MANDO A ESCRIBIR: %s", valor);
 
     enviarListaIntsYDatos(listaInts, unosDatos, memoria_fd, info_logger, ACCESO_PEDIDO_ESCRITURA);
 
@@ -499,7 +499,7 @@ int calcular_bytes_segun_registro(char* registro){
 }
 
 void cambiar_valor_del_registroCPU(char* registro, char* valor) {
-    log_warning(warning_logger, "CAMBIO EL VALOR DE %s A %s", registro, valor);
+   // log_warning(warning_logger, "CAMBIO EL VALOR DE %s A %s", registro, valor);
     if (strcmp(registro, "PC") == 0)
         PCB_Actual->program_counter = atoi(valor);
 
