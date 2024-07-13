@@ -25,14 +25,18 @@ extern int contadorDispositivosIO;
 extern int memoria_fd;
 extern int kernel_fd;
 
-extern t_list* listaDeArchivos;
 
 int conectarKernel(char *modulo);
 int conectarMemoria(char *modulo);
 t_log* iniciar_logger(char*);
 void paquete(int, t_log*);
 void terminar_programa(int, t_log*);
-void* recibirKernel();
+void* recibirKernelStdin();
+void* recibirKernelStdout();
+void* recibirKernelDialfs();
+void* recibirKernelGenerica();
+void cualInterfaz();
+
 void *recibirMemoria();
 void* solicitudIO_GEN_SLEEP (void* cliente_socket); //Genera una solicitud para que haga el usleep de las u. de trabajo
 void* solicitudIO_STDIN_READ(void* cliente_socket); //Genera una solicitud para que pueda ingresar texto x teclado y luego mandarselo a memoria

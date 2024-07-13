@@ -1,6 +1,5 @@
 #include <logs.h>
 
-
 t_log* info_logger;
 t_log* trace_logger;
 t_log* error_logger;
@@ -8,19 +7,18 @@ t_config* configuracionEntradasalida;
 bool logsCreados = false;
 bool configCreada = false;
 t_config_entradaSalida* cfg_entradaSalida;
+char* nombreInterfaz;
+t_config* configFs;
 archBloques* archivoBloques;
 void* bitarraycontent;
 t_bitarray* bitmap;
-t_list* lista_archivos;
-
+t_list* listaDeArchivos;
 
 void crearEstructurasFs() {
-
     crearBitmap();
 
     crearArchivoBloques();
 }
-
 
 void crearBitmap() {
     char* path = string_new();
@@ -90,7 +88,12 @@ void crearArchivoBloques() {
     close(archivoBloques->fd);
 }
 
-int init_loggers_config(char* path){
+int init_loggers_config(char* configPath){
+
+    char* path = string_new();
+	string_append(&path, "/home/utnso/tp-2024-1c-CANCH/configs/");
+	string_append(&path, configPath);
+	string_append(&path, ".config");
 
     trace_logger = log_create("trace_logger.log", "entradaSalida", true, LOG_LEVEL_TRACE);
     info_logger = log_create("info_logger.log", "entradaSalida", true, LOG_LEVEL_INFO);
@@ -111,6 +114,9 @@ int init_loggers_config(char* path){
     logsCreados = true;
 
     configuracionEntradasalida = config_create(path);
+
+    //int a = config_keys_amount(configuracionEntradasalida);
+    //log_info(info_logger ,"CANTIDAD DE ITEMS ACAAAA %d", a);
     if(configuracionEntradasalida == NULL){
         printf("no pude leer la config");
     }
@@ -122,6 +128,55 @@ t_config_entradaSalida *cfg_entradaSalida_start()
 {
     t_config_entradaSalida *cfg = malloc(sizeof(t_config_entradaSalida));
     return cfg;
+}
+
+void cargarListaDialfs() {
+
+    
+    listaDeArchivos = list_create();
+    char* path = string_new();
+
+    string_append(&path, cfg_entradaSalida->PATH_BASE_DIALFS);
+    string_append(&path, "/");
+    string_append(&path, "nom-arch-fs.txt");
+
+    log_info(info_logger, "%s", path);
+    FILE* f = fopen(path, "rb");
+    if(f ==NULL) {
+        log_info(info_logger, "Estoy troll, el archivo de nombres no se creo");
+
+        f = fopen(path, "wb");
+        if (f == NULL) {
+            log_error(info_logger, "Error al crear el archivo de nombres");
+            return;
+        }
+    }
+
+    configFs = config_create(path);
+
+    int cantidadDeArchivos = config_keys_amount(configFs);
+
+    if(!cantidadDeArchivos) {
+        log_info(info_logger, "Todavia no hay archs creados");
+        return;
+    }
+
+    for(int i=0; i<cantidadDeArchivos; i++) {           //El primero es F-0
+        char* numArchivo = string_new(); //string_itoa(i);
+        
+        string_append(&numArchivo, "F-");
+        string_append(&numArchivo, string_itoa(i));
+        
+        char* nomArchLeido = config_get_string_value(configFs, numArchivo);
+        log_info(info_logger, "archivo leido: %s", nomArchLeido);
+        list_add(listaDeArchivos, nomArchLeido); 
+        
+    }
+
+    fclose(f);
+
+    return;
+
 }
 
 int cargar_configuracion(){
@@ -155,16 +210,31 @@ int cargar_configuracion(){
     cfg_entradaSalida->RETRASO_COMPACTACION = config_get_int_value(configuracionEntradasalida, "RETRASO_COMPACTACION");
     log_trace(trace_logger, "RETRASO_COMPACTACION Cargado Correctamente: %d", cfg_entradaSalida->RETRASO_COMPACTACION);
 
-    if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDOUT") == 0)
+    if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDOUT") == 0) {
 		cfg_entradaSalida->TIPO_INTERFAZ_INT = 0;
-	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDIN") == 0)
+        return true;
+    } else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "STDIN") == 0) {
 		cfg_entradaSalida->TIPO_INTERFAZ_INT = 1;
-	else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIAL_FS") == 0)
+        return true;
+    } else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS") == 0) {
 		cfg_entradaSalida->TIPO_INTERFAZ_INT = 2;
-	else
-		cfg_entradaSalida->TIPO_INTERFAZ_INT = 3;
-
-    return true;
+        cargarListaDialfs();
+        return true;
+    } else if (strcmp(nombreInterfaz, "ESPERA") == 0) {
+        cfg_entradaSalida->TIPO_INTERFAZ_INT = 3;
+        return true;
+    } else if(strcmp(nombreInterfaz, "SLP1") == 0) {
+        cfg_entradaSalida->TIPO_INTERFAZ_INT = 4;
+        return true;
+    } else if(strcmp(nombreInterfaz, "GENERICA") == 0) {
+        cfg_entradaSalida->TIPO_INTERFAZ_INT = 5;
+        return true;
+    } else if(strcmp(nombreInterfaz, "IO_GEN_SLEEP") == 0) {
+        cfg_entradaSalida->TIPO_INTERFAZ_INT = 6;
+        return true;
+    }
+    
+	return true;
 }
 
 

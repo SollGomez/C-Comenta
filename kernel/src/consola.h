@@ -3,6 +3,8 @@
 
 #include "main.h"
 
+extern pthread_mutex_t semaforo2;
+
 extern int planificadorLargoAvance;
 extern int planificadorCortoAvance;
 
@@ -23,5 +25,7 @@ void* multiprogramacion(void*);
 void* ejecutar_script_operaciones (void* parametros);
 void iniciar_proceso (char* linea);
 void* iniciarConsola ();
+void funcionesDeLaConsola(char* linea);
+
 
 #endif /* SRC_CONSOLA_H_ */

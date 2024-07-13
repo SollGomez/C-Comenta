@@ -1,12 +1,13 @@
 #include <clean.h>
 #include <utils/utilidades.h>
 #include <comunicacion.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 
 
-void cualInterfaz();
 void manejarInterfazGenerica(uint32_t unidadesDeTrabajo);
-void manejarInterfazStdin(uint32_t direccionFisica, uint32_t pid);
+void manejarInterfazStdin(t_list* listaInts);
 void crearArchivo(char* nombreArchivo);
 void eliminarArchivo(char* nombreArchivo);
 void truncarArchivo (char* nombreArchivo, uint32_t tamanio);
@@ -22,3 +23,4 @@ void* leerArchivo(char* nombreArchivo, uint32_t direccionALeer, uint32_t tamanio
 uint32_t primerBitDisponible();
 uint32_t primerBitOcupado();
 void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar);
+int es_archivo_txt(const char *filename);

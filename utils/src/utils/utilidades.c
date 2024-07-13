@@ -164,10 +164,54 @@ void liberarInstruccion(Instruccion * instruccion) {
     free(instruccion->id);
     free(instruccion);
 }
+ 
+bool enviarListaUint32_t(t_list* listaInts, int socket_cliente, t_log* logger, op_code_cliente codigo) {
+    t_paquete* paquete = crear_paquete(codigo, logger);
+    if(!agregarUint32_tsAPaquete(listaInts, paquete)){
+        log_error(logger, "Hubo un error cuando se intento agregar las instrucciones al paquete");
+        return false;
+    }
+    enviar_paquete(paquete, socket_cliente);
+    log_info(logger, "Se envio el paquete");
+    eliminar_paquete(paquete);
+    return true;
+}
 
-bool agregarUint32_tsAPaquete(t_list* listaInts, t_paquete* paquete)
-{
+bool enviarListaString(t_list* listaStrings, int socket_cliente, t_log* logger, op_code_cliente codigo) {//POR FAVOR CHEQUEAR
+    t_paquete* paquete = crear_paquete(codigo, logger);
+    if(!agregarStringsAPaquete(listaStrings, paquete)){
+        log_error(logger, "Hubo un error cuando se intento agregar las instrucciones al paquete");
+        return false;
+    }
+    enviar_paquete(paquete, socket_cliente);
+    log_info(logger, "Se envio el paquete");
+    eliminar_paquete(paquete);
+    return true;
+}
 
+bool agregarStringsAPaquete(t_list* listaStrings, t_paquete* paquete) {//Creo que el error esta aca
+    paquete->buffer->size += 100*list_size(listaStrings);//HARDCODEADO EL 100
+    paquete->buffer->size += sizeof(uint8_t);
+
+    void* stream = malloc(paquete->buffer->size);
+    int offset=0;
+
+    void copiarElementos(char* unString){//Seguramente aca
+        memcpy(stream + offset, unString, strlen(unString + 1));
+        offset += strlen(unString + 3);
+    }
+
+    int cantidad_strings = list_size(listaStrings);
+
+    memcpy(stream + offset, &cantidad_strings, sizeof(uint8_t));
+    offset += sizeof(uint8_t);
+
+    list_iterate(listaStrings,copiarElementos);
+    paquete->buffer->stream = stream;
+    return true;
+}
+
+bool agregarUint32_tsAPaquete(t_list* listaInts, t_paquete* paquete) {
     paquete->buffer->size+= sizeof(uint32_t)*list_size(listaInts);
     paquete->buffer->size += sizeof(uint8_t);
 
@@ -184,19 +228,6 @@ bool agregarUint32_tsAPaquete(t_list* listaInts, t_paquete* paquete)
 
     list_iterate(listaInts,copiarElementos);
     paquete->buffer->stream = stream;
-    return true;
-}
-
-bool enviarListaUint32_t(t_list* listaInts, int socket_cliente, t_log* logger, op_code_cliente codigo)
-{
-    t_paquete* paquete = crear_paquete(codigo, logger);
-    if(!agregarUint32_tsAPaquete(listaInts, paquete)){
-        log_error(logger, "Hubo un error cuando se intento agregar las instrucciones al paquete");
-        return false;
-    }
-    enviar_paquete(paquete, socket_cliente);
-    log_info(logger, "Se envio el paquete");
-    eliminar_paquete(paquete);
     return true;
 }
 
@@ -293,16 +324,18 @@ void liberarPcbCpu(PCB* pcb) {
 
 t_list* recibirListaUint32_t(int socket_cliente){
     int tamanio;
-    int desplazamiento = 0;
+    int desplazamiento = 0;//Raro este 0
     void *buffer = recibir_stream(&tamanio, socket_cliente);
+
     t_list* listaInts = list_create();
     int cantidad_ints = 0;
+
     memcpy(&cantidad_ints, buffer + desplazamiento, sizeof(uint8_t));
     desplazamiento+=sizeof(uint8_t);
 
     for (int i = 0; i < cantidad_ints; ++i) {
         uint32_t* nuevoEntero = malloc(sizeof(uint32_t));
-        memcpy(nuevoEntero, buffer + desplazamiento, sizeof (uint32_t));
+        memcpy(nuevoEntero, buffer + desplazamiento, sizeof(uint32_t));
         desplazamiento+=sizeof(uint32_t);
         list_add(listaInts, nuevoEntero);
     }
@@ -310,8 +343,59 @@ t_list* recibirListaUint32_t(int socket_cliente){
     return listaInts;
 }
 
-uint32_t recibirValor_uint32(int socket) {
+t_list* recibirListaString(int socket_cliente) {
+    int tamanio;
+    int desplazamiento = 0;
+    void *buffer = recibir_stream(&tamanio, socket_cliente);
 
+    t_list* listaStrings = list_create();
+    int cantidad_strings = 0;
+
+    memcpy(&cantidad_strings, buffer + desplazamiento, sizeof(uint8_t));
+    //memcpy(&tamanioString, buffer + desplazamiento, sizeof(uint8_t));
+
+    desplazamiento += sizeof(uint8_t);
+
+    for (int i = 0; i < cantidad_strings; ++i) {
+        char* nuevoString = malloc(100 + 1);//Revisar en nombre de jesucristo
+        memcpy(nuevoString, buffer + desplazamiento, sizeof (uint32_t));
+        desplazamiento += sizeof(uint32_t);
+        list_add(listaStrings, nuevoString);
+    }
+
+    free(buffer);
+    return listaStrings;
+}
+
+char* recibirString(int socket_cliente){
+    //int tamanio;
+    /*int desplazamiento = 0;
+    void *buffer = recibir_stream(&desplazamiento, socket_cliente);
+
+    uint8_t tamanioString = 0;
+    char* string;
+
+    memcpy(&tamanioString, buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    string= malloc(tamanioString);
+    memcpy(string, buffer + desplazamiento, tamanioString);
+    free(buffer);
+    return string;*/
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    paquete->buffer = malloc(sizeof(t_buffer));
+    paquete->buffer->size = 0;
+    paquete->buffer->stream = recibir_stream(&paquete->buffer->size, socket);
+    char* valor;
+    valor = malloc(100);//HARDCODEADO el 100
+    memcpy(&valor, paquete->buffer->stream, sizeof(uint32_t));
+    eliminar_paquete(paquete);
+
+    return valor;
+}
+
+
+uint32_t recibirValor_uint32(int socket) {
     t_paquete *paquete = malloc(sizeof (t_paquete));
     paquete->buffer = malloc(sizeof(t_buffer));
     paquete->buffer->size = 0;
@@ -438,7 +522,7 @@ t_list* recibirListaIntsYDatos(int socket_cliente,t_datos* datos){
     desplazamiento+=sizeof(uint8_t);
 
     for (int i = 0; i < cantidad_ints; ++i) {
-        uint32_t* nuevoEntero = malloc(sizeof(uint32_t));
+        uint32_t* nuevoEntero = malloc(sizeof(uint32_t));//Nunca se libera
         memcpy(nuevoEntero, buffer + desplazamiento, sizeof (uint32_t));
         desplazamiento+=sizeof(uint32_t);
         list_add(listaInts, nuevoEntero);
@@ -446,7 +530,7 @@ t_list* recibirListaIntsYDatos(int socket_cliente,t_datos* datos){
 
     memcpy(&datos->tamanio, buffer + desplazamiento, sizeof (uint32_t));
     desplazamiento+=sizeof(uint32_t);
-    datos->datos = malloc(datos->tamanio);
+    datos->datos = malloc(datos->tamanio);//Se libera?
     memcpy(datos->datos, buffer + desplazamiento, datos->tamanio);
 
     free(buffer);
@@ -455,30 +539,35 @@ t_list* recibirListaIntsYDatos(int socket_cliente,t_datos* datos){
 }
 
 void enviarOrden(op_code_cliente orden, int socket, t_log *logger) {
-    t_paquete * paquete= crear_paquete(orden, logger);
-    paquete->buffer->size+=sizeof (uint32_t);
+    t_paquete* paquete = crear_paquete(orden, logger);
+    paquete->buffer->size += sizeof(uint32_t);
     void* stream = malloc(paquete->buffer->size);
     uint32_t valor = 0;
-    int offset= 0;
-    memcpy(stream + offset, &valor, sizeof(uint32_t));
-    paquete->buffer->stream = stream;
-
-    enviar_paquete(paquete,socket);
-    eliminar_paquete(paquete);
-    free(valor);
-    free(offset);
-}
-
-void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger) {
-    t_paquete * paquete= crear_paquete(orden, logger);
-    paquete->buffer->size = sizeof(uint32_t);
-    void* stream = malloc(paquete->buffer->size);
     int offset = 0;
     memcpy(stream + offset, &valor, sizeof(uint32_t));
     paquete->buffer->stream = stream;
+
+    enviar_paquete(paquete,socket);
+    eliminar_paquete(paquete);
+    //free(valor);//Este creo que tambien rompe
+    //free(offset);//Esta bien este free?
+    //Habria que liberar el stream
+}
+
+void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger) {
+    t_paquete * paquete = crear_paquete(orden, logger);
+    paquete->buffer->size = sizeof(uint32_t);
+    void* stream = malloc(paquete->buffer->size);
+    int offset = 0;
+
+    memcpy(stream + offset, &valor, sizeof(uint32_t));
+    paquete->buffer->stream = stream;
+
     enviar_paquete(paquete,socket);
     log_info(logger, "se envio el paquete");
+
     eliminar_paquete(paquete);
+    //free(stream);
 }
 
 void* recibir_stream(int* size, uint32_t cliente_socket) {
@@ -735,10 +824,8 @@ char* recibirEnteroYString(int socket_cliente,uint32_t* entero) {
     int tamanio;
     int desplazamiento = 0;
     void *buffer = recibir_stream(&tamanio, socket_cliente);
-
-    memcpy(&entero, buffer + desplazamiento, sizeof(uint32_t));
+    memcpy(entero, buffer + desplazamiento, sizeof(uint32_t));
     desplazamiento+=sizeof(uint32_t);
-
     uint32_t tamanioString =0;
     memcpy(&tamanioString, buffer + desplazamiento, sizeof (uint32_t));
     desplazamiento+=sizeof(uint32_t);
@@ -785,19 +872,27 @@ PCB* recibir_contextoEjecucion_y_char_y_uint32(int conexion, uint32_t* numero) {
     memcpy(&(PcbRecv->program_counter), buffer + desplazamiento, sizeof(uint32_t));
     desplazamiento += sizeof(uint32_t);
 
-    uint32_t tamanioAx = 0;
+    memcpy(&(registros->registro_AX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    memcpy(&(registros->registro_BX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    memcpy(&(registros->registro_CX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    memcpy(&(registros->registro_DX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
 
-    memcpy(&tamanioAx, buffer + desplazamiento, sizeof(uint32_t));
+    memcpy(&(registros->registro_EAX), buffer + desplazamiento, sizeof(uint32_t));
     desplazamiento += sizeof(uint32_t);
-
-    memcpy(&(registros->registro_AX), buffer + desplazamiento, tamanioAx);
-    desplazamiento += tamanioAx;
-    memcpy(&(registros->registro_BX), buffer + desplazamiento, tamanioAx);
-    desplazamiento += tamanioAx;
-    memcpy(&(registros->registro_CX), buffer + desplazamiento, tamanioAx);
-    desplazamiento += tamanioAx;
-    memcpy(&(registros->registro_DX), buffer + desplazamiento, tamanioAx);
-    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_EBX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_ECX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_EDX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+	memcpy(&(registros->registro_SI), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_DI), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
 
     PcbRecv->registros = registros;
 
@@ -831,19 +926,27 @@ PCB* recibir_contextoEjecucion_y_char_y_uint32_y_uint32(int conexion, uint32_t* 
     memcpy(&(PcbRecv->program_counter), buffer + desplazamiento, sizeof(uint32_t));
     desplazamiento += sizeof(uint32_t);
 
-    uint32_t tamanioAx = 0;
+    memcpy(&(registros->registro_AX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    memcpy(&(registros->registro_BX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    memcpy(&(registros->registro_CX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    memcpy(&(registros->registro_DX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
 
-    memcpy(&tamanioAx, buffer + desplazamiento, sizeof(uint32_t));
+    memcpy(&(registros->registro_EAX), buffer + desplazamiento, sizeof(uint32_t));
     desplazamiento += sizeof(uint32_t);
-
-    memcpy(&(registros->registro_AX), buffer + desplazamiento, tamanioAx);
-    desplazamiento += tamanioAx;
-    memcpy(&(registros->registro_BX), buffer + desplazamiento, tamanioAx);
-    desplazamiento += tamanioAx;
-    memcpy(&(registros->registro_CX), buffer + desplazamiento, tamanioAx);
-    desplazamiento += tamanioAx;
-    memcpy(&(registros->registro_DX), buffer + desplazamiento, tamanioAx);
-    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_EBX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_ECX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_EDX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+	memcpy(&(registros->registro_SI), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_DI), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
 
     PcbRecv->registros = registros;
 
@@ -880,19 +983,27 @@ PCB* recibir_contextoEjecucion_y_char_y_uint32_y_uint32_y_uint32_y_uint32(int co
     memcpy(&(PcbRecv->program_counter), buffer + desplazamiento, sizeof(uint32_t));
     desplazamiento += sizeof(uint32_t);
 
-    uint32_t tamanioAx = 0;
+    memcpy(&(registros->registro_AX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    memcpy(&(registros->registro_BX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    memcpy(&(registros->registro_CX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
+    memcpy(&(registros->registro_DX), buffer + desplazamiento, sizeof(uint8_t));
+    desplazamiento += sizeof(uint8_t);
 
-    memcpy(&tamanioAx, buffer + desplazamiento, sizeof(uint32_t));
+    memcpy(&(registros->registro_EAX), buffer + desplazamiento, sizeof(uint32_t));
     desplazamiento += sizeof(uint32_t);
-
-    memcpy(&(registros->registro_AX), buffer + desplazamiento, tamanioAx);
-    desplazamiento += tamanioAx;
-    memcpy(&(registros->registro_BX), buffer + desplazamiento, tamanioAx);
-    desplazamiento += tamanioAx;
-    memcpy(&(registros->registro_CX), buffer + desplazamiento, tamanioAx);
-    desplazamiento += tamanioAx;
-    memcpy(&(registros->registro_DX), buffer + desplazamiento, tamanioAx);
-    desplazamiento += tamanioAx;
+    memcpy(&(registros->registro_EBX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_ECX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_EDX), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+	memcpy(&(registros->registro_SI), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
+    memcpy(&(registros->registro_DI), buffer + desplazamiento, sizeof(uint32_t));
+    desplazamiento += sizeof(uint32_t);
 
     PcbRecv->registros = registros;
 
@@ -962,4 +1073,44 @@ char* recibirEnteroEnteroEnteroEnteroChar(int socket_cliente, uint32_t* entero1,
 	desplazamiento += tamanioPalabra + 1;
 
 	return palabraRecibida;
+}
+
+char* recibirEnteroEnteroEnteroChar(int socket_cliente, uint32_t* entero1, uint32_t* entero2, uint32_t* entero3){
+	uint32_t tamanioBuffer;
+	uint32_t desplazamiento = 0;
+	void *buffer = recibir_buffer(&tamanioBuffer, socket_cliente);
+
+	memcpy(entero1, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+	memcpy(entero2, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+    memcpy(entero3, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+	uint32_t tamanioPalabra=0;
+	memcpy(&tamanioPalabra, buffer + desplazamiento, sizeof(uint32_t));
+	desplazamiento += sizeof(uint32_t);
+
+	char* palabraRecibida = malloc(tamanioPalabra + 1);
+	memcpy(palabraRecibida, buffer + desplazamiento, tamanioPalabra + 1);
+	desplazamiento += tamanioPalabra + 1;
+
+	return palabraRecibida;
+}
+
+
+void enviar_uint32_y_uint32_y_uint32_y_char(char* path, uint32_t valor1, uint32_t valor2, uint32_t valor3, int socket, op_code_cliente orden, t_log *logger){
+    t_paquete * paquete= crear_paquete(orden, logger);
+    agregar_a_paquete2(paquete, &valor1, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &valor2, sizeof(uint32_t));
+    agregar_a_paquete2(paquete, &valor3, sizeof(uint32_t));
+
+    uint32_t largo_nombre = strlen(path) + 1;
+	agregar_a_paquete2(paquete, &largo_nombre, sizeof(uint32_t));
+	agregar_a_paquete2(paquete, path, largo_nombre);
+
+    enviar_paquete(paquete,socket);
+    eliminar_paquete(paquete);
 }

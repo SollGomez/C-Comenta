@@ -29,16 +29,18 @@ extern pthread_mutex_t mutexFS;
 
 int recibirConexion(char *);
 void *recibirCPU(void);
-void *recibirIO(int);
+void* recibirIO (void* interfaz_fd);
 void *recibirKernel();
 void cualInterfaz(int tipoInterfaz);
 
 void inicializarProceso(int);
 void GuardarNombreArchiv(uint32_t pid, char* file_name);
 void* manejarLectura(uint32_t posInicial, uint32_t tamanio, uint32_t pid);
-void manejarEscritura(uint32_t posInicial, void* datos, uint32_t tamanio, uint32_t pid);
-void realizarPedidoLectura(int cliente_socket);     //Vale para io y cpu. Les manda LECTURA_REALIZADA
+void manejarEscritura(uint32_t posInicial, void* datos, uint32_t pid,  uint32_t tamanio);
+void realizarPedidoLectura(int cliente_socket);     //Vale para io. Le manda LECTURA_REALIZADA
 void realizarPedidoEscritura(int cliente_socket);   //Vale para io y cpu. Les manda ESCRITURA_REALIZADA
+void realizarPedidoLecturaCpu();
+uint32_t manejarLecturaCpu(uint32_t posInicial, uint32_t tamanio, uint32_t pid);
 
 void finalizarProceso(int);
 t_log* iniciar_logger(char*);

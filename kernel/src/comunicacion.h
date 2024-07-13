@@ -20,7 +20,7 @@ int recibirConexion(char *puerto);
 int conectarModuloCPU(char *);
 int conectarModuloCPUInterrupt(char *);
 int conectarModuloMemoria(char *);
-void *recibirIO(int fdInterfaz);
+void* recibirIO (void* interfaz_fd);
 void cualInterfaz(int tipoInterfaz);
 void escucharCPU (void);
 

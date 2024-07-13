@@ -13,6 +13,7 @@ int main(int argc, char* argv[]) {
     config = crearConfig(argv[1]);
     iniciarNecesidades();
 	
+	
     return 0;
 }
 

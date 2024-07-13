@@ -18,6 +18,7 @@ void liberarPcbCpu(PCB* pcb);
 void enviar_uint32_y_uint32_y_char(char* path, uint32_t valor1, uint32_t valor2, int socket, op_code_cliente orden, t_log *logger);
 void recibirOrden(int socket);
 void enviarOrden(op_code_cliente orden, int socket, t_log *logger);
+
 void enviarValor_uint32(uint32_t valor, int socket, op_code_cliente orden, t_log *logger);
 void* recibir_stream(int* size, uint32_t cliente_socket);
 PCB* recibir_contextoEjecucion_y_char(int conexion);
@@ -45,5 +46,12 @@ PCB* recibir_contextoEjecucion_y_char_y_uint32_y_uint32(int conexion, uint32_t* 
 PCB* recibir_contextoEjecucion_y_char_y_uint32_y_uint32_y_uint32_y_uint32(int conexion, uint32_t* numero1, uint32_t* numero2, uint32_t* numero3, uint32_t* numero4);
 void enviar_uint32_y_uint32_y_uint32_y_uint32_y_char(char* path, uint32_t valor1, uint32_t valor2, uint32_t valor3, uint32_t valor4, int socket, op_code_cliente orden, t_log *logger);
 char* recibirEnteroEnteroEnteroEnteroChar(int socket_cliente, uint32_t* entero1, uint32_t* entero2, uint32_t* entero3, uint32_t* entero4);
+void enviar_uint32_y_uint32_y_uint32_y_char(char* path, uint32_t valor1, uint32_t valor2, uint32_t valor3, int socket, op_code_cliente orden, t_log *logger);
+char* recibirEnteroEnteroEnteroChar(int socket_cliente, uint32_t* entero1, uint32_t* entero2, uint32_t* entero3);
+
+bool enviarListaString(t_list* listaStrings, int socket_cliente, t_log* logger, op_code_cliente codigo);
+bool agregarStringsAPaquete(t_list* listaStrings, t_paquete* paquete);
+char* recibirString(int socket_cliente);
+t_list* recibirListaString(int socket_cliente);
 
 #endif

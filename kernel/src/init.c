@@ -23,8 +23,7 @@ t_queue* colaReady_FIFO;
 t_list* listaRecursos;
 t_list* colaReady;
 t_list* colaReadyVRR;
-
-t_list* tablaGlobal_ArchivosAbiertos; //Archivos hechos
+t_list* tablaGlobal_ArchivosAbiertos;
 t_list* listaPeticionesArchivos;
 
 pthread_mutex_t mutex_colaNew;
@@ -38,6 +37,8 @@ pthread_mutex_t mutex_listaPeticionesArchivos;
 pthread_mutex_t mutex_contadorPeticionesFs;
 pthread_mutex_t mutex_debug_logger;
 pthread_mutex_t mutex_TGAA;
+pthread_mutex_t mutex_iniciarProceso;
+
 
 pthread_mutex_t planificacionLargo;
 pthread_mutex_t planificacionCorto;
@@ -53,7 +54,7 @@ pthread_t hilo_planificador_LP;
 pthread_t hilo_planificador_corto;
 pthread_t hilo_liberador_procesos;
 
-void iniciarNecesidades(){
+void iniciarNecesidades() {
     loggerInfo=iniciar_logger("kernel.log");
 	tablaGlobal_ArchivosAbiertos = list_create();
 	listaPeticionesArchivos = list_create();
@@ -63,6 +64,10 @@ void iniciarNecesidades(){
     colaExec = list_create();
     colaBloq = list_create();
     colaExit = queue_create();
+
+    list_add(tablaGlobal_ArchivosAbiertos, "nombreLoco");
+    list_add(tablaGlobal_ArchivosAbiertos, "otroNombreLocoperomaslargoparaprobarquepasa");
+
 
     pthread_mutex_init(&mutex_colaExec, NULL);
     pthread_mutex_init(&mutex_colaNew, NULL);
@@ -75,6 +80,7 @@ void iniciarNecesidades(){
     pthread_mutex_init(&mutex_contadorPeticionesFs, NULL);
     pthread_mutex_init(&mutex_debug_logger, NULL);
     pthread_mutex_init(&mutex_TGAA, NULL);
+    pthread_mutex_init(&mutex_iniciarProceso, NULL);
 
     sem_init(&sem_procesosEnNew,0,0);
     sem_init(&sem_procesosReady,0,0);
@@ -91,14 +97,12 @@ void iniciarNecesidades(){
 	pthread_join(tid[3], NULL);
     pthread_create(&tid[1], NULL, escucharConexionesIO, config_get_string_value(config,"PUERTO_ESCUCHA"));
 
-    
-	
-
     pthread_create(&hilo_planificador_LP, NULL, (void*)planificadorLargoPlazo, NULL);
     pthread_create(&hilo_planificador_corto, NULL, (void*)planificadorCortoPlazo, NULL);
     pthread_create(&hilo_liberador_procesos, NULL, (void*)liberar_procesos, NULL);
 
     pthread_create(&tid[4], NULL, iniciarConsola, NULL);
+
 	// pthread_create(&tid[5], NULL, escucharFilesystemRef, NULL);
 	pthread_create(&tid[6], NULL, escucharCPURef, NULL);
 

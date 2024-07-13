@@ -7,7 +7,7 @@ directorioEjecutable=$(dirname "$directorio")
 directorioModulo=$(dirname "$directorioEjecutable")
 directorioTp=$(dirname "$directorioModulo")
 
-test="$1"
+numPrueba="$1"
 
 directorioConfig="$directorioTp/configs/$test"
 
@@ -16,5 +16,5 @@ directorioBin="$directorioModulo/bin/"
 
 # Cambiar al directorio
 cd "$directorioBin"
-# Ejecutar el programa con parámetros determinados
-./cpu "$directorioConfig/cpu.config" 
+# Ejecutar el programa con parámetros determinados 
+./cpu "$directorioConfig/cpu$numPrueba.config" 

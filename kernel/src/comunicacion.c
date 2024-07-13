@@ -4,12 +4,13 @@ int cpuDispatch_fd;
 int cpuInterrupt_fd;
 int memoria_fd;
 int kernel_fd;
-int vectorIO[4];
+int stdin_fd;
+int vectorIO[10];
 
 int recibirConexion (char* puerto) {
 	int entradasalida_fd;
 	t_log* logger;
-	pthread_t tid[4];
+	pthread_t tid[10];
 	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
 	int32_t tipoInterfaz;
 	
@@ -19,21 +20,20 @@ int recibirConexion (char* puerto) {
 		entradasalida_fd = esperar_cliente(kernel_fd);
 		recv(entradasalida_fd, &tipoInterfaz, sizeof(int32_t), MSG_WAITALL);
 		vectorIO[tipoInterfaz] = entradasalida_fd;
-		cualInterfaz(tipoInterfaz);
-		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, vectorIO[tipoInterfaz]);
-
-
+		cualInterfaz(tipoInterfaz);		
+		void* fdDeIo = &vectorIO[tipoInterfaz];
+		pthread_create(&tid[tipoInterfaz], NULL, recibirIO, fdDeIo);
+		pthread_detach(tid[tipoInterfaz]);
 	}
 
 	return EXIT_SUCCESS;
 }
 
-
 void cualInterfaz (int tipoInterfaz) {
 	t_log* logger;
 	logger = log_create("modulo.log", "-", 1, LOG_LEVEL_INFO);
 
-	switch (tipoInterfaz){
+	switch (tipoInterfaz) {
 	case 0:
 		log_info(logger, "Interfaz STDOUT conectada");
 		break;
@@ -41,10 +41,19 @@ void cualInterfaz (int tipoInterfaz) {
 		log_info(logger, "Interfaz STDIN conectada");
 		break;
 	case 2:
-		log_info(logger, "Interfaz DIAL_FS conectada");
+		log_info(logger, "Interfaz DIALFS conectada");
 		break;
 	case 3:
+		log_info(logger, "Interfaz ESPERA conectada");
+		break;
+	case 4:
+		log_info(logger, "Interfaz SLP1 conectada");
+		break;
+	case 5:
 		log_info(logger, "Interfaz GENERICA conectada");
+		break;
+	case 6:
+		log_info(logger, "Interfaz IO_GEN_SLEEP conectada");
 		break;
 	default:
 		break;
@@ -124,7 +133,6 @@ int conectarModuloCPUInterrupt(char *modulo){
 }
 
 int conectarModuloMemoria(char *modulo){
-
 	char *ip;
 	char *puerto;
 	char charAux[50];
@@ -151,86 +159,52 @@ int conectarModuloMemoria(char *modulo){
 	log_info(logger, "IP=%s\n", ip);
 	log_info(logger, "PUERTO=%s\n", puerto);
 
-	memoria_fd= crear_conexion(logger, "Conecto Kernel a memoria",ip, puerto);
+	memoria_fd = crear_conexion(logger, "Conecto Kernel a memoria",ip, puerto);
 
 	log_destroy(logger);
 
 	return memoria_fd;
 }
 
-void* recibirIO (int interfaz_fd) {
+void* recibirIO (void* interfaz_fd) {
+	int conexion = *((int*) interfaz_fd);
+
 	while (1) {
 		t_log* logger;
 		logger = iniciar_logger("recibirIO.log");
-
-		int cod_op = recibir_operacion(interfaz_fd); //seguro se necesita un mutex
+		
+		int cod_op = recibir_operacion(conexion); //seguro se necesita un mutex
 		// pthread_mutex_lock(&mutexFS);
 
-		t_list *lista = list_create();
+		log_info(info_logger, "Me llego el cod_op %d", cod_op);
+
+		//t_list *lista = list_create();//No se usaba
 	    switch (cod_op) {
-			case IO_STDIN_READ:{
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
-			case IO_STDOUT_WRITE:{
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
-			case IO_FS_CREATE:{
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
-			case IO_FS_DELETE:{
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
-			case IO_FS_TRUNCATE:{
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
-			case IO_FS_WRITE:{
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
-			case IO_FS_READ: {
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
-				PCB* pcbBuscado = buscarProcesoBloq(pid);
-				moverProceso_BloqReady(pcbBuscado);
-				break;
-			}
 			case SOLICITUD_IO_CUMPLIDA: {
-				uint32_t pid = recibirValor_uint32(interfaz_fd);
+				t_list* listaEnteros = list_create();
+				listaEnteros = recibirListaUint32_t(conexion);
+				uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0);
+	
+				log_info(info_logger, "Me llego el pid %d", pid);
 				PCB* pcbBuscado = buscarProcesoBloq(pid);
 				moverProceso_BloqReady(pcbBuscado);
 				break;
 			}
-			 case -1:
-				 log_error(logger, "el cliente se desconecto.");
-
-				 log_error(logger, "Terminando servidor ENTRADASALIDA");
-				 return NULL;
-
-			 default:
+			case -1:{
+				log_error(logger, "el cliente se desconecto.");
+				log_error(logger, "Terminando servidor ENTRADASALIDA");
+				return NULL;
+			}
+			default:{
 				log_warning(logger,"Operacion desconocida. No quieras meter la pata %d ", cod_op);
 				break;
+			}
 		}
 		//pthread_mutex_unlock(&mutexFS);
 	}
 }
 
-t_log* iniciar_logger(char *nombre){
+t_log* iniciar_logger(char *nombre) {
 	t_log* nuevo_logger;
 	nuevo_logger = log_create(nombre, "tp", 1, LOG_LEVEL_INFO);
 	if(nuevo_logger == NULL){
@@ -241,49 +215,25 @@ t_log* iniciar_logger(char *nombre){
 	return nuevo_logger;
 }
 
-void leer_consola(t_log* logger){
-	char* leido;
-
-	leido = readline("> ");
-
-	while(*leido != '\0'){
-		log_info(logger, "%s\n", leido);
-		free(leido);
-		leido = readline("> ");
-	}
-
-	free(leido);
-}
-
-void paquete(t_log* logger, char* parametro){
-	t_paquete* paquete = crear_paquete(PAQUETECLIENTE,logger);
-
-   agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
-
-	//enviar_paquete(paquete, kernel_fd);
-	free(paquete);
-}
-
-void terminar_programa(int conexion, t_log* logger)
-{	log_destroy(logger);
+void terminar_programa(int conexion, t_log* logger) {
+	(logger);
 	liberar_conexion(conexion);
 }
 
-PCB* obtenerPcbExec(){
+PCB* obtenerPcbExec() {
     pthread_mutex_lock(&mutex_colaExec);
     PCB* unaPcb = list_get(colaExec,0);
     pthread_mutex_unlock(&mutex_colaExec);
     return unaPcb;
 }
 
-void moverProceso_BloqrecursoReady(Recurso* recurso){
+void moverProceso_BloqrecursoReady(Recurso* recurso) {
     pthread_mutex_lock(&semaforos_io[recurso->indiceSemaforo]);
     PCB* pcbLiberada = list_remove(recurso->cola,0);
     pthread_mutex_unlock(&semaforos_io[recurso->indiceSemaforo]);
     uint32_t num;
     PCB* pcbEncontrado = encontrarProceso(pcbLiberada->id, &num);
-    if(pcbEncontrado != NULL){
-
+    if(pcbEncontrado != NULL) {
 		pthread_mutex_lock(&mutex_colaBloq);
 		eliminarElementoLista(pcbLiberada, colaBloq);
 		pthread_mutex_unlock(&mutex_colaBloq);
@@ -305,7 +255,7 @@ void moverProceso_BloqrecursoReady(Recurso* recurso){
 }
 
 void escucharCPU (void) {
-	while (cpuDispatch_fd != -1)	{
+	while (cpuDispatch_fd != -1) {
 		int cod_op = recibir_operacion(cpuDispatch_fd);
 
 		switch(cod_op){
@@ -383,14 +333,16 @@ void escucharCPU (void) {
 				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
 
 				t_list* listaInts = list_create();
-
+				log_info(info_logger, "PID %d - dir fisica %d - tamanio %d", pcbActualizada->id, direccion_fisica, tamanio);
 				list_add(listaInts, &pcbActualizada->id);
 				list_add(listaInts, &direccion_fisica);
 				list_add(listaInts, &tamanio);
 
-				enviarListaUint32_t(listaInts,vectorIO[interfaz], info_logger, IO_STDIN_READ);
+				enviarListaUint32_t(listaInts, vectorIO[interfaz], info_logger, IO_STDIN_READ);
 				list_clean(listaInts);
 				list_destroy(listaInts);
+
+				break;
 			}
 			case IO_STDOUT_WRITE: {	//FALTA VER QUE PASA CON EL TAMAÑO
 				uint32_t direccion_fisica;
@@ -410,6 +362,8 @@ void escucharCPU (void) {
 				enviarListaUint32_t(listaInts,vectorIO[interfaz], info_logger, IO_STDOUT_WRITE);
 				list_clean(listaInts);
 				list_destroy(listaInts);
+
+				break;
 			}
 			case IO_FS_CREATE: {
 				uint32_t interfaz;
@@ -419,8 +373,10 @@ void escucharCPU (void) {
 				PCB* pcbActualizada = obtenerPcbExec();
 				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
 
+				log_info(info_logger, "PCB->id: <%d>", pcbActualizada->id);
 				enviarEnteroYString(pcbActualizada->id, nombreArchivo, vectorIO[interfaz], info_logger, IO_FS_CREATE);
 
+				break;
 			}
 			case IO_FS_DELETE: {
 				uint32_t interfaz;
@@ -432,6 +388,7 @@ void escucharCPU (void) {
 
 				enviarEnteroYString(pcbActualizada->id, nombreArchivo, vectorIO[interfaz], info_logger, IO_FS_DELETE);
 
+				break;
 			}
 			case IO_FS_TRUNCATE: {
 				uint32_t interfaz;
@@ -442,8 +399,9 @@ void escucharCPU (void) {
 				PCB* pcbActualizada = obtenerPcbExec();
 				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
 
-				enviar_uint32_y_uint32_y_char(nombreArchivo, &pcbActualizada->id, &tamanio, vectorIO[interfaz], IO_FS_TRUNCATE, info_logger); //NO ESTOY SEGURO SI VAN LOS "&"
+				enviar_uint32_y_uint32_y_char(nombreArchivo, pcbActualizada->id, tamanio, vectorIO[interfaz], IO_FS_TRUNCATE, info_logger); //NO ESTOY SEGURO SI VAN LOS "&"
 
+				break;
 			}
 			case IO_FS_WRITE: {
 				uint32_t interfaz;
@@ -456,7 +414,9 @@ void escucharCPU (void) {
 				PCB* pcbActualizada = obtenerPcbExec();
 				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
 
-				enviar_uint32_y_uint32_y_uint32_y_uint32_y_char(nombreArchivo, &pcbActualizada->id, &tamanio, &punteroArchivo, &direccion_fisica, vectorIO[interfaz], IO_FS_WRITE, info_logger);
+				enviar_uint32_y_uint32_y_uint32_y_uint32_y_char(nombreArchivo, pcbActualizada->id, tamanio, punteroArchivo, direccion_fisica, vectorIO[interfaz], IO_FS_WRITE, info_logger);
+
+				break;
 			}
 			case IO_FS_READ: {
 				uint32_t interfaz;
@@ -469,13 +429,17 @@ void escucharCPU (void) {
 				PCB* pcbActualizada = obtenerPcbExec();
 				moverProceso_ExecBloq(pcbActualizada); //RECIBIR CONFIRMACION DE BAUTI
 
-				enviar_uint32_y_uint32_y_uint32_y_uint32_y_char(nombreArchivo, &pcbActualizada->id, &tamanio, &punteroArchivo, &direccion_fisica, vectorIO[interfaz], IO_FS_READ, info_logger);
+				enviar_uint32_y_uint32_y_uint32_y_uint32_y_char(nombreArchivo, pcbActualizada->id, tamanio, punteroArchivo, direccion_fisica, vectorIO[interfaz], IO_FS_READ, info_logger);
+
+				break;
 			}
 			case OUT_OF_MEMORY: {
 				PCB* pcbRecibida = recibir_contextoEjecucion(cpuDispatch_fd);
 				actualizarPcbEjecucion(pcbRecibida);
 				PCB* pcbActualizada = obtenerPcbExec();
-				moverProceso_ExecReady(pcbActualizada);
+				moverProceso_ExecExit(pcbActualizada);//Antes exec ready
+				log_info(info_logger,"Finaliza el proceso <%d> - Motivo: <OUT_OF_MEMORY>",pcbActualizada->id);
+				break;
 			}
 			case -1:
 				log_error(info_logger, "Cliente desconectado de %s...", "CPU");
@@ -488,7 +452,7 @@ void escucharCPU (void) {
 	}
 }
 
-void actualizarPcbEjecucion(PCB* pcbRecibida){
+void actualizarPcbEjecucion(PCB* pcbRecibida) {
     pthread_mutex_lock(&mutex_colaExec);
     PCB* pcbExec = list_get(colaExec, 0);
 
@@ -500,7 +464,7 @@ void actualizarPcbEjecucion(PCB* pcbRecibida){
     pthread_mutex_unlock(&mutex_colaExec);
 }
 
-void manejoDeRecursos(char* orden, char* recursoSolicitado){
+void manejoDeRecursos(char* orden, char* recursoSolicitado) {
     PCB* unaPcb = obtenerPcbExec();
 
     bool coincideConSolicitado (Recurso* unRecurso) {
@@ -549,7 +513,7 @@ void signalRecursoPcb (Recurso* recurso, PCB* unaPcb) {
 	eliminar_paquete(paquete);
 }
 
-void bloquearProcesoPorRecurso(Recurso* recurso){
+void bloquearProcesoPorRecurso(Recurso* recurso) {
     pthread_mutex_lock(&mutex_colaExec);
     PCB* pcbABlockedRecurso = list_remove(colaExec,0);
     pthread_mutex_unlock(&mutex_colaExec);
@@ -567,22 +531,19 @@ void bloquearProcesoPorRecurso(Recurso* recurso){
     log_info(info_logger,"PID: <%d> - Estado Anterior: <EXEC> - Estado Actual: <BLOCKED_RECURSO[%s]>", pcbABlockedRecurso->id, recurso->nombreRecurso);
 }
 
-void* esperaTiempo(void* aux1){
-
+void* esperaTiempo(void* aux1) {
 	SleepCpu* aux2 = (SleepCpu *) aux1;
-
-
-
 
     sleep(aux2->segundosSleep);
     moverProceso_BloqReady(aux2->pcb);
     free(aux2);
 }
+
 PCB* buscarProcesoBloq(uint32_t pid) {
 	for(int i=0 ; i<list_size(colaBloq) ; i++){
 		PCB* pcbBuscado = list_get(colaBloq, i);
 		if(pcbBuscado->id == pid)
 			return pcbBuscado;
 	}
-	log_error(info_logger, "No se encontró el proceso bloqueado");
+	log_error(info_logger, "No se encontro el proceso bloqueado");
 }

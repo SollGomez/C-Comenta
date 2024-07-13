@@ -5,8 +5,10 @@ int traducir_direccion_logica(int direccion_logica) {
 	uint32_t num_pagina = direccion_logica / tam_pagina;
 
 	uint32_t desplazamiento_pagina = direccion_logica % tam_pagina;
+	int marco = -1;
 
-	int marco = buscarMarcoEnTLB(PCB_Actual->id, num_pagina);
+	if(CANTIDAD_ENTRADAS_TLB)
+		marco = buscarMarcoEnTLB(PCB_Actual->id, num_pagina);
 
 	if(marco == -1)
 	{
@@ -18,12 +20,11 @@ int traducir_direccion_logica(int direccion_logica) {
 
 		enviarListaUint32_t(listaInts,memoria_fd, info_logger, SOLICITUDMARCO);
 
-		uint32_t marco;
 		op_code_cliente cod = recibir_operacion(memoria_fd);
 
 		if(cod == SOLICITUDMARCO){        
 			marco = recibirValor_uint32(memoria_fd);
-
+			log_info(info_logger, "Marco: %d", marco);
 			agregarEntradaTLB(PCB_Actual->id, num_pagina, marco);
 
 		}

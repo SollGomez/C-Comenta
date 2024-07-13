@@ -1,6 +1,7 @@
 #include "consola.h"
 
 pthread_mutex_t semaforo;
+pthread_mutex_t semaforo2;
 
 char* path;
 
@@ -9,67 +10,98 @@ int planificadorCortoAvance;
 
 void* iniciarConsola () {
 	pthread_mutex_init(&semaforo, NULL);
+
 	while (1) {
 	    char* linea = readline(">");
 	    log_info(info_logger,"linea: %s",linea);
 
+		if (!strncmp(linea, ":q", 2)) {
+			free(linea);//Estaba comentado cuando andaba
+			break;
+		}
+
 	    if (!strncmp(linea,"EJECUTAR_SCRIPT", strlen("EJECUTAR_SCRIPT")))
 	    	ejecutar_script(linea);
+		else
+			funcionesDeLaConsola(linea);
 
-	    if (!strncmp(linea,"INICIAR_PROCESO", strlen("INICIAR_PROCESO")))
-	    	iniciar_proceso(linea);
-
-	    if (!strncmp(linea, "FINALIZAR_PROCESO", strlen("FINALIZAR_PROCESO")))
-	    	finalizar_proceso(linea);
-
-	    if (!strncmp(linea,"DETENER_PLANIFICACION", strlen("DETENER_PLANIFICACION")))
-	    	DETENER_PLANIFICACION(linea);
-
-	    if (!strncmp(linea,"INICIAR_PLANIFICACION", strlen("INICIAR_PLANIFICACION")))
-	    	INICIAR_PLANIFICACION(linea);
-
-	    if (!strncmp(linea,"MULTIPROGRAMACION", strlen("MULTIPROGRAMACION"))){
-	    	MULTIPROGRAMACION(linea);
-	    	log_info(info_logger, "Grado multiprog actualizado: %d", GRADO_MAX_MULTIPROGRAMACION);
-	    }
-
-	    if (!strncmp(linea, "PROCESO_ESTADO", strlen("PROCESO_ESTADO")))
-	    	PROCESO_ESTADO(linea);
-
-	    if (!strncmp(linea, ":q", 2)) {
-	    	free(linea);
-	    	break;
-	    }
-
-	    free(linea);
+	    free(linea);//Estaba comentado cuando andaba
 	}
+}
+
+void funcionesDeLaConsola(char* linea) {
+	if (!strncmp(linea,"INICIAR_PROCESO", strlen("INICIAR_PROCESO"))){
+		log_info(info_logger, "lei iniciar proceso");
+		iniciar_proceso(linea);
+	}
+
+	if (!strncmp(linea, "FINALIZAR_PROCESO", strlen("FINALIZAR_PROCESO"))) {
+		log_info(info_logger, "lei finalizar proceso");
+		finalizar_proceso(linea);
+	}
+
+	if (!strncmp(linea,"DETENER_PLANIFICACION", strlen("DETENER_PLANIFICACION"))) {
+		log_info(info_logger, "lei detener plani");
+		DETENER_PLANIFICACION(linea);
+	}
+
+	if (!strncmp(linea,"INICIAR_PLANIFICACION", strlen("INICIAR_PLANIFICACION"))) {
+		log_info(info_logger, "lei iniciar plani");
+		INICIAR_PLANIFICACION(linea);
+	}
+
+	if (!strncmp(linea,"MULTIPROGRAMACION", strlen("MULTIPROGRAMACION"))) {
+		log_info(info_logger, "lei cambiar grado multiprog");
+		MULTIPROGRAMACION(linea);
+		log_info(info_logger, "Grado multiprog actualizado: %d", GRADO_MAX_MULTIPROGRAMACION);
+	}
+
+	if (!strncmp(linea, "PROCESO_ESTADO", strlen("PROCESO_ESTADO"))) {
+		log_info(info_logger, "lei mostrar procesos");
+		PROCESO_ESTADO(linea);
+	}
+
+	return;
 }
 
 void ejecutar_script (char* linea) {
 	log_info(info_logger, "RECONOCI LA LINEA %s", linea);
 
-	path = malloc(sizeof(linea));
-	char* saveptr = malloc(sizeof(linea));
+	path = malloc(strlen(linea) + 1);
+	char* saveptr = malloc(strlen(linea) + 1);
 
 	saveptr[0] =' \0';
 	path[0] = '\0';
 	sscanf(linea,"%s %s",saveptr, path);
 
+	pthread_mutex_lock(&mutex_iniciarProceso);
     pthread_t tid;
     pthread_create(&(tid), NULL, ejecutar_script_operaciones, path);
     pthread_join(tid, NULL);
-    free(saveptr);
+    free(saveptr);//Estaba comentado cuando andaba
+	pthread_mutex_unlock(&mutex_iniciarProceso);
 
     return;
 }
 
 void* ejecutar_script_operaciones (void* parametros) {
-    char* pathptr = (char*) parametros;
+	char* directory = "/home/utnso/scripts-pruebas";
+    char* file = (char*) parametros;
+	
+	log_info(info_logger, "Ruta a buscar: %s", directory);
+
+	size_t total_length = strlen(directory) + strlen(file) + 1;
+    char pathInstrucciones[total_length];
+
+	strcpy(pathInstrucciones, directory);
+    strcat(pathInstrucciones, file);
+
+	log_info(info_logger, "Archivo a buscar: %s", pathInstrucciones);
 
 	FILE* fptr;
 
-	fptr = fopen(pathptr, "r");
-	char instruccion[100];
+	fptr = fopen(pathInstrucciones, "r");
+	char instruccion[200];
 	
 	if (fptr == NULL)
 		log_info(info_logger, "NO ENCONTRE EL ARCHIVO");
@@ -80,36 +112,18 @@ void* ejecutar_script_operaciones (void* parametros) {
 	while (fgets(instruccion, sizeof(instruccion), fptr)) {
 		log_info(info_logger, "ESTOY LEYENDO UN ARCHIVO. Instruccion <%s>", instruccion);
 
-	    if (!strncmp(instruccion,"INICIAR_PROCESO", strlen("INICIAR_PROCESO")))
-	    	iniciar_proceso(instruccion);
-
-	    if (!strncmp(instruccion, "FINALIZAR_PROCESO", strlen("FINALIZAR_PROCESO")))
-	    	finalizar_proceso(instruccion);
-
-	    if (!strncmp(instruccion,"DETENER_PLANIFICACION", strlen("DETENER_PLANIFICACION")))
-	    	DETENER_PLANIFICACION(instruccion);
-
-	    if (!strncmp(instruccion,"INICIAR_PLANIFICACION", strlen("INICIAR_PLANIFICACION")))
-	    	INICIAR_PLANIFICACION(instruccion);
-
-	    if (!strncmp(instruccion,"MULTIPROGRAMACION", strlen("MULTIPROGRAMACION"))){
-	    	MULTIPROGRAMACION(instruccion);
-	    	log_info(info_logger, "Grado multiprog actualizado: %d", GRADO_MAX_MULTIPROGRAMACION);
-	    }
-	    if (!strncmp(instruccion, "PROCESO_ESTADO", strlen("PROCESO_ESTADO")))
-	    	PROCESO_ESTADO(instruccion);
+		funcionesDeLaConsola(instruccion);
 	}
-
-	        
+	
 	fclose(fptr);
-    //free(pathptr);
 
-	return NULL;
+	return;
 }
 
 void iniciar_proceso (char* linea) {
-	path = malloc(sizeof(linea));
-	char* saveptr = malloc(sizeof(linea));
+	log_info(info_logger, "funcion iniciar");
+	path = malloc(strlen(linea) + 1);
+	char* saveptr = malloc(strlen(linea) + 1);
 
 	saveptr[0] =' \0';
 	path[0] = '\0';
@@ -118,7 +132,7 @@ void iniciar_proceso (char* linea) {
     pthread_t tid;
     pthread_create(&(tid), NULL, inicializarProceso, path);
     pthread_join(tid, NULL);
-    free(saveptr);
+	free(saveptr);//ESTABA COMENTADO CUANDO ANDABA
 
     return;
 }
@@ -127,16 +141,15 @@ void* inicializarProceso (void* parametros) {
 	log_info(info_logger, "voy a iniciar proceso");
 	pthread_mutex_lock(&semaforo);
     char* pathptr = (char*) parametros;
-	PCB *pcb = crearPcb(pathptr);
+	PCB* pcb = crearPcb(pathptr);
 
     queue_push(colaNew,pcb);
 
     sem_post(&sem_procesosEnNew);
     log_info(info_logger, "Se crea el proceso <%d> en NEW", pcb->id);
     pthread_mutex_unlock(&semaforo);
-    free(pathptr);
 
-	return NULL;
+	return;
 }
 
 void finalizar_proceso (char* linea) {
@@ -199,7 +212,7 @@ void* finalizarProceso (void* pid) {
 	}
 
 	if (numCola != 3) {
-		log_info(info_logger,"Finaliza el proceso <%d> - Motivo: <SUCCESS>",pcbBuscado->id);
+		log_info(info_logger,"Finaliza el proceso <%d> - Motivo: <INTERRUPTED_BY_USER>",pcbBuscado->id);
 		sem_post(&sem_cpuLibre);
 
 		pthread_mutex_lock(&mutex_colaExit);
@@ -335,6 +348,14 @@ void* multiprogramacion (void* linea) {
 
 	log_info(info_logger, "Grado Anterior: <%d> - Grado Actual: <%d>", GRADO_MAX_MULTIPROGRAMACION, nuevoGradoMP);
 	GRADO_MAX_MULTIPROGRAMACION=nuevoGradoMP;
+
+	uint32_t tamLista = queue_size(colaNew);
+
+	if(tamLista){
+		for(int i=0 ; i<tamLista ; i++){
+			sem_post(&sem_procesosEnNew);
+		}
+	}
 
 	pthread_mutex_unlock(&semaforo);
 

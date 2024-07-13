@@ -115,8 +115,7 @@ void agregar_a_paquete2(t_paquete* paquete, void* valor, int tamanio)
 
 
 
-void enviar_paquete(t_paquete* paquete, int socket_cliente)
-{
+void enviar_paquete(t_paquete* paquete, int socket_cliente) {
 	int bytes = paquete->buffer->size + 2*sizeof(int);
 	void* a_enviar = serializar_paquete(paquete, bytes);
 
@@ -125,14 +124,12 @@ void enviar_paquete(t_paquete* paquete, int socket_cliente)
 	free(a_enviar);
 }
 
-void eliminar_paquete(t_paquete* paquete)
-{
+void eliminar_paquete(t_paquete* paquete) {
 	free(paquete->buffer->stream);
 	free(paquete->buffer);
 	free(paquete);
 }
 
-void liberar_conexion(int socket_cliente)
-{
+void liberar_conexion(int socket_cliente) {
 	close(socket_cliente);
 }
