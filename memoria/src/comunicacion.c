@@ -110,10 +110,11 @@ void cualInterfaz(int tipoInterfaz){
 				lista = recibirListaUint32_t(cpu_fd);
 				t_paquete* paquete = crear_paquete(SOLICITUDINSTRUCCION, info_logger);
 				Instruccion* instruccion;
+				usleep(RETARDO_RESPUESTA*2000); //ver si cambiar a sleep
+
 				instruccion = retornarInstruccionACPU(*(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1)); // pid y pc
 				log_trace(trace_logger, "PID: %d PC: %d", *(uint32_t*)list_get(lista,0),*(uint32_t*)list_get(lista,1));
 				//log_trace(trace_logger, "Instruccion: %s %s %s", instruccion->id, instruccion->param1, instruccion->param2);
-				sleep(RETARDO_RESPUESTA); //ver si cambiar a sleep
 				// log_info(info_logger, "instruccion: %s %s %s %s %s %s\n", instruccion->id, instruccion->param1, instruccion->param2
 				// 														, instruccion->param3, instruccion->param4, instruccion->param5);
 				agregar_instruccion_a_paquete(paquete, instruccion);
