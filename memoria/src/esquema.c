@@ -155,6 +155,7 @@ void achicar(TablaDePaginas* tabla, uint32_t tamanio){
     }
     for(int i=list_size(tabla->paginas); i>pagsFinales; i--){
         Pagina* pag = list_get(tabla->paginas, i-1);
+        marcarMarcoLibre(pag->marco);
         list_remove(tabla->paginas, i-1);
         liberarPagina(pag);
     }
