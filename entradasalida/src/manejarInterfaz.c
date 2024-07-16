@@ -433,6 +433,7 @@ void compactarV2(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* arch
 
     uint32_t dondeLeer = archivoATruncar->bloqueInicial * cfg_entradaSalida->BLOCK_SIZE;
     void* datosAux = leerArchivo(nombreArchivo, dondeLeer, archivoATruncar->tamArchivo);                    //NO OLVIDAR DE ESCRIBIR
+    log_debug(debug_logger, "Datos a escribir: %s", datosAux);
     //Limpiar bitmap
     for(int i=archivoATruncar->bloqueInicial; i<cantBloques + archivoATruncar->bloqueInicial; i++) {
         //log_error(error_logger, "Limpio el bit %d", i);
@@ -498,7 +499,7 @@ void moverArchivo(int nuevoOrigen, t_config* configArchivo) {
     log_debug(debug_logger, "Voy a mover a un archivo su bloque inicial a %d", nuevoOrigen);
     uint32_t bloqueInicial = (uint32_t)config_get_int_value(configArchivo, "BLOQUE_INICIAL");
     uint32_t sizeArchivo = (uint32_t)config_get_int_value(configArchivo, "TAMANIO_ARCHIVO");
-    uint32_t punteroEnDisco = (bloqueInicial * cfg_entradaSalida->BLOCK_SIZE);
+    uint32_t punteroEnDisco = 0;
     uint32_t cantBloques = (uint32_t)ceil((double)sizeArchivo / (double)cfg_entradaSalida->BLOCK_SIZE);
     char* nombreArchivo = config_get_string_value(configArchivo, "NOMBRE_ARCHIVO");
     if(sizeArchivo == 0) {
@@ -510,6 +511,8 @@ void moverArchivo(int nuevoOrigen, t_config* configArchivo) {
     uint32_t desplazamiento = bloqueInicial - nuevoOrigen;
     void* informacionArchivo = leerArchivo(nombreArchivo, punteroEnDisco, sizeArchivo);
 
+
+    log_debug(debug_logger, "datos leiodos: %s", informacionArchivo);
     config_set_value(configArchivo, "BLOQUE_INICIAL", string_itoa(nuevoOrigen));
     config_save(configArchivo);
     punteroEnDisco = (nuevoOrigen * cfg_entradaSalida->BLOCK_SIZE);
@@ -768,6 +771,8 @@ void escribirArchivo(char* nombreArchivo, void* datos, uint32_t direccionAEscrib
 
     archivoBloques->direccionArchivo = mmap(NULL,archivoBloques->tamanio, PROT_READ | PROT_WRITE, MAP_SHARED, archivoBloques->fd , 0);
 
+    log_trace(trace_logger, "Escribo datos en el bloque %d", bloqueAEscribir);
+
     memcpy(archivoBloques->direccionArchivo + direccionAEscribir + bloqueAEscribir, datos, tamanioAEscribir);
     
     msync(archivoBloques->direccionArchivo, archivoBloques->tamanio, MS_SYNC);
@@ -785,6 +790,15 @@ void* leerArchivo(char* nombreArchivo, uint32_t direccionALeer, uint32_t tamanio
 
     void* datos = malloc(tamanioALeer);
 
+     char* pathArchivoALeer = string_new();
+    string_append(&pathArchivoALeer, cfg_entradaSalida->PATH_BASE_DIALFS);
+    string_append(&pathArchivoALeer, "/");
+    string_append(&pathArchivoALeer, nombreArchivo); 
+    t_config* configArchivo = config_create(pathArchivoALeer);
+    uint32_t bloqueInicialArchivo = config_get_int_value(configArchivo, "BLOQUE_INICIAL");
+
+    uint32_t bloqueALeer = bloqueInicialArchivo * cfg_entradaSalida->BLOCK_SIZE;
+
     char* pathArchivoBloques = string_new();
     string_append(&pathArchivoBloques, cfg_entradaSalida->PATH_BASE_DIALFS);
     string_append(&pathArchivoBloques, "/bloques.dat");
@@ -794,7 +808,7 @@ void* leerArchivo(char* nombreArchivo, uint32_t direccionALeer, uint32_t tamanio
     archivoBloques->direccionArchivo = mmap(NULL,archivoBloques->tamanio, PROT_READ | PROT_WRITE, MAP_SHARED, archivoBloques->fd , 0);
 
     //msync(archivoBloques->archivo, archivoBloques->tamanio, MS_SYNC);
-    memcpy(datos, archivoBloques->direccionArchivo + direccionALeer, tamanioALeer);
+    memcpy(datos, archivoBloques->direccionArchivo + direccionALeer + bloqueALeer, tamanioALeer);
 
     //log_info(info_logger, "La data que lei es: %s", datos);
 

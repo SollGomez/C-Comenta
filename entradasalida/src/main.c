@@ -16,27 +16,39 @@ int main(int argc, char* argv[]) {
 		crearEstructurasFs();
 	}
 
-	for(int i=0; i<cfg_entradaSalida->BLOCK_COUNT; i++){
-		log_info(info_logger, "bit %d en pos %d", bitarray_test_bit(bitmap, i), i);
-	}
+	// for(int i=0; i<cfg_entradaSalida->BLOCK_COUNT; i++){
+	// 	log_info(info_logger, "bit %d en pos %d", bitarray_test_bit(bitmap, i), i);
+	// }
 
 	
-	crearArchivo("salida.txt");
-	crearArchivo("archivo1.txt");
-	crearArchivo("cronologico.txt");
-	crearArchivo("archivo2.txt");
+	// crearArchivo("salida.txt");
+	// crearArchivo("archivo1.txt");
+	// crearArchivo("cronologico.txt");
+	// crearArchivo("archivo2.txt");
 
-	truncarArchivo("salida.txt", 80);
-	truncarArchivo("archivo1.txt", 10);
-	truncarArchivo("cronologico.txt", 80);
-	truncarArchivo("archivo2.txt", 10);
+	// truncarArchivo("salida.txt", 80);
+	// truncarArchivo("archivo1.txt", 10);
+	// truncarArchivo("cronologico.txt", 80);
+	// truncarArchivo("archivo2.txt", 10);
 
-	crearArchivo("pesado.txt");
-	truncarArchivo("pesado.txt", 250);
+	// escribirArchivo("salida.txt", "Fallout 1 Fallout 2 Fallout 3 Fallout: New Vegas Fallout 4 Fallout 76", 0, 69);
+
+	// void* datos = leerArchivo("salida.txt", 0, 80);
+
+	// log_info(info_logger, "Datos leidos de salida %s", datos);
+
+	// escribirArchivo("cronologico.txt", "Fallout 76 Fallout 1 Fallout 2 Fallout 3 Fallout: New Vegas Fallout 4", 0, 69);
+
+	// void* datos2 = leerArchivo("cronologico.txt", 0, 80);
+
+	// log_info(info_logger, "datos leidos de crono %s", datos2);
+
+	// crearArchivo("pesado.txt");
+	// truncarArchivo("pesado.txt", 250);
 	
-	eliminarArchivo("archivo1.txt");
+	// eliminarArchivo("archivo1.txt");
 
-	truncarArchivo("archivo2.txt", 70);
+	// truncarArchivo("archivo2.txt", 70);
 
 	//crearArchivo("duhndaud.txt");
 	//eliminarArchivo("duhndaud.txt");
@@ -60,19 +72,19 @@ int main(int argc, char* argv[]) {
     // }
 */
 	
-	// pthread_t kernel;
-	// pthread_t memoria;
+	pthread_t kernel;
+	pthread_t memoria;
 
-    // pthread_create(&kernel, NULL, iniciarKernel, NULL);
+    pthread_create(&kernel, NULL, iniciarKernel, NULL);
 
-	// if(cfg_entradaSalida->TIPO_INTERFAZ_INT == 1 || cfg_entradaSalida->TIPO_INTERFAZ_INT == 2 || cfg_entradaSalida->TIPO_INTERFAZ_INT == 0){ 
-	// 	pthread_create(&memoria, NULL, iniciarMemoria, NULL);
-	// 	pthread_join(memoria, NULL);
-	// }
+	if(cfg_entradaSalida->TIPO_INTERFAZ_INT == 1 || cfg_entradaSalida->TIPO_INTERFAZ_INT == 2 || cfg_entradaSalida->TIPO_INTERFAZ_INT == 0){ 
+		pthread_create(&memoria, NULL, iniciarMemoria, NULL);
+		pthread_join(memoria, NULL);
+	}
 
-	// pthread_join(kernel, NULL);
+	pthread_join(kernel, NULL);
 
-	//cerrarPrograma();
+	// cerrarPrograma();
     return 0;
 	
 }
