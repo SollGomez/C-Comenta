@@ -16,6 +16,10 @@ int main(int argc, char* argv[]) {
 		crearEstructurasFs();
 	}
 
+	for(int i=0; i<cfg_entradaSalida->BLOCK_COUNT; i++){
+		log_info(info_logger, "bit %d en pos %d", bitarray_test_bit(bitmap, i), i);
+	}
+
 	
 	crearArchivo("salida.txt");
 	crearArchivo("archivo1.txt");
@@ -33,6 +37,7 @@ int main(int argc, char* argv[]) {
 	eliminarArchivo("archivo1.txt");
 
 	truncarArchivo("archivo2.txt", 70);
+
 	//crearArchivo("duhndaud.txt");
 	//eliminarArchivo("duhndaud.txt");
 	//manejarInterfazStdin(2, 30);
