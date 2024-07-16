@@ -3,6 +3,7 @@
 #include <comunicacion.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <math.h>
 
 
 
@@ -24,3 +25,10 @@ uint32_t primerBitDisponible();
 uint32_t primerBitOcupado();
 void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar);
 int es_archivo_txt(const char *filename);
+
+void compactarV2(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar);
+uint32_t aplicar_algoritmo_compactacion(t_archivo_metadata* archivoATruncar);
+void moverArchivo(int nuevoOrigen, t_config* configArchivo);
+t_config* conseguirConfigArchivoPorInicio(int inicioArchivo);
+void resetearBitmap();
+int bloquesLibresDetrasDe(uint32_t posicion);

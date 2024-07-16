@@ -17,7 +17,22 @@ int main(int argc, char* argv[]) {
 	}
 
 	
+	crearArchivo("salida.txt");
+	crearArchivo("archivo1.txt");
+	crearArchivo("cronologico.txt");
+	crearArchivo("archivo2.txt");
 
+	truncarArchivo("salida.txt", 80);
+	truncarArchivo("archivo1.txt", 10);
+	truncarArchivo("cronologico.txt", 80);
+	truncarArchivo("archivo2.txt", 10);
+
+	crearArchivo("pesado.txt");
+	truncarArchivo("pesado.txt", 250);
+	
+	eliminarArchivo("archivo1.txt");
+
+	truncarArchivo("archivo2.txt", 70);
 	//crearArchivo("duhndaud.txt");
 	//eliminarArchivo("duhndaud.txt");
 	//manejarInterfazStdin(2, 30);
@@ -40,17 +55,17 @@ int main(int argc, char* argv[]) {
     // }
 */
 	
-	pthread_t kernel;
-	pthread_t memoria;
+	// pthread_t kernel;
+	// pthread_t memoria;
 
-    pthread_create(&kernel, NULL, iniciarKernel, NULL);
+    // pthread_create(&kernel, NULL, iniciarKernel, NULL);
 
-	if(cfg_entradaSalida->TIPO_INTERFAZ_INT == 1 || cfg_entradaSalida->TIPO_INTERFAZ_INT == 2 || cfg_entradaSalida->TIPO_INTERFAZ_INT == 0){ 
-		pthread_create(&memoria, NULL, iniciarMemoria, NULL);
-		pthread_join(memoria, NULL);
-	}
+	// if(cfg_entradaSalida->TIPO_INTERFAZ_INT == 1 || cfg_entradaSalida->TIPO_INTERFAZ_INT == 2 || cfg_entradaSalida->TIPO_INTERFAZ_INT == 0){ 
+	// 	pthread_create(&memoria, NULL, iniciarMemoria, NULL);
+	// 	pthread_join(memoria, NULL);
+	// }
 
-	pthread_join(kernel, NULL);
+	// pthread_join(kernel, NULL);
 
 	//cerrarPrograma();
     return 0;

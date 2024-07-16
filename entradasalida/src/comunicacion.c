@@ -203,7 +203,7 @@ void *recibirMemoria() {
 					t_list* listaInts = list_create();
 					listaInts = recibirListaIntsYDatos(memoria_fd, datos);
 					uint32_t pid = *(uint32_t*) list_get(listaInts, 0);
-					uint32_t tamanio = *(uint32_t*) list_get(listaInts, 1);
+					uint32_t tamanio = *(uint32_t*) list_get(listaInts, 2);
 					uint32_t puntero = *(uint32_t*) list_get(listaInts, 3);
 					logEscribirArchivo(pid, archivoAEscribir, tamanio, puntero);
 					escribirArchivo(archivoAEscribir, datos->datos, puntero, tamanio);
@@ -387,8 +387,8 @@ void* recibirKernelDialfs() {
 			uint32_t pid;
 			uint32_t tamanio;
 			char* nombreArchivo = recibirEnteroEnteroChar(kernel_fd, &pid, &tamanio);
-			truncarArchivo(nombreArchivo, tamanio);
 			logTruncarArchivo(pid, nombreArchivo, tamanio);
+			truncarArchivo(nombreArchivo, tamanio);
 			t_list* listaInts = list_create();
 			list_add(listaInts, &pid);
 			enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
@@ -435,9 +435,13 @@ void* devolucionIO_STDOUT_WRITE(void* cliente_socket) {  //Esta funcion puede ca
 	listaInts = recibirListaIntsYDatos(conexion, datitos);
 
 	uint32_t pid = *(uint32_t*)list_get(listaInts, 0);
+	uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);
+	
+    char buffer[tamanio + 1]; 
+    memcpy(buffer, datitos->datos, tamanio);
+    buffer[tamanio] = '\0'; 
 
-
-	printf("\n\n PID <%d> - <%s>\n\n", pid, datitos->datos);
+    printf("\n\n PID <%d> - <%s>\n\n", pid, buffer);
 
 	enviarListaUint32_t(listaInts, kernel_fd, info_logger, SOLICITUD_IO_CUMPLIDA);
 	return NULL;

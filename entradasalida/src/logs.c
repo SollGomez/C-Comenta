@@ -3,6 +3,7 @@
 t_log* info_logger;
 t_log* trace_logger;
 t_log* error_logger;
+t_log* debug_logger;
 t_config* configuracionEntradasalida;
 bool logsCreados = false;
 bool configCreada = false;
@@ -98,7 +99,7 @@ int init_loggers_config(char* configPath){
     trace_logger = log_create("trace_logger.log", "entradaSalida", true, LOG_LEVEL_TRACE);
     info_logger = log_create("info_logger.log", "entradaSalida", true, LOG_LEVEL_INFO);
     error_logger = log_create("error_logger.log","entradaSalida", true, LOG_LEVEL_ERROR);
-
+    debug_logger = log_create("debug_logger.log","entradaSalida", true, LOG_LEVEL_DEBUG);
     if(trace_logger== NULL || info_logger== NULL || error_logger== NULL){
 
         printf("No pude crear los loggers");
@@ -130,54 +131,7 @@ t_config_entradaSalida *cfg_entradaSalida_start()
     return cfg;
 }
 
-void cargarListaDialfs() {
 
-    
-    listaDeArchivos = list_create();
-    char* path = string_new();
-
-    string_append(&path, cfg_entradaSalida->PATH_BASE_DIALFS);
-    string_append(&path, "/");
-    string_append(&path, "nom-arch-fs.txt");
-
-    log_info(info_logger, "%s", path);
-    FILE* f = fopen(path, "rb");
-    if(f ==NULL) {
-        log_info(info_logger, "Estoy troll, el archivo de nombres no se creo");
-
-        f = fopen(path, "wb");
-        if (f == NULL) {
-            log_error(info_logger, "Error al crear el archivo de nombres");
-            return;
-        }
-    }
-
-    configFs = config_create(path);
-
-    int cantidadDeArchivos = config_keys_amount(configFs);
-
-    if(!cantidadDeArchivos) {
-        log_info(info_logger, "Todavia no hay archs creados");
-        return;
-    }
-
-    for(int i=0; i<cantidadDeArchivos; i++) {           //El primero es F-0
-        char* numArchivo = string_new(); //string_itoa(i);
-        
-        string_append(&numArchivo, "F-");
-        string_append(&numArchivo, string_itoa(i));
-        
-        char* nomArchLeido = config_get_string_value(configFs, numArchivo);
-        log_info(info_logger, "archivo leido: %s", nomArchLeido);
-        list_add(listaDeArchivos, nomArchLeido); 
-        
-    }
-
-    fclose(f);
-
-    return;
-
-}
 
 int cargar_configuracion(){
     cfg_entradaSalida->IP_KERNEL = config_get_string_value(configuracionEntradasalida, "IP_KERNEL");
@@ -218,7 +172,6 @@ int cargar_configuracion(){
         return true;
     } else if(strcmp(cfg_entradaSalida->TIPO_INTERFAZ, "DIALFS") == 0) {
 		cfg_entradaSalida->TIPO_INTERFAZ_INT = 2;
-        cargarListaDialfs();
         return true;
     } else if (strcmp(nombreInterfaz, "ESPERA") == 0) {
         cfg_entradaSalida->TIPO_INTERFAZ_INT = 3;
