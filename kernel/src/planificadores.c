@@ -108,7 +108,7 @@ void* esperarRR (void* pcbReady) {
 			usleep(10000);
 		}*/
 
-        usleep((QUANTUM/2 -450));
+        usleep((QUANTUM/2 -600));
 
 		pcb->tiempoEjecutando++;
 		if (pcb->tiempoEjecutando >= QUANTUM) {
@@ -130,11 +130,11 @@ void* esperarVRR(void* pcbReady) {
 	pcb->tiempoEjecutando = 0;
     uint32_t numCola = 0;
 	while (1) {
-        usleep((QUANTUM/2 -450));
+        usleep((QUANTUM/2 -600));
 
 		pcb->tiempoEjecutando++;
 
-        if (pcb->tiempoEjecutando >= QUANTUM) {//DESALOJO
+        if (pcb->tiempoEjecutando >= QUANTUM || (pcb->quantum && (pcb->tiempoEjecutando > pcb->quantum))) {//DESALOJO
             if (list_size(colaExec)) {
                 PCB* pcbExec = obtenerPcbExec();
                 if (pcb->id == pcbExec->id) {
