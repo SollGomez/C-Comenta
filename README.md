@@ -83,8 +83,8 @@ cd so-deploy
 ```
 ponen las credenciales de acceso:
 
-user: marrkbau
-pass: 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
+user: SollGomez
+pass: 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
 
 Antes de clonar las terminales de PuTTY
 ```bash
