@@ -415,12 +415,8 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
 
 
 void compactarV2(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar) {
-
-
     
-    resetearBitmap();
-
-
+    //resetearBitmap();
     //tengo la info del archivo a truncar
     uint32_t cantBloques = (uint32_t)ceil((double)archivoATruncar->tamArchivo / (double)cfg_entradaSalida->BLOCK_SIZE);
 
@@ -432,7 +428,7 @@ void compactarV2(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* arch
     log_info(info_logger, "Inicio compactacion");
 
     uint32_t dondeLeer = archivoATruncar->bloqueInicial * cfg_entradaSalida->BLOCK_SIZE;
-    void* datosAux = leerArchivo(nombreArchivo, dondeLeer, archivoATruncar->tamArchivo);                    //NO OLVIDAR DE ESCRIBIR
+    void* datosAux = leerArchivo(nombreArchivo, 0, archivoATruncar->tamArchivo);                    //NO OLVIDAR DE ESCRIBIR
     log_debug(debug_logger, "Datos a escribir: %s", datosAux);
     //Limpiar bitmap
     for(int i=archivoATruncar->bloqueInicial; i<cantBloques + archivoATruncar->bloqueInicial; i++) {
@@ -520,7 +516,7 @@ void moverArchivo(int nuevoOrigen, t_config* configArchivo) {
         //log_error(error_logger, "en mover Asigno bit: %d", i);
         bitarray_set_bit(bitmap, i);
     }
-    escribirArchivo(nombreArchivo, informacionArchivo, punteroEnDisco, sizeArchivo);
+    escribirArchivo(nombreArchivo, informacionArchivo, 0, sizeArchivo);
     for(int i=nuevoUltimoBloque + 1; i<=actualUltimoBloque; i++) {
         //log_error(error_logger, "en mover Limpio bit: %d", i);
         bitarray_clean_bit(bitmap, i);
@@ -748,11 +744,6 @@ uint32_t hayEspacioContiguo(uint32_t blocksRequested) {
 }
 
 void escribirArchivo(char* nombreArchivo, void* datos, uint32_t direccionAEscribir, uint32_t tamanioAEscribir) {
-    //uint32_t offset = direccionAEscribir % cfg_entradaSalida->BLOCK_SIZE;
-    //log_info(info_logger, "Offset: %d", offset);
-    //uint32_t numeroDeBloque = encontrarNumeroBloque(direccionAEscribir); //no se usa porque damos por hecho que la dir es pasada en bytes    
-
-    //log_info(info_logger, "Escribo esta data: %s del tam %d", datos, tamanioAEscribir);
 
     char* pathArchivoAEscribir = string_new();
     string_append(&pathArchivoAEscribir, cfg_entradaSalida->PATH_BASE_DIALFS);
@@ -771,14 +762,17 @@ void escribirArchivo(char* nombreArchivo, void* datos, uint32_t direccionAEscrib
 
     archivoBloques->direccionArchivo = mmap(NULL,archivoBloques->tamanio, PROT_READ | PROT_WRITE, MAP_SHARED, archivoBloques->fd , 0);
 
-    log_trace(trace_logger, "Escribo datos en el bloque %d", bloqueAEscribir);
+    log_trace(trace_logger, "Escribo datos en el bloque %d, Direccion: %d , %s", bloqueAEscribir, direccionAEscribir, datos);
 
-    memcpy(archivoBloques->direccionArchivo + direccionAEscribir + bloqueAEscribir, datos, tamanioAEscribir);
+    uint32_t offset = bloqueInicialArchivo * cfg_entradaSalida->BLOCK_SIZE + direccionAEscribir;
+
+    log_trace(trace_logger, "Offset: %d", offset);
+
+    memcpy(archivoBloques->direccionArchivo + offset, datos, tamanioAEscribir);
     
     msync(archivoBloques->direccionArchivo, archivoBloques->tamanio, MS_SYNC);
 
     close(archivoBloques->fd);
-   // free(archivoBloques->fd);
 }
 
 //no se usa porque damos por hecho que la dir es pasada en bytes
