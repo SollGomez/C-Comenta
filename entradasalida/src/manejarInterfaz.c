@@ -112,7 +112,7 @@ void eliminarArchivo(char* nombreArchivo) {
     uint32_t tamanioEnBloques = (uint32_t)ceil((double)tamanioArchivo / (double)cfg_entradaSalida->BLOCK_SIZE);
 
     for(int i=bloqueInicial; i<bloqueInicial + tamanioEnBloques; i++) {
-        log_debug(debug_logger, "Limpio el bit %d", i);
+        
         bitarray_clean_bit(bitmap, i);
     }
     
@@ -343,7 +343,7 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
 
                 msync(bitmap, cfg_entradaSalida->BLOCK_COUNT/8, MS_SYNC);
 
-                log_debug(info_logger, "Pase por aqui?");
+			
 
                 char* bitAux= string_itoa(bitDisponible);
                 config_set_value(config, "BLOQUE_INICIAL", bitAux);
@@ -429,7 +429,7 @@ void compactarV2(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* arch
 
     uint32_t dondeLeer = archivoATruncar->bloqueInicial * cfg_entradaSalida->BLOCK_SIZE;
     void* datosAux = leerArchivo(nombreArchivo, 0, archivoATruncar->tamArchivo);                    //NO OLVIDAR DE ESCRIBIR
-    log_debug(debug_logger, "Datos a escribir: %s", datosAux);
+    
     //Limpiar bitmap
     for(int i=archivoATruncar->bloqueInicial; i<cantBloques + archivoATruncar->bloqueInicial; i++) {
         //log_error(error_logger, "Limpio el bit %d", i);
@@ -437,7 +437,7 @@ void compactarV2(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* arch
     }
 
     uint32_t ultimoBloqueLibre = aplicar_algoritmo_compactacion(archivoATruncar);
-    log_debug(debug_logger, "Mi archivo ahora va a arrancar en %u", ultimoBloqueLibre);
+   
 
     usleep(cfg_entradaSalida->RETRASO_COMPACTACION * 1000);
 
@@ -473,7 +473,7 @@ uint32_t aplicar_algoritmo_compactacion(t_archivo_metadata* archivoATruncar) {
         }
         if (bitarray_test_bit(bitmap, i) && !busco_bloque_libre)
         {
-            log_debug(debug_logger, "Bloque ocupado en %d", i);
+            
             config_archivo_a_mover = conseguirConfigArchivoPorInicio(i);
             moverArchivo(primer_bloque_libre, config_archivo_a_mover);
             uint32_t bloqueInicial = (uint32_t)config_get_int_value(config_archivo_a_mover, "BLOQUE_INICIAL");
@@ -492,7 +492,7 @@ uint32_t aplicar_algoritmo_compactacion(t_archivo_metadata* archivoATruncar) {
 }
 
 void moverArchivo(int nuevoOrigen, t_config* configArchivo) {
-    log_debug(debug_logger, "Voy a mover a un archivo su bloque inicial a %d", nuevoOrigen);
+   
     uint32_t bloqueInicial = (uint32_t)config_get_int_value(configArchivo, "BLOQUE_INICIAL");
     uint32_t sizeArchivo = (uint32_t)config_get_int_value(configArchivo, "TAMANIO_ARCHIVO");
     uint32_t punteroEnDisco = 0;
@@ -508,7 +508,7 @@ void moverArchivo(int nuevoOrigen, t_config* configArchivo) {
     void* informacionArchivo = leerArchivo(nombreArchivo, punteroEnDisco, sizeArchivo);
 
 
-    log_debug(debug_logger, "datos leiodos: %s", informacionArchivo);
+   
     config_set_value(configArchivo, "BLOQUE_INICIAL", string_itoa(nuevoOrigen));
     config_save(configArchivo);
     punteroEnDisco = (nuevoOrigen * cfg_entradaSalida->BLOCK_SIZE);
@@ -582,7 +582,7 @@ t_config* conseguirConfigArchivoPorInicio(int inicioArchivo) {
 
 void resetearBitmap() {
 
-    log_debug(debug_logger, "Reseteo el bitmap");
+    
 
     for(int i=0; i<cfg_entradaSalida->BLOCK_COUNT; i++) {
         bitarray_clean_bit(bitmap, i);
@@ -762,11 +762,11 @@ void escribirArchivo(char* nombreArchivo, void* datos, uint32_t direccionAEscrib
 
     archivoBloques->direccionArchivo = mmap(NULL,archivoBloques->tamanio, PROT_READ | PROT_WRITE, MAP_SHARED, archivoBloques->fd , 0);
 
-    log_trace(trace_logger, "Escribo datos en el bloque %d, Direccion: %d , %s", bloqueAEscribir, direccionAEscribir, datos);
+   
 
     uint32_t offset = bloqueInicialArchivo * cfg_entradaSalida->BLOCK_SIZE + direccionAEscribir;
 
-    log_trace(trace_logger, "Offset: %d", offset);
+  
 
     memcpy(archivoBloques->direccionArchivo + offset, datos, tamanioAEscribir);
     
