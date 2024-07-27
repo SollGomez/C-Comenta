@@ -50,7 +50,6 @@ void resize(char* tamanio){
 		switch (cod_op) {
 		case RESIZE:{
             uint32_t resultado = recibirValor_uint32(memoria_fd);
-            log_error(error_logger, "resize recibe %d", resultado);
             if(resultado == 1){
                 log_info(info_logger, "Se agrandó correctamente el tamaño a %d", tam);
             }
@@ -130,13 +129,11 @@ void ejecutar_MOV_IN(char* registro, int direccion_logica) {
     if (!(direccion_fisica < 0)) {
 
         uint32_t valor = leer_valor_de_memoria(direccion_fisica, cantidad_bytes);
-        log_info(info_logger, "LEI EN UINT: %d", valor);
         char buffer[20];
         sprintf(buffer, "%d", valor);
-        log_info(info_logger, "LEI: %s", buffer);
+        //log_info(info_logger, "LEI: %s", buffer);
         log_info(info_logger, "Pongo valor %s en el registro %s", buffer, registro);
         cambiar_valor_del_registroCPU(registro,buffer);
-        //free(valor);
         PCB_Actual->program_counter++;
     }
 }
@@ -379,7 +376,7 @@ void* recibir_valor_de_memoria(){
             uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);
 
             valor = datitos->datos;
-            log_info(info_logger, "VALOR LEIDO DE MEMORIA: %s", datitos->datos);
+            //log_info(info_logger, "VALOR LEIDO DE MEMORIA: %s", datitos->datos);
             list_clean_and_destroy_elements(listaInts,free);
             list_destroy(listaInts);
 
@@ -392,7 +389,7 @@ void* recibir_valor_de_memoria(){
             uint32_t puntero = *(uint32_t*)list_get(listaInts,3);
             //valor = (void*)puntero;
             valor = &puntero;
-            log_info(info_logger, "VALOR LEIDO DE MEMORIA ABER?: %d", puntero);
+            //log_info(info_logger, "VALOR LEIDO DE MEMORIA ABER?: %d", puntero);
 
             list_clean_and_destroy_elements(listaInts,free);
             list_destroy(listaInts);
@@ -418,7 +415,7 @@ char* recibir_char_de_memoria(){
             t_list* listaInts = recibirListaIntsYDatos(memoria_fd, datitos); //pid, dirLeer, tamanio, dirEscribir
             uint32_t tamanio = *(uint32_t*)list_get(listaInts,2);
             valor = (char*)datitos->datos;
-            log_info(info_logger, "VALOR LEIDO DE MEMORIA: %s", datitos->datos);
+            //log_info(info_logger, "VALOR LEIDO DE MEMORIA: %s", datitos->datos);
             list_clean_and_destroy_elements(listaInts,free);
             list_destroy(listaInts);
 

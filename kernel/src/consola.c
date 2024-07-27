@@ -16,7 +16,7 @@ void* iniciarConsola () {
 	    log_info(info_logger,"linea: %s",linea);
 
 		if (!strncmp(linea, ":q", 2)) {
-			free(linea);//Estaba comentado cuando andaba
+			free(linea);
 			break;
 		}
 
@@ -25,39 +25,39 @@ void* iniciarConsola () {
 		else
 			funcionesDeLaConsola(linea);
 
-	    free(linea);//Estaba comentado cuando andaba
+	    free(linea);
 	}
 }
 
 void funcionesDeLaConsola(char* linea) {
 	if (!strncmp(linea,"INICIAR_PROCESO", strlen("INICIAR_PROCESO"))){
-		log_info(info_logger, "lei iniciar proceso");
+		//log_info(info_logger, "lei iniciar proceso");
 		iniciar_proceso(linea);
 	}
 
 	if (!strncmp(linea, "FINALIZAR_PROCESO", strlen("FINALIZAR_PROCESO"))) {
-		log_info(info_logger, "lei finalizar proceso");
+		//log_info(info_logger, "lei finalizar proceso");
 		finalizar_proceso(linea);
 	}
 
 	if (!strncmp(linea,"DETENER_PLANIFICACION", strlen("DETENER_PLANIFICACION"))) {
-		log_info(info_logger, "lei detener plani");
+		//log_info(info_logger, "lei detener plani");
 		DETENER_PLANIFICACION(linea);
 	}
 
 	if (!strncmp(linea,"INICIAR_PLANIFICACION", strlen("INICIAR_PLANIFICACION"))) {
-		log_info(info_logger, "lei iniciar plani");
+		//log_info(info_logger, "lei iniciar plani");
 		INICIAR_PLANIFICACION(linea);
 	}
 
 	if (!strncmp(linea,"MULTIPROGRAMACION", strlen("MULTIPROGRAMACION"))) {
-		log_info(info_logger, "lei cambiar grado multiprog");
+		//log_info(info_logger, "lei cambiar grado multiprog");
 		MULTIPROGRAMACION(linea);
 		log_info(info_logger, "Grado multiprog actualizado: %d", GRADO_MAX_MULTIPROGRAMACION);
 	}
 
 	if (!strncmp(linea, "PROCESO_ESTADO", strlen("PROCESO_ESTADO"))) {
-		log_info(info_logger, "lei mostrar procesos");
+		//log_info(info_logger, "lei mostrar procesos");
 		PROCESO_ESTADO(linea);
 	}
 
@@ -78,7 +78,7 @@ void ejecutar_script (char* linea) {
     pthread_t tid;
     pthread_create(&(tid), NULL, ejecutar_script_operaciones, path);
     pthread_join(tid, NULL);
-    free(saveptr);//Estaba comentado cuando andaba
+    free(saveptr);
 	pthread_mutex_unlock(&mutex_iniciarProceso);
 
     return;
@@ -132,7 +132,7 @@ void iniciar_proceso (char* linea) {
     pthread_t tid;
     pthread_create(&(tid), NULL, inicializarProceso, path);
     pthread_join(tid, NULL);
-	free(saveptr);//ESTABA COMENTADO CUANDO ANDABA
+	free(saveptr);
 
     return;
 }

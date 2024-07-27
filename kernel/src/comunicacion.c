@@ -176,16 +176,12 @@ void* recibirIO (void* interfaz_fd) {
 		int cod_op = recibir_operacion(conexion); //seguro se necesita un mutex
 		// pthread_mutex_lock(&mutexFS);
 
-		log_info(info_logger, "Me llego el cod_op %d", cod_op);
-
-		//t_list *lista = list_create();//No se usaba
 	    switch (cod_op) {
 			case SOLICITUD_IO_CUMPLIDA: {
 				t_list* listaEnteros = list_create();
 				listaEnteros = recibirListaUint32_t(conexion);
 				uint32_t pid = *(uint32_t*)list_get(listaEnteros, 0);
 	
-				log_info(info_logger, "Me llego el pid %d", pid);
 				PCB* pcbBuscado = buscarProcesoBloq(pid);
 				moverProceso_BloqReady(pcbBuscado);
 				break;
