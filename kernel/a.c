@@ -129,7 +129,7 @@ void compactar(t_interfaz_dialfs *idialfs, char *archivo_agrandar, uint32_t nuev
     config_set_value(config, "TAMANIO_ARCHIVO", string_itoa((int)nuevo_size));
     ocupar_bitmap(idialfs, ultimo_bloque_libre, (uint32_t)ceil((double)nuevo_size / (double)idialfs->block_size));
     escribir_bloque(idialfs->bloques, puntero_en_disco, size_archivo, buffer);
-    log_debug(logger, "Se re-escribio el archivo a partir del bloque %u, con size %u", puntero_en_disco, size_archivo);
+    //log_debug(logger, "Se re-escribio el archivo a partir del bloque %u, con size %u", puntero_en_disco, size_archivo);
     config_save(config);
     // lloro :´( 😭
 }

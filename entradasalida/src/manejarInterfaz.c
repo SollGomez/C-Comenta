@@ -192,7 +192,7 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
         while(bloquesASumar) {
 
             bitarray_set_bit(bitmap, posicionFinalActual + bloquesASumar - 1);
-            log_info(info_logger, "Asigno bit: %d", posicionFinalActual + bloquesASumar - 1);
+            //log_info(info_logger, "Asigno bit: %d", posicionFinalActual + bloquesASumar - 1);
             bloquesASumar--;
         }
         return;
@@ -214,7 +214,7 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
         escribirArchivo(nombreArchivo, datos, direccionAPonerDatos, archivoATruncar->tamArchivo);
 
         for(int i=archivoATruncar->bloqueInicial; i<=posicionFinalActual; i++){     //ese menor o igual 
-            log_info(info_logger, "entre al for con inicial %d y final %d", archivoATruncar->bloqueInicial, posicionFinalActual);
+            //log_info(info_logger, "entre al for con inicial %d y final %d", archivoATruncar->bloqueInicial, posicionFinalActual);
             bitarray_clean_bit(bitmap, i);
         }
 
@@ -225,7 +225,7 @@ void agrandarArchivo(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* 
         uint32_t posicionFinal = posInicialNueva + bloquesASumar;
 
         for(int i=posInicialNueva; i<posicionFinal; i++){
-            log_info(info_logger, "Asigno bit: %d", i);
+            //log_info(info_logger, "Asigno bit: %d", i);
             bitarray_set_bit(bitmap, i);
         }
         return;
@@ -451,7 +451,7 @@ void compactarV2(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* arch
         bitarray_set_bit(bitmap, i);
     }
     escribirArchivo(nombreArchivo, datosAux, punteroEnDisco, archivoATruncar->tamArchivo);
-    log_debug(debug_logger, "Se re-escribio el archivo a partir del bloque %u, con size %u", ultimoBloqueLibre, tamanio);
+    //log_debug(debug_logger, "Se re-escribio el archivo a partir del bloque %u, con size %u", ultimoBloqueLibre, tamanio);
     config_save(archivoATruncar->configArchivo);
 
 }
@@ -633,7 +633,7 @@ void resetearBitmap() {
                 char* nombreArchivo = config_get_string_value(config, "NOMBRE_ARCHIVO");
 
                 for(int i=posicion; i<posicion + tamanioEnBloques; i++) {
-                    log_info(info_logger, "Asigno bit: %d a archivo %s", i, nombreArchivo);
+                    //log_info(info_logger, "Asigno bit: %d a archivo %s", i, nombreArchivo);
                     bitarray_set_bit(bitmap, i);
                 }
                 //printf("Archivo: %s, BLOQUE_INICIAL: %u\n", entry->d_name, posicion);
