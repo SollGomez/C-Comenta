@@ -416,7 +416,7 @@ void compactar(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archiv
 
 void compactarV2(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* archivoATruncar) {
     
-    //resetearBitmap();
+   
     //tengo la info del archivo a truncar
     uint32_t cantBloques = (uint32_t)ceil((double)archivoATruncar->tamArchivo / (double)cfg_entradaSalida->BLOCK_SIZE);
 
@@ -453,6 +453,7 @@ void compactarV2(char* nombreArchivo, uint32_t tamanio, t_archivo_metadata* arch
     escribirArchivo(nombreArchivo, datosAux, punteroEnDisco, archivoATruncar->tamArchivo);
     //log_debug(debug_logger, "Se re-escribio el archivo a partir del bloque %u, con size %u", ultimoBloqueLibre, tamanio);
     config_save(archivoATruncar->configArchivo);
+	 resetearBitmap();
 
 }
 
