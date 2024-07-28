@@ -81,12 +81,7 @@ git clone https://github.com/sisoputnfrba/so-deploy.git
 cd so-deploy
 ./deploy.sh -t=/home/utnso -p=utils -p=kernel -p=cpu -p=memoria -p=entradasalida "tp-2024-1c-CANCH"
 ```
-ponen las credenciales de acceso:
-
-user: SollGomez
-pass: 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
-
-Antes de clonar las terminales de PuTTY
+Faltan las credenciales de acceso...
 ```bash
 cd ..
 cd tp-2024-1c-CANCH
